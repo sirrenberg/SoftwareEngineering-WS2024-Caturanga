@@ -1,3 +1,5 @@
+import { Country, LocationType, Simulation } from "../types";
+
 export const simulationData: Simulation[] = [
   {
     name: Country.burundi,

@@ -13,7 +13,8 @@ enum LocationType {
   camp,
 }
 
-interface SimLocation {  // can not be called Location as that conflicts with MongoDB
+interface SimLocation {
+  // can not be called Location as that conflicts with MongoDB
   name: string;
   region: string;
   country: string;
@@ -34,5 +35,8 @@ interface Route {
 interface Simulation {
   name: Country;
   locations: SimLocation[];
-  routes: Route[]
+  routes: Route[];
 }
+
+export type { SimLocation, Route, Simulation };
+export { Country, LocationType };

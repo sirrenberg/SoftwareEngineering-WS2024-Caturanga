@@ -9,13 +9,14 @@ import {
 } from "react-leaflet";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
-import data from "../data";
+import { simulationData } from "../test-data/data";
 import { useState } from "react";
 import { ListItemButton, ListItemText, Button } from "@mui/material";
 import { useMapEvent } from "react-leaflet/hooks";
 
 function Configurations() {
-  const [configs, setConfigs] = useState(data);
+  const [configs, setConfigs] = useState(simulationData);
+
   const [selectedConfigIndex, setSelectedConfigIndex] = useState(0);
   const [operationMode, setOperationMode] = useState("visualizing"); // ["visualizing", "add-node", "add-route"]
   const [selectedNodes, setSelectedNodes] = useState([]); // [node1, node2
@@ -59,7 +60,7 @@ function Configurations() {
             bgcolor: "background.paper",
           }}
         >
-          {data.map((config, index) => {
+          {configs.map((config, index) => {
             return (
               <ListItem
                 button
@@ -77,7 +78,7 @@ function Configurations() {
 
       <div className="map-section">
         <h2 className="selected-config-title">
-          {data[selectedConfigIndex].name}, Mode: {operationMode}
+          {configs[selectedConfigIndex].name}, Mode: {operationMode}
         </h2>
         <MapContainer
           center={[14, 40]}
@@ -107,11 +108,14 @@ function Configurations() {
           />
 
           {/* Add locations */}
-          {data[0].locations.map((location) => {
+          {configs[selectedConfigIndex].locations.map((location) => {
+            console.log(location);
+            console.log(location.population / 100);
+
             return (
               <Circle
-                center={[Number(location.latitude), Number(location.longitude)]}
-                radius={location.population / 100}
+                center={[location.latitude, location.longitude]}
+                radius={location.population ? location.population / 100 : 10000}
                 pathOptions={{
                   color: selectedConfigIndex === 0 ? "red" : "blue",
                 }}
@@ -156,12 +160,12 @@ function Configurations() {
           })}
 
           {/* Add routes */}
-          {data[0].routes.map((route) => {
+          {configs[selectedConfigIndex].routes.map((route) => {
             // search for from and to locations
-            const fromLocation = data[0].locations.find(
+            const fromLocation = configs[selectedConfigIndex].locations.find(
               (location) => location.name === route.from
             );
-            const toLocation = data[0].locations.find(
+            const toLocation = configs[selectedConfigIndex].locations.find(
               (location) => location.name === route.to
             );
             return (
