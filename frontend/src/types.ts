@@ -13,26 +13,26 @@ enum LocationType {
   camp,
 }
 
-interface Location {
+interface SimLocation {  // can not be called Location as that conflicts with MongoDB
   name: string;
   region: string;
   country: string;
   latitude: number;
   longitude: number;
-  loaction_type: LocationType;
-  conflict_date?: bigint;
-  population: bigint; // or capacity of camp
+  location_type: LocationType;
+  conflict_date?: number;
+  population?: number; // or capacity of camp
 }
 
 interface Route {
   from: string; // Location?
   to: string; // Location?
-  distance: bigint;
-  forced_redirection?: bigint;
+  distance: number;
+  forced_redirection?: number;
 }
 
 interface Simulation {
   name: Country;
-  locations: Location[];
+  locations: SimLocation[];
   routes: Route[]
 }
