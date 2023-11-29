@@ -4,16 +4,15 @@ import "../styles/Navbar.css";
 function Navbar() {
   return (
     <div className="navbar-container">
-      <div className="logo-container">
+      <div className="nav-title-container">
         <NavLink to="/" className="nav-link">
-          <img src="./bayern-wappen.png" alt="Bayern wappen" className="logo" />
+          <h2 className="nav-title">CATURANGA</h2>
         </NavLink>
       </div>
 
       <div className="nav-links-container">
-        <NavLink to="/results">Ergebnisse</NavLink>
-        <NavLink to="/seats">Sitzverteilung</NavLink>
-        <NavLink to="/overview">Übersicht</NavLink>
+        <NavLink to="/configurations">Configurations</NavLink>
+        <NavLink to="/simulations">Simulations</NavLink>
       </div>
     </div>
   );

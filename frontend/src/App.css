@@ -1,3 +1,44 @@
 :root {
-  main-green: #3bb732;
+  --main-green: #3bb732;
+  --white: #ffffff;
+}
+* {
+  margin: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Roboto", sans-serif;
+  color: var(--black);
+}
+
+.App {
+  background-color: var(--white);
+  min-height: 100vh;
+  width: 100vw;
+}
+
+.content-page {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: var(--white);
+}
+
+.nav-link {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+a {
+  text-decoration: none;
+  transition: all 0.3s ease-in-out;
+}
+
+@media screen and (min-width: 992px) {
+  .content-page {
+    min-height: 88vh;
+  }
 }
