@@ -4,7 +4,7 @@
   justify-content: center;
   align-items: center;
 
-  background-color: var(--bayern-blue);
+  background-color: var(--main-green);
   color: var(--white);
   box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
 
@@ -14,7 +14,12 @@
   width: 100%;
 }
 
-.logo-container {
+.nav-title {
+  font-size: 2em;
+  color: var(--white);
+}
+
+/* .logo-container {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -24,7 +29,7 @@
 
 .logo {
   width: 75%;
-}
+} */
 
 .nav-links-container {
   display: flex;
@@ -45,14 +50,14 @@
 
 .nav-links-container a.active {
   background-color: var(--white);
-  color: var(--bayern-blue);
+  color: var(--main-green);
   text-decoration: underline;
   transform: scale(1.05);
 }
 
 .nav-links-container > a:hover {
   background-color: var(--white);
-  color: var(--bayern-blue);
+  color: var(--main-green);
 }
 
 @media screen and (min-width: 992px) {
