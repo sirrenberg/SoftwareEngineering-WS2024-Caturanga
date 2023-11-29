@@ -1,9 +1,9 @@
 enum Country {
-  burundi,
-  car,
-  ethiopia,
-  mali,
-  ssudan,
+  burundi = "Burundi",
+  car = "Central African Repbulic",
+  ethiopia = "Ethiopia",
+  mali = "Mali",
+  ssudan = "South Sudan",
 }
 
 enum LocationType {
