@@ -26,8 +26,6 @@ function Configurations() {
       // Access the clicked coordinates
       const { lat, lng } = event.latlng;
 
-      console.log("map clicked");
-
       //if operation mode is add-location
       if (operationMode === "add-location") {
         // add a new node to the data
@@ -109,9 +107,6 @@ function Configurations() {
 
           {/* Add locations */}
           {configs[selectedConfigIndex].locations.map((location) => {
-            console.log(location);
-            console.log(location.population / 100);
-
             return (
               <Circle
                 center={[location.latitude, location.longitude]}
@@ -123,8 +118,6 @@ function Configurations() {
                       operationMode === "add-route"
                     ) {
                       setSelectedNodes([...selectedNodes, location]);
-
-                      console.log(selectedNodes);
 
                       // if there are already 2 nodes selected
                       if (selectedNodes.length === 1) {
@@ -144,8 +137,6 @@ function Configurations() {
                         setSelectedNodes([]);
                       }
                     }
-                    console.log("location clicked");
-                    console.log(selectedNodes);
                   },
                 }}
               >
