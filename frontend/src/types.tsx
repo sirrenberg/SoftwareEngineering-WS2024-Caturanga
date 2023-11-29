@@ -1,6 +1,6 @@
 enum Country {
   burundi = "Burundi",
-  car = "Central African Repbulic",
+  car = "Central African Republic",
   ethiopia = "Ethiopia",
   mali = "Mali",
   ssudan = "South Sudan",

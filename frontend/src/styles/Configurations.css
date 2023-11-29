@@ -24,6 +24,8 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  position: relative;
+  top: 2em;
 }
 
 .selected-config-title {
@@ -33,8 +35,8 @@
 }
 
 .leaflet-container {
-  width: 60vw;
-  height: 60vh;
+  width: 70vw;
+  height: 70vh;
 }
 
 .buttons-container {

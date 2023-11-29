@@ -18,7 +18,7 @@ function Configurations() {
   const [configs, setConfigs] = useState(simulationData);
 
   const [selectedConfigIndex, setSelectedConfigIndex] = useState(0);
-  const [operationMode, setOperationMode] = useState("visualizing"); // ["visualizing", "add-node", "add-route"]
+  const [operationMode, setOperationMode] = useState("visualizing"); // ["visualizing", "add-location", "add-route"]
   const [selectedNodes, setSelectedNodes] = useState([]); // [node1, node2
 
   function ClickHandler() {
@@ -28,8 +28,8 @@ function Configurations() {
 
       console.log("map clicked");
 
-      //if operation mode is add-node
-      if (operationMode === "add-node") {
+      //if operation mode is add-location
+      if (operationMode === "add-location") {
         // add a new node to the data
         const newNode = {
           name: "New Node",
@@ -116,9 +116,6 @@ function Configurations() {
               <Circle
                 center={[location.latitude, location.longitude]}
                 radius={location.population ? location.population / 100 : 10000}
-                pathOptions={{
-                  color: selectedConfigIndex === 0 ? "red" : "blue",
-                }}
                 eventHandlers={{
                   click: () => {
                     if (
@@ -187,9 +184,9 @@ function Configurations() {
           <Button
             variant="contained"
             sx={{ width: "200px" }}
-            onClick={() => setOperationMode("add-node")}
+            onClick={() => setOperationMode("add-location")}
           >
-            Add Node
+            Add Location
           </Button>
           <Button
             variant="contained"
