@@ -2,3 +2,4 @@ fastapi
 uvicorn[standard]
 pymongo
 load_dotenv
+pandas
