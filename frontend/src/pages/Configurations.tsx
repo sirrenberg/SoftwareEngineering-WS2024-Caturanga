@@ -20,6 +20,9 @@ import {
   LocationType,
 } from "../types";
 
+// TODO: center the map around the biggest location
+// TODO: create a component for the map
+
 function Configurations() {
   const [configs, setConfigs] = useState<Simulation[]>(simulationData);
 
