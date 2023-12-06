@@ -7,10 +7,16 @@ enum Country {
 }
 
 enum LocationType {
-  conflict_zone,
-  town,
-  forwarding_hub,
-  camp,
+  conflict_zone = "Conflict Zone",
+  town = "Town",
+  forwarding_hub = "Forwarding Hub",
+  camp = "Camp",
+}
+
+enum MapOperatingMode {
+  vizualizing = "Vizualizing",
+  adding_location = "Adding Location",
+  adding_route = "Adding Route",
 }
 
 interface SimLocation {
@@ -39,4 +45,4 @@ interface Simulation {
 }
 
 export type { SimLocation, Route, Simulation };
-export { Country, LocationType };
+export { Country, LocationType, MapOperatingMode };

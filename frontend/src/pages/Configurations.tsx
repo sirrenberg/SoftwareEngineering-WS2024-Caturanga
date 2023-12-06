@@ -13,27 +13,38 @@ import { simulationData } from "../test-data/data";
 import { useState } from "react";
 import { ListItemButton, ListItemText, Button } from "@mui/material";
 import { useMapEvent } from "react-leaflet/hooks";
+import {
+  MapOperatingMode,
+  Simulation,
+  SimLocation,
+  LocationType,
+} from "../types";
 
 function Configurations() {
-  const [configs, setConfigs] = useState(simulationData);
+  const [configs, setConfigs] = useState<Simulation[]>(simulationData);
 
-  const [selectedConfigIndex, setSelectedConfigIndex] = useState(0);
-  const [operationMode, setOperationMode] = useState("visualizing"); // ["visualizing", "add-location", "add-route"]
-  const [selectedNodes, setSelectedNodes] = useState([]); // [node1, node2
+  const [selectedConfigIndex, setSelectedConfigIndex] = useState<number>(0);
+  const [operationMode, setOperationMode] = useState<MapOperatingMode>(
+    MapOperatingMode.vizualizing
+  ); // ["visualizing", "add-location", "add-route"]
+  const [selectedNodes, setSelectedNodes] = useState<SimLocation[]>([]); // [node1, node2
 
   function ClickHandler() {
-    const map = useMapEvent("click", (event) => {
+    useMapEvent("click", (event) => {
       // Access the clicked coordinates
       const { lat, lng } = event.latlng;
 
       //if operation mode is add-location
-      if (operationMode === "add-location") {
+      if (operationMode === MapOperatingMode.adding_location) {
         // add a new node to the data
-        const newNode = {
+        const newNode: SimLocation = {
           name: "New Node",
           latitude: lat,
           longitude: lng,
           population: 1000000,
+          region: "New Region",
+          country: "New Country",
+          location_type: LocationType.camp,
         };
 
         const newConfigs = [...configs];
@@ -41,7 +52,7 @@ function Configurations() {
         setConfigs(newConfigs);
 
         // reset operation mode
-        setOperationMode("visualizing");
+        setOperationMode(MapOperatingMode.vizualizing);
       }
     });
     return null;
@@ -87,14 +98,14 @@ function Configurations() {
           <ClickHandler />
           {/* OPEN STREEN MAPS TILES */}
           {/* <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        /> */}
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          /> */}
           {/* WATERCOLOR CUSTOM TILES */}
           {/* <TileLayer
-          attribution='Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          url="https://stamen-tiles-{s}.a.ssl.fastly.net/watercolor/{z}/{x}/{y}.jpg"
-        /> */}
+            attribution='Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            url="https://stamen-tiles-{s}.a.ssl.fastly.net/watercolor/{z}/{x}/{y}.jpg"
+          /> */}
           {/* GOOGLE MAPS TILES */}
           <TileLayer
             attribution="Google Maps"
@@ -115,7 +126,7 @@ function Configurations() {
                   click: () => {
                     if (
                       selectedNodes.length < 2 &&
-                      operationMode === "add-route"
+                      operationMode === MapOperatingMode.adding_route
                     ) {
                       setSelectedNodes([...selectedNodes, location]);
 
@@ -133,7 +144,7 @@ function Configurations() {
                         setConfigs(newConfigs);
 
                         // reset operation mode
-                        setOperationMode("visualizing");
+                        setOperationMode(MapOperatingMode.vizualizing);
                         setSelectedNodes([]);
                       }
                     }
@@ -153,9 +164,16 @@ function Configurations() {
             const fromLocation = configs[selectedConfigIndex].locations.find(
               (location) => location.name === route.from
             );
+
             const toLocation = configs[selectedConfigIndex].locations.find(
               (location) => location.name === route.to
             );
+
+            // should not happen
+            if (!fromLocation || !toLocation) {
+              return null;
+            }
+
             return (
               <Polyline
                 positions={[
@@ -175,14 +193,14 @@ function Configurations() {
           <Button
             variant="contained"
             sx={{ width: "200px" }}
-            onClick={() => setOperationMode("add-location")}
+            onClick={() => setOperationMode(MapOperatingMode.adding_location)}
           >
             Add Location
           </Button>
           <Button
             variant="contained"
             sx={{ width: "200px" }}
-            onClick={() => setOperationMode("add-route")}
+            onClick={() => setOperationMode(MapOperatingMode.adding_route)}
           >
             Add Route
           </Button>
