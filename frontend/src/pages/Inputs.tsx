@@ -1,4 +1,4 @@
-import "../styles/Configurations.css";
+import "../styles/Inputs.css";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import { simulationData } from "../test-data/data";
@@ -17,9 +17,9 @@ import { LatLngExpression } from "leaflet";
 // TODO: center the map around the biggest location
 // TODO: create a component for the map
 
-function Configurations() {
-  const [configs, setConfigs] = useState<Simulation[]>(simulationData);
-  const [selectedConfigIndex, setSelectedConfigIndex] = useState<number>(0);
+function Inputs() {
+  const [inputs, setInputs] = useState<Simulation[]>(simulationData);
+  const [selectedInputIndex, setSelectedInputIndex] = useState<number>(0);
   const [operationMode, setOperationMode] = useState<MapOperatingMode>(
     MapOperatingMode.vizualizing
   ); // ["visualizing", "add-location", "add-route"]
@@ -44,9 +44,9 @@ function Configurations() {
           location_type: LocationType.camp,
         };
 
-        const newConfigs = [...configs];
-        newConfigs[selectedConfigIndex].locations.push(newNode);
-        setConfigs(newConfigs);
+        const newInputs = [...inputs];
+        newInputs[selectedInputIndex].locations.push(newNode);
+        setInputs(newInputs);
         // reset operation mode
         setOperationMode(MapOperatingMode.vizualizing);
       }
@@ -70,9 +70,9 @@ function Configurations() {
           distance: 100,
         };
 
-        const newConfigs = [...configs];
-        newConfigs[selectedConfigIndex].routes.push(newRoute);
-        setConfigs(newConfigs);
+        const newInputs = [...inputs];
+        newInputs[selectedInputIndex].routes.push(newRoute);
+        setInputs(newInputs);
 
         // reset operation mode
         setOperationMode(MapOperatingMode.vizualizing);
@@ -90,8 +90,8 @@ function Configurations() {
     }
 
     let maxPopulation = 0;
-    let maxLocation = configs[selectedConfigIndex].locations[0];
-    configs[selectedConfigIndex].locations.forEach((location) => {
+    let maxLocation = inputs[selectedInputIndex].locations[0];
+    inputs[selectedInputIndex].locations.forEach((location) => {
       if (location.population && location.population > maxPopulation) {
         maxPopulation = location.population;
         maxLocation = location;
@@ -102,11 +102,11 @@ function Configurations() {
 
   useEffect(() => {
     calcMapCenter();
-  }, [selectedConfigIndex]);
+  }, [selectedInputIndex]);
 
   return (
-    <div className="configs-container">
-      <div className="configs-list-container">
+    <div className="inputs-container">
+      <div className="inputs-list-container">
         <List
           sx={{
             width: "100%",
@@ -115,15 +115,15 @@ function Configurations() {
             bgcolor: "background.paper",
           }}
         >
-          {configs.map((config, index) => {
+          {inputs.map((input, index) => {
             return (
               <ListItem
                 button
                 key={index}
-                onClick={() => setSelectedConfigIndex(index)}
+                onClick={() => setSelectedInputIndex(index)}
               >
-                <ListItemButton selected={selectedConfigIndex === index}>
-                  <ListItemText primary={config.name} />
+                <ListItemButton selected={selectedInputIndex === index}>
+                  <ListItemText primary={input.name} />
                 </ListItemButton>
               </ListItem>
             );
@@ -132,12 +132,12 @@ function Configurations() {
       </div>
 
       <div className="map-section">
-        <h2 className="selected-config-title">
-          {configs[selectedConfigIndex].name}, Mode: {operationMode}
+        <h2 className="selected-input-title">
+          {inputs[selectedInputIndex].name}, Mode: {operationMode}
         </h2>
 
         <Map
-          config={configs[selectedConfigIndex]}
+          input={inputs[selectedInputIndex]}
           MapClickHandler={MapClickHandler}
           NodeClickHandler={NodeClickHandler}
           center={mapCenter}
@@ -164,4 +164,4 @@ function Configurations() {
   );
 }
 
-export default Configurations;
+export default Inputs;

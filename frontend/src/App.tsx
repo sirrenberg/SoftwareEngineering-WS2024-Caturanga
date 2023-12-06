@@ -3,7 +3,7 @@ import { Routes, Route } from "react-router-dom";
 import Navbar from "./components/Navbar";
 
 import LandingPage from "./pages/LandingPage";
-import Configurations from "./pages/Configurations";
+import Inputs from "./pages/Inputs";
 
 function App() {
   return (
@@ -11,7 +11,7 @@ function App() {
       <Navbar />
       <Routes>
         <Route path="/" element={<LandingPage />} />
-        <Route path="/configurations" element={<Configurations />} />
+        <Route path="/inputs" element={<Inputs />} />
       </Routes>
     </div>
   );

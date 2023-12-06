@@ -13,12 +13,12 @@ import { useEffect } from "react";
 import { v4 as uuidv4 } from "uuid";
 
 function Map({
-  config,
+  input,
   center,
   MapClickHandler,
   NodeClickHandler,
 }: {
-  config: Simulation;
+  input: Simulation;
   center: LatLngExpression;
   MapClickHandler?: () => null;
   NodeClickHandler?: (location: SimLocation) => void;
@@ -86,7 +86,7 @@ function Map({
       />
 
       {/* Add locations */}
-      {config.locations.map((location) => {
+      {input.locations.map((location) => {
         return (
           <Circle
             key={uuidv4()}
@@ -109,13 +109,13 @@ function Map({
       })}
 
       {/* Add routes */}
-      {config.routes.map((route) => {
+      {input.routes.map((route) => {
         // search for from and to locations
-        const fromLocation = config.locations.find(
+        const fromLocation = input.locations.find(
           (location) => location.name === route.from
         );
 
-        const toLocation = config.locations.find(
+        const toLocation = input.locations.find(
           (location) => location.name === route.to
         );
 
@@ -127,6 +127,7 @@ function Map({
         return (
           <Polyline
             key={uuidv4()}
+            // weight={route.distance / 100}
             positions={[
               [fromLocation.latitude, fromLocation.longitude],
               [toLocation.latitude, toLocation.longitude],
