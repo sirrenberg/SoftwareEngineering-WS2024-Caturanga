@@ -2,7 +2,7 @@ import "../styles/Configurations.css";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import { simulationData } from "../test-data/data";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ListItemButton, ListItemText, Button } from "@mui/material";
 import {
   MapOperatingMode,
@@ -24,6 +24,7 @@ function Configurations() {
     MapOperatingMode.vizualizing
   ); // ["visualizing", "add-location", "add-route"]
   const [selectedNodes, setSelectedNodes] = useState<SimLocation[]>([]); // [node1, node2]
+  const [mapCenter, setMapCenter] = useState<LatLngExpression>([0, 0]); // [lat, lng
 
   function MapClickHandler(): null {
     useMapEvent("click", (event) => {
@@ -43,8 +44,8 @@ function Configurations() {
           location_type: LocationType.camp,
         };
 
-        const newConfigs = { ...configs };
-        configs[selectedConfigIndex].locations.push(newNode);
+        const newConfigs = [...configs];
+        newConfigs[selectedConfigIndex].locations.push(newNode);
         setConfigs(newConfigs);
         // reset operation mode
         setOperationMode(MapOperatingMode.vizualizing);
@@ -80,8 +81,14 @@ function Configurations() {
     }
   }
 
-  function getMapCenter(): LatLngExpression {
+  function calcMapCenter(): void {
     // Returns the location of the biggest location
+
+    // if not in vizualizing mode, return
+    if (operationMode !== MapOperatingMode.vizualizing) {
+      return;
+    }
+
     let maxPopulation = 0;
     let maxLocation = configs[selectedConfigIndex].locations[0];
     configs[selectedConfigIndex].locations.forEach((location) => {
@@ -90,8 +97,12 @@ function Configurations() {
         maxLocation = location;
       }
     });
-    return [maxLocation.latitude, maxLocation.longitude] as LatLngExpression;
+    setMapCenter([maxLocation.latitude, maxLocation.longitude]);
   }
+
+  useEffect(() => {
+    calcMapCenter();
+  }, [selectedConfigIndex]);
 
   return (
     <div className="configs-container">
@@ -129,7 +140,7 @@ function Configurations() {
           config={configs[selectedConfigIndex]}
           MapClickHandler={MapClickHandler}
           NodeClickHandler={NodeClickHandler}
-          center={getMapCenter()}
+          center={mapCenter}
         />
 
         <div className="buttons-container">

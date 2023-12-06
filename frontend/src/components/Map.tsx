@@ -10,6 +10,7 @@ import { LocationType, SimLocation, Simulation } from "../types";
 import { LatLngExpression } from "leaflet";
 import { useMap } from "react-leaflet/hooks";
 import { useEffect } from "react";
+import { v4 as uuidv4 } from "uuid";
 
 function Map({
   config,
@@ -88,7 +89,7 @@ function Map({
       {config.locations.map((location) => {
         return (
           <Circle
-            key={location.name}
+            key={uuidv4()}
             center={[location.latitude, location.longitude]}
             radius={location.population ? location.population / 100 : 10000}
             color={getNodeColor(location)}
@@ -125,7 +126,7 @@ function Map({
 
         return (
           <Polyline
-            key={`${fromLocation.name}-${toLocation.name}`}
+            key={uuidv4()}
             positions={[
               [fromLocation.latitude, fromLocation.longitude],
               [toLocation.latitude, toLocation.longitude],
