@@ -22,11 +22,6 @@ function Inputs() {
   function calcMapCenter(): void {
     // Returns the location of the biggest location
 
-    // if not in vizualizing mode, return
-    if (operationMode !== MapOperatingMode.vizualizing) {
-      return;
-    }
-
     let maxPopulation = 0;
     let maxLocation = inputs[selectedInputIndex].locations[0];
     inputs[selectedInputIndex].locations.forEach((location) => {
@@ -74,12 +69,7 @@ function Inputs() {
           Preview: {inputs[selectedInputIndex].name}
         </h2>
 
-        <Map
-          input={inputs[selectedInputIndex]}
-          MapClickHandler={MapClickHandler}
-          NodeClickHandler={NodeClickHandler}
-          center={mapCenter}
-        />
+        <Map input={inputs[selectedInputIndex]} center={mapCenter} />
 
         <div className="buttons-container">
           <Link to={"/inputs/" + inputs[selectedInputIndex].name}>
