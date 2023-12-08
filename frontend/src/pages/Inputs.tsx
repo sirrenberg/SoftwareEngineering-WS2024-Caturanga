@@ -11,73 +11,13 @@ import {
   LocationType,
 } from "../types";
 import Map from "../components/Map";
-import { useMapEvent } from "react-leaflet/hooks";
 import { LatLngExpression } from "leaflet";
 import { Link } from "react-router-dom";
 
 function Inputs() {
   const [inputs, setInputs] = useState<Simulation[]>(simulationData);
   const [selectedInputIndex, setSelectedInputIndex] = useState<number>(0);
-  const [operationMode, setOperationMode] = useState<MapOperatingMode>(
-    MapOperatingMode.vizualizing
-  ); // ["visualizing", "add-location", "add-route"]
-  const [selectedNodes, setSelectedNodes] = useState<SimLocation[]>([]); // [node1, node2]
   const [mapCenter, setMapCenter] = useState<LatLngExpression>([0, 0]); // [lat, lng
-
-  function MapClickHandler(): null {
-    useMapEvent("click", (event) => {
-      // Access the clicked coordinates
-      const { lat, lng } = event.latlng;
-
-      //if operation mode is add-location
-      if (operationMode === MapOperatingMode.adding_location) {
-        // add a new node to the data
-        const newNode: SimLocation = {
-          name: "New Node",
-          latitude: lat,
-          longitude: lng,
-          population: 1000000,
-          region: "New Region",
-          country: "New Country",
-          location_type: LocationType.camp,
-        };
-
-        const newInputs = [...inputs];
-        newInputs[selectedInputIndex].locations.push(newNode);
-        setInputs(newInputs);
-        // reset operation mode
-        setOperationMode(MapOperatingMode.vizualizing);
-      }
-    });
-    return null;
-  }
-
-  function NodeClickHandler(location: SimLocation): void {
-    if (
-      selectedNodes.length < 2 &&
-      operationMode === MapOperatingMode.adding_route
-    ) {
-      setSelectedNodes([...selectedNodes, location]);
-
-      // if there are already 2 nodes selected
-      if (selectedNodes.length === 1) {
-        // add a new route to the data
-        const newRoute = {
-          from: selectedNodes[0].name,
-          to: location.name,
-          distance: 100,
-        };
-
-        const newInputs = [...inputs];
-        newInputs[selectedInputIndex].routes.push(newRoute);
-        setInputs(newInputs);
-
-        // reset operation mode
-        setOperationMode(MapOperatingMode.vizualizing);
-        setSelectedNodes([]);
-      }
-    }
-  }
 
   function calcMapCenter(): void {
     // Returns the location of the biggest location
@@ -131,7 +71,7 @@ function Inputs() {
 
       <div className="map-section">
         <h2 className="selected-input-title">
-          {inputs[selectedInputIndex].name}, Mode: {operationMode}
+          Preview: {inputs[selectedInputIndex].name}
         </h2>
 
         <Map

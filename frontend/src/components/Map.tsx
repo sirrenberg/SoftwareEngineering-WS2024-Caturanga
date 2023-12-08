@@ -104,7 +104,10 @@ function Map({
               }}
             >
               <Popup>
-                {location.name}: {location.population}
+                {location.name} ({location.location_type})
+                <ul>
+                  <li>pop.: {location.population}</li>
+                </ul>
               </Popup>
             </Circle>
           );

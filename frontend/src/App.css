@@ -22,10 +22,10 @@ body {
 .content-page {
   display: flex;
   flex-direction: column;
-  justify-content: center;
   align-items: center;
   background-color: var(--white);
   padding-top: 12vh;
+  min-height: 100vh;
 }
 
 .nav-link {
@@ -42,6 +42,6 @@ a {
 
 @media screen and (min-width: 992px) {
   .content-page {
-    min-height: 88vh;
+    min-height: 100vh;
   }
 }
