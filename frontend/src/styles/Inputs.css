@@ -19,13 +19,12 @@
 
 .map-section {
   width: 100%;
-  height: 100%;
+  height: 88vh;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   position: relative;
-  top: 2em;
 }
 
 .selected-input-title {
@@ -35,8 +34,10 @@
 }
 
 .leaflet-container {
-  width: 70vw;
-  height: 70vh;
+  min-height: 50vh;
+  min-width: 50vw;
+  width: 80%;
+  height: 100%;
 }
 
 .buttons-container {
@@ -46,4 +47,8 @@
   padding: 1em;
 
   width: 60%;
+}
+
+.input-links {
+  color: var(--black);
 }

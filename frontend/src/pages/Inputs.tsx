@@ -13,9 +13,7 @@ import {
 import Map from "../components/Map";
 import { useMapEvent } from "react-leaflet/hooks";
 import { LatLngExpression } from "leaflet";
-
-// TODO: center the map around the biggest location
-// TODO: create a component for the map
+import { Link } from "react-router-dom";
 
 function Inputs() {
   const [inputs, setInputs] = useState<Simulation[]>(simulationData);
@@ -105,7 +103,7 @@ function Inputs() {
   }, [selectedInputIndex]);
 
   return (
-    <div className="inputs-container">
+    <div className="inputs-container content-page">
       <div className="inputs-list-container">
         <List
           sx={{
@@ -144,20 +142,11 @@ function Inputs() {
         />
 
         <div className="buttons-container">
-          <Button
-            variant="contained"
-            sx={{ width: "200px" }}
-            onClick={() => setOperationMode(MapOperatingMode.adding_location)}
-          >
-            Add Location
-          </Button>
-          <Button
-            variant="contained"
-            sx={{ width: "200px" }}
-            onClick={() => setOperationMode(MapOperatingMode.adding_route)}
-          >
-            Add Route
-          </Button>
+          <Link to={"/inputs/" + inputs[selectedInputIndex].name}>
+            <Button variant="contained" sx={{ width: "200px" }}>
+              Edit Conflict Input
+            </Button>
+          </Link>
         </div>
       </div>
     </div>

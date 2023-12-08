@@ -1,6 +1,7 @@
 :root {
   --main-green: #3bb732;
   --white: #ffffff;
+  --black: #000000;
 }
 * {
   margin: 0;
@@ -24,12 +25,14 @@ body {
   justify-content: center;
   align-items: center;
   background-color: var(--white);
+  padding-top: 12vh;
 }
 
 .nav-link {
   display: flex;
   justify-content: center;
   align-items: center;
+  text-decoration: none;
 }
 
 a {
