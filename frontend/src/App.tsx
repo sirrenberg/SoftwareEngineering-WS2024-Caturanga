@@ -6,6 +6,7 @@ import LandingPage from "./pages/LandingPage";
 import Inputs from "./pages/Inputs";
 import AddInput from "./pages/AddInput";
 import Settings from "./pages/Settings";
+import Simulations from "./pages/Simulations";
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
         <Route path="/inputs" element={<Inputs />} />
         <Route path="/inputs/:id" element={<AddInput />} />
         <Route path="/settings" element={<Settings />} />
+        <Route path="/simulations" element={<Simulations />} />
       </Routes>
     </div>
   );
