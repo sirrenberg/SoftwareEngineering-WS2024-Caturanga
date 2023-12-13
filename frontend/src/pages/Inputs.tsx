@@ -1,41 +1,43 @@
 import "../styles/Inputs.css";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
-import { simulationData } from "../test-data/data";
 import { useEffect, useState } from "react";
 import { ListItemButton, ListItemText, Button } from "@mui/material";
-import {
-  MapOperatingMode,
-  Simulation,
-  SimLocation,
-  LocationType,
-} from "../types";
+import { Simulation } from "../types";
 import Map from "../components/Map";
 import { LatLngExpression } from "leaflet";
 import { Link } from "react-router-dom";
+import { useAPI } from "../hooks/useAPI";
+import { calcMapCenter } from "../helper/misc";
 
 function Inputs() {
-  const [inputs, setInputs] = useState<Simulation[]>(simulationData);
+  const { sendRequest } = useAPI();
+
+  const [inputs, setInputs] = useState<Simulation[]>([]);
   const [selectedInputIndex, setSelectedInputIndex] = useState<number>(0);
   const [mapCenter, setMapCenter] = useState<LatLngExpression>([0, 0]); // [lat, lng
 
-  function calcMapCenter(): void {
-    // Returns the location of the biggest location
+  useEffect(() => {
+    console.log("Fetching inputs");
 
-    let maxPopulation = 0;
-    let maxLocation = inputs[selectedInputIndex].locations[0];
-    inputs[selectedInputIndex].locations.forEach((location) => {
-      if (location.population && location.population > maxPopulation) {
-        maxPopulation = location.population;
-        maxLocation = location;
-      }
+    sendRequest("/simulations", "GET").then((data) => {
+      console.log(data);
+
+      setInputs(data);
     });
-    setMapCenter([maxLocation.latitude, maxLocation.longitude]);
-  }
+  }, []);
 
   useEffect(() => {
-    calcMapCenter();
-  }, [selectedInputIndex]);
+    if (inputs.length > 0) {
+      setMapCenter(calcMapCenter(inputs[selectedInputIndex].locations));
+    }
+  }, []);
+
+  if (inputs.length === 0) {
+    console.log("No inputs");
+
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="inputs-container content-page">
@@ -56,7 +58,7 @@ function Inputs() {
                 onClick={() => setSelectedInputIndex(index)}
               >
                 <ListItemButton selected={selectedInputIndex === index}>
-                  <ListItemText primary={input.name} />
+                  <ListItemText primary={input.region} />
                 </ListItemButton>
               </ListItem>
             );
@@ -66,13 +68,13 @@ function Inputs() {
 
       <div className="map-section">
         <h2 className="selected-input-title">
-          Preview: {inputs[selectedInputIndex].name}
+          Preview: {inputs[selectedInputIndex].region}
         </h2>
 
         <Map input={inputs[selectedInputIndex]} center={mapCenter} />
 
         <div className="buttons-container">
-          <Link to={"/inputs/" + inputs[selectedInputIndex].name}>
+          <Link to={"/inputs/" + inputs[selectedInputIndex]._id}>
             <Button variant="contained" sx={{ width: "200px" }}>
               Edit Conflict Input
             </Button>

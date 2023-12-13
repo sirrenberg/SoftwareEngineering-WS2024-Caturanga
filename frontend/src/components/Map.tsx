@@ -26,14 +26,16 @@ function Map({
 }) {
   const zoomLevel = 5;
 
-  function Recenter() {
-    const map = useMap();
-    useEffect(() => {
-      map.flyTo(center, zoomLevel, { duration: 1 });
-    }, [center]);
+  // function Recenter() {
+  //   console.log("recenter");
 
-    return null;
-  }
+  //   const map = useMap();
+  //   useEffect(() => {
+  //     map.flyTo(center, zoomLevel, { duration: 1 });
+  //   }, [center]);
+
+  //   return null;
+  // }
 
   function getNodeColor(location: SimLocation) {
     // get the color of the node based on the location type
@@ -59,13 +61,13 @@ function Map({
   return (
     <div className="map-background">
       <MapContainer
-        center={[0, 0]}
+        center={center}
         zoom={zoomLevel}
         // scrollWheelZoom={false}
         doubleClickZoom={false}
       >
         <MapClickHandler />
-        <Recenter />
+        {/* <Recenter /> */}
         {/* Add a tile layer */}
         {/* OPEN STREEN MAPS TILES */}
         {/* <TileLayer
