@@ -9,8 +9,8 @@ import {
 import "leaflet/dist/leaflet.css";
 import { LocationType, SimLocation, Simulation } from "../types";
 import { LatLngExpression } from "leaflet";
-import { useMap } from "react-leaflet/hooks";
-import { useEffect } from "react";
+// import { useMap } from "react-leaflet/hooks";
+// import { useEffect } from "react";
 import { v4 as uuidv4 } from "uuid";
 
 function Map({

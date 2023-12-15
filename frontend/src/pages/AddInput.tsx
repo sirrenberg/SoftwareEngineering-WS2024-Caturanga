@@ -14,6 +14,7 @@ import { useMapEvent } from "react-leaflet/hooks";
 import { useAPI } from "../hooks/useAPI";
 import { calcMapCenter } from "../helper/misc";
 import { LatLngExpression } from "leaflet";
+import { v4 as uuidv4 } from "uuid";
 
 function AddInput() {
   const { id } = useParams<{ id: string }>();
@@ -23,7 +24,7 @@ function AddInput() {
   const [operationMode, setOperationMode] = useState<MapOperatingMode>(
     MapOperatingMode.vizualizing
   ); // ["visualizing", "add-location", "add-route"]
-  const [selectedNodes, setSelectedNodes] = useState<SimLocation[]>([]); // [node1, node2]
+  const [selectedNode, setSelectedNode] = useState<SimLocation | null>(null); // [node1, node2]
   const [mapCenter, setMapCenter] = useState<LatLngExpression>([0, 0]); // [lat, lng]
 
   useEffect(() => {
@@ -46,7 +47,7 @@ function AddInput() {
       if (operationMode === MapOperatingMode.adding_location) {
         // add a new node to the data
         const newNode: SimLocation = {
-          name: "New Node",
+          name: "New Node" + uuidv4(),
           latitude: lat,
           longitude: lng,
           population: 1000000,
@@ -67,18 +68,14 @@ function AddInput() {
   }
 
   function NodeClickHandler(location: SimLocation): void {
-    if (
-      selectedNodes.length < 2 &&
-      operationMode === MapOperatingMode.adding_route
-    ) {
-      setSelectedNodes([...selectedNodes, location]);
-      console.log(selectedNodes);
-
-      // if there are already 2 nodes selected
-      if (selectedNodes.length === 1) {
-        // add a new route to the data
+    if (operationMode === MapOperatingMode.adding_route) {
+      if (selectedNode === null) {
+        setSelectedNode(location);
+      }
+      // already 1 node selected
+      else {
         const newRoute = {
-          from: selectedNodes[0].name,
+          from: selectedNode.name,
           to: location.name,
           distance: 100,
         };
@@ -89,7 +86,7 @@ function AddInput() {
 
         // reset operation mode
         setOperationMode(MapOperatingMode.vizualizing);
-        setSelectedNodes([]);
+        setSelectedNode(null);
       }
     }
   }
@@ -128,6 +125,7 @@ function AddInput() {
             sx={{ width: "200px" }}
             onClick={() => {
               setOperationMode(MapOperatingMode.adding_route);
+              setSelectedNode(null);
             }}
           >
             Add Route
