@@ -1,11 +1,3 @@
-enum Country {
-  burundi = "Burundi",
-  car = "Central African Republic",
-  ethiopia = "Ethiopia",
-  mali = "Mali",
-  ssudan = "South Sudan",
-}
-
 enum LocationType {
   conflict_zone = "Conflict Zone",
   town = "Town",
@@ -39,10 +31,11 @@ interface Route {
 }
 
 interface Simulation {
-  name: Country;
+  _id: string;
+  region: string;
   locations: SimLocation[];
   routes: Route[];
 }
 
 export type { SimLocation, Route, Simulation };
-export { Country, LocationType, MapOperatingMode };
+export { LocationType, MapOperatingMode };

@@ -12,6 +12,7 @@ function Navbar() {
 
       <div className="nav-links-container">
         <NavLink to="/inputs">Inputs</NavLink>
+        <NavLink to="/settings">Settings</NavLink>
         <NavLink to="/simulations">Simulations</NavLink>
       </div>
     </div>
