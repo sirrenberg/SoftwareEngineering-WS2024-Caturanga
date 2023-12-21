@@ -3,6 +3,7 @@ from bson.objectid import ObjectId as ObjectID
 from dotenv import load_dotenv
 from flee_adapter.adapter import Adapter
 import os
+import yaml
 
 
 
@@ -20,7 +21,25 @@ class Controller:
         sim = self.adapter.run_simulation()
         self.store_simulation(sim)
         return sim
-    
+
+    async def run_simulation_simsettings(self, simsettings_id: str):
+
+        simsettings = await self.get_simsetting(simsettings_id)
+        filename = simsettings_id + ".yml"
+        path = os.path.join("flee", "stored_simsettings", filename)
+
+        if not os.path.exists(path):
+            try:
+                with open(path, 'w') as simsettings_file:
+                    yaml.dump(simsettings, simsettings_file, default_flow_style=False)
+            except Exception as e:
+                return "Error creating Yaml file"
+
+        sim = self.adapter.run_simulation(path)
+        self.store_simulation(sim)
+        return sim
+
+
 
     def store_simulation(self, result):
 

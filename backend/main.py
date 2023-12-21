@@ -19,15 +19,17 @@ app.add_middleware(
     allow_headers=["*"],  # allow all headers
 )
 
+### General: -----------------------------------------------------------------------------------------------------------
 
 @app.get("/")
 def read_root():
-    return {"data": "Welcome to the Caturanga API!"}
+    return {"data": "Welcome to the Caturanga API!!"}
 
 
-# this runs the Burundi simulation and returns the result
-# TODO - this should take a simulation ID as a parameter and run that simulation
-@app.get("/run_simulation")
+### Run Simulations: ---------------------------------------------------------------------------------------------------
+
+# Run the Burundi simulation and returns the result
+@app.get("/run_simulation/")
 def run_simulation():
     """
     Runs the simulation using the controller module.
@@ -37,37 +39,22 @@ def run_simulation():
     """
     return controller.run_simulation()
 
-
-@app.get("/simulation_results")
-async def get_all_simulation_results():
-    """
-    Retrieves all simulation results.
-
-    Returns:
-        A list of simulation results.
-    """
-    return await controller.get_all_simulation_results()
-
-
-
-@app.get("/simulation_results/{simulation_result_id}")
-async def get_simulation_result(
-    simulation_result_id: str = Path(
-        description="The ID of the simulation whose data you want to view."
+# Run a simulation with the simsettins for a specific simulation:
+@app.get("/run_simulation_simsettings/{simsetting_id}")
+async def run_simulation_simsettings(
+    simsetting_id: str = Path(
+        description="The ID of the simulation you want to run"
     ),
 ):
-    """
-    Retrieve the data of a simulation result based on its ID.
 
-    Args:
-        simulation_result_id (str): The ID of the simulation result.
-
-    Returns:
-        The data of the simulation result.
-    """
-    return await controller.get_simulation_result(simulation_result_id)
+    return await controller.run_simulation_simsettings(simsetting_id)
 
 
+
+
+### Simulation: --------------------------------------------------------------------------------------------------------
+
+## Return all simulations:
 @app.get("/simulations")
 async def get_all_simulations():
     """
@@ -76,6 +63,7 @@ async def get_all_simulations():
     return await controller.get_all_simulations()
 
 
+## Return a single simulation by id:
 @app.get("/simulations/{simulation_id}")
 async def get_simulation(
     simulation_id: str = Path(
@@ -94,18 +82,53 @@ async def get_simulation(
     return await controller.get_simulation(simulation_id)
 
 
+### Simulation results: ------------------------------------------------------------------------------------------------
+
+## Return all simulation results:
+@app.get("/simulation_results")
+async def get_all_simulation_results():
+    """
+    Retrieves all simulation results.
+
+    Returns:
+        A list of simulation results.
+    """
+    return await controller.get_all_simulation_results()
+
+
+## Return simulation results of a specific simulation:
+@app.get("/simulation_results/{simulation_result_id}")
+async def get_simulation_result(
+    simulation_result_id: str = Path(
+        description="The ID of the simulation whose data you want to view."
+    ),
+):
+    """
+    Retrieve the data of a simulation result based on its ID.
+
+    Args:
+        simulation_result_id (str): The ID of the simulation result.
+
+    Returns:
+        The data of the simulation result.
+    """
+    return await controller.get_simulation_result(simulation_result_id)
+
+
+### Simulation inputs: -------------------------------------------------------------------------------------------------
+
 class SimulationSetting(BaseModel):
     log_levels: str
     spawn_rules: str
     move_rules: str
     optimizations: str
 
-
 JSONObject = Dict[AnyStr, Any]
 JSONArray = List[Any]
 JSONStructure = Union[JSONArray, JSONObject]
 
 
+## Return all simsettings:
 @app.get("/simsettings")
 async def get_all_simsettings():
     """
@@ -114,6 +137,7 @@ async def get_all_simsettings():
     return await controller.get_all_simsettings()
 
 
+## Return simsettings for a specific simulation:
 @app.get("/simsettings/{simsetting_id}")
 async def get_simulation(
     simsetting_id: str = Path(
@@ -123,6 +147,7 @@ async def get_simulation(
     return await controller.get_simsetting(simsetting_id)
 
 
+## Post new simsettings:
 @app.post("/simsettings")
 async def post_simsettings(simsetting: JSONStructure = None):
     """
@@ -133,6 +158,7 @@ async def post_simsettings(simsetting: JSONStructure = None):
     return {"data": simsetting}
 
 
+## Delete simsettings for a specific simulation:
 @app.delete("/simsettings/{simsetting_id}")
 async def delete_simsetting(
     simsetting_id: str = Path(
