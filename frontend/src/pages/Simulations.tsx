@@ -2,15 +2,14 @@ import "../styles/Inputs.css";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import { useEffect, useState } from "react";
-import { ListItemButton, ListItemText, Button } from "@mui/material";
+import { ListItemButton, ListItemText, Slider, Box } from "@mui/material";
 import { Simulation } from "../types";
 import Map from "../components/Map";
 import { LatLngExpression } from "leaflet";
-import { Link } from "react-router-dom";
 import { useAPI } from "../hooks/useAPI";
 import { calcMapCenter } from "../helper/misc";
 
-function Inputs() {
+function Simulations() {
   const { sendRequest } = useAPI();
 
   const [inputs, setInputs] = useState<Simulation[]>([]);
@@ -68,21 +67,25 @@ function Inputs() {
 
       <div className="map-section">
         <h2 className="selected-input-title">
-          Preview: {inputs[selectedInputIndex].region}
+          Result: {inputs[selectedInputIndex].region}
         </h2>
 
         <Map input={inputs[selectedInputIndex]} center={mapCenter} />
 
-        <div className="buttons-container">
-          <Link to={"/inputs/" + inputs[selectedInputIndex]._id}>
-            <Button variant="contained" sx={{ width: "200px" }}>
-              Edit Conflict Input
-            </Button>
-          </Link>
+        <div className="slider-container">
+          <Box sx={{ width: 300 }}>
+            <Slider
+              valueLabelDisplay="auto"
+              step={1}
+              marks
+              min={0}
+              max={14}
+            />
+          </Box>
         </div>
       </div>
     </div>
   );
 }
 
-export default Inputs;
+export default Simulations;
