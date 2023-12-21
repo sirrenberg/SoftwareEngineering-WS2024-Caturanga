@@ -5,15 +5,6 @@ from bson.objectid import ObjectId as ObjectID
 from datetime import datetime
 from dotenv import load_dotenv
 
-# TODO: create a function for DB access
-# TODO: create API endpoints for DB access
-
-load_dotenv()
-MONGODB_URI = os.environ.get('MONGO_URI')
-
-client = MongoClient(MONGODB_URI)
-db = client.get_database("Caturanga")
-simulations_collection = db.get_collection("simulations")
 
 # Function to convert CSV to lists of dictionaries
 def csv_to_list(file_path):
@@ -32,8 +23,11 @@ def csv_to_list_reg_corr(file_path):
         csv_reader = csv.reader(file)
         
         for row in csv_reader:
-            name, date = row
-            data.append({'name': name, 'date': date})
+            if(len(row) == 0):
+                continue
+            else:
+                name, date = row[0], row[1]
+                data.append({'name': name, 'date': date})
 
     return data
 
@@ -55,12 +49,15 @@ def csv_to_list_sim_period(file_path):
 def transform_location_data(location_data):
     transformed_data = []
     for row in location_data:
+        name_key = '#name' if '#name' in row else '#"name"'
+        lat_key = 'latitude' if 'latitude' in row else 'lat'
+        lon_key = 'longitude' if 'longitude' in row else 'lon'
         transformed_data.append({
-            'name': row['#name'],
+            'name': row[name_key],
             'region': row['region'],
             'country': row['country'],
-            'latitude': float(row['latitude']),
-            'longitude': float(row['longitude']),
+            'latitude': float(row[lat_key]),
+            'longitude': float(row[lon_key]),
             'location_type': row['location_type'],
             'conflict_date': int(row['conflict_date']) if row['conflict_date'] else None,
             'population': int(row['population']) if row['population'] else None
@@ -71,8 +68,9 @@ def transform_location_data(location_data):
 def transform_routes_data(routes_data):
     transformed_data = []
     for row in routes_data:
+        name1_key = '#name1' if '#name1' in row else '#"name1"'
         transformed_data.append({
-            'from': row['#name1'],
+            'from': row[name1_key],
             'to': row['name2'],
             'distance': float(row['distance']),
             'forced_redirection': float(row['forced_redirection']) if row['forced_redirection'] else None
@@ -136,56 +134,78 @@ def transform_sim_period_data(sim_period_data):
     return transformed_data
 
 
-# Specify the names of your CSV files
-country = 'burundi'
+def insert_test_data(countries):
+    load_dotenv()
+    MONGODB_URI = os.environ.get('MONGO_URI')
 
-script_dir = os.path.dirname(__file__)
-data_dir = os.path.join(script_dir, f'..\\frontend\\src\\test-data\\{country}')
+    client = MongoClient(MONGODB_URI)
+    db = client.get_database("Caturanga")
+    simulations_collection = db.get_collection("simulations")
 
-location_csv_path = os.path.join(data_dir, 'locations.csv')
-routes_csv_path = os.path.join(data_dir, 'routes.csv')
-conflicts_csv_path = os.path.join(data_dir, 'conflicts.csv')
-closures_csv_path = os.path.join(data_dir, 'closures.csv')
-reg_corrections_csv_path = os.path.join(data_dir, 'registration_corrections.csv')
-sim_period_csv_path = os.path.join(data_dir, 'sim_period.csv')
+    for country in countries:
+        script_dir = os.path.dirname(__file__)
+        data_dir = os.path.join(script_dir, f'..\\backend\\flee\\conflict_input\\{country}')
 
-# Convert CSV to lists of dictionaries
-location_data = csv_to_list(location_csv_path)
-routes_data = csv_to_list(routes_csv_path)
-conflicts_data = csv_to_list(conflicts_csv_path)
-closures_data = csv_to_list(closures_csv_path)
-reg_corr_data = csv_to_list_reg_corr(reg_corrections_csv_path)
-sim_period_data = csv_to_list_sim_period(sim_period_csv_path)
+        location_csv_path = os.path.join(data_dir, 'locations.csv')
+        routes_csv_path = os.path.join(data_dir, 'routes.csv')
+        conflicts_csv_path = os.path.join(data_dir, 'conflicts.csv')
+        closures_csv_path = os.path.join(data_dir, 'closures.csv')
+        reg_corrections_csv_path = os.path.join(data_dir, 'registration_corrections.csv')
+        sim_period_csv_path = os.path.join(data_dir, 'sim_period.csv')
 
-
-# Transform CSV data to match MongoDB schema
-locations = transform_location_data(location_data)
-routes = transform_routes_data(routes_data)
-conflicts = transform_conflicts_data(conflicts_data)
-closures = transform_closure_data(closures_data)
-reg_corr = transform_reg_corr_data(reg_corr_data)
-sim_period = transform_sim_period_data(sim_period_data)
+        # Convert CSV to lists of dictionaries
+        location_data = csv_to_list(location_csv_path)
+        routes_data = csv_to_list(routes_csv_path)
+        conflicts_data = csv_to_list(conflicts_csv_path)
+        closures_data = csv_to_list(closures_csv_path)
+        reg_corr_data = csv_to_list_reg_corr(reg_corrections_csv_path)
+        sim_period_data = csv_to_list_sim_period(sim_period_csv_path)
 
 
-# Create the JSON object to be inserted into the MongoDB
-mongo_document = {
-    'region': country,
-    'closures': closures,
-    'conflicts': conflicts,
-    'locations': locations,
-    'registration_corrections': reg_corr,
-    'routes': routes,
-    'sim_period': sim_period
-}
+        # Transform CSV data to match MongoDB schema
+        locations = transform_location_data(location_data)
+        routes = transform_routes_data(routes_data)
+        conflicts = transform_conflicts_data(conflicts_data)
+        closures = transform_closure_data(closures_data)
+        reg_corr = transform_reg_corr_data(reg_corr_data)
+        sim_period = transform_sim_period_data(sim_period_data)
 
 
+        # Create the JSON object to be inserted into the MongoDB
+        mongo_document = {
+            'region': country,
+            'closures': closures,
+            'conflicts': conflicts,
+            'locations': locations,
+            'registration_corrections': reg_corr,
+            'routes': routes,
+            'sim_period': sim_period
+        }
 
-# insert test data into the database
-# result = simulations_collection.insert_one(mongo_document)
+        # insert test data into the database
+        result = simulations_collection.insert_one(mongo_document)
+
+    client.close()
 
 
-# delete document from collection
-# result = simulations_collection.delete_many({"_id": ObjectID("65690fe42c4979a9ede0b9d0")})
+def delete_test_data(id):
+    load_dotenv()
+    MONGODB_URI = os.environ.get('MONGO_URI')
 
-client.close()
+    client = MongoClient(MONGODB_URI)
+    db = client.get_database("Caturanga")
+    simulations_collection = db.get_collection("simulations")
 
+    # delete document from collection
+    result = simulations_collection.delete_many({"_id": ObjectID(id)})
+
+    client.close()
+
+
+# insert test data from frontend folder into the database
+countries = ['burundi', 'car', 'ethiopia', 'mali', 'ssudan']
+# insert_test_data(countries)
+
+# delete test data from the database
+delete_id = "65843763aef0c55ae04c33b1"
+# delete_test_data(delete_id)
