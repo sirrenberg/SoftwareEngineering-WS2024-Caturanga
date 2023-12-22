@@ -27,13 +27,9 @@ class Controller:
 
         Args:
             simulation_id (str): The object ID of the dummy simulation.
-
-        Returns:
-            dict: The result of the simulation.
         """
         sim = self.adapter.run_simulation()
         self.store_simulation(sim, simulation_id)
-        return sim
 
 
     def store_simulation(self, result, object_id: str):
