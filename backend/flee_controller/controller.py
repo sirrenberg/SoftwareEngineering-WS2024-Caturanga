@@ -27,11 +27,9 @@ class Controller:
 
     def store_simulation(self, result, object_id: str):
 
-        load_dotenv()
-        MONGODB_URI = os.environ.get('MONGO_URI')
-        client = MongoClient(MONGODB_URI)
-        db = client.Caturanga
+        client, db = self.connect_db()
         simulations_collection = db.simulations_results
+        
         new_simulation = {}
         new_simulation["data"] = result
         simulations_collection.replace_one({"_id": ObjectID(object_id)}, new_simulation)
@@ -41,10 +39,7 @@ class Controller:
     
     async def store_dummy_simulation(self):
 
-        load_dotenv()
-        MONGODB_URI = os.environ.get('MONGO_URI')
-        client = MongoClient(MONGODB_URI)
-        db = client.Caturanga
+        client, db = self.connect_db()
         collection = db.simulations_results
 
         dummy_simulation = {}
@@ -143,3 +138,13 @@ class Controller:
         return self.db.get_collection("simsettings").delete_one(
             {"_id": ObjectID(simsetting_id)}
         )
+
+    def connect_db(self):
+        """
+        Connect to the database.
+        """
+        load_dotenv()
+        MONGODB_URI = os.environ.get('MONGO_URI')
+        client = MongoClient(MONGODB_URI)
+        db = client.Caturanga
+        return client, db
