@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Path, Request
+from fastapi import FastAPI, Path, Request, BackgroundTasks
 from flee_controller.controller import Controller
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -28,14 +28,24 @@ def read_root():
 # this runs the Burundi simulation and returns the result
 # TODO - this should take a simulation ID as a parameter and run that simulation
 @app.get("/run_simulation")
-def run_simulation():
+async def run_simulation(background_tasks: BackgroundTasks):
     """
     Runs the simulation using the controller module.
 
     Returns:
         The result of the simulation.
     """
-    return controller.run_simulation()
+    object_id = await controller.store_dummy_simulation()
+
+    """
+    The run_simulation method is run in the background, so that user does not have to wait.
+
+    See https://fastapi.tiangolo.com/tutorial/background-tasks/ for a comparison with Celery, which requires
+    a more complex setup, but can be used to perform very heavy background computation.
+    """
+    background_tasks.add_task(controller.run_simulation, object_id)
+
+    return {"dummy simulation": str(object_id)}
 
 
 @app.get("/simulation_results")

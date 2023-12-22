@@ -9,6 +9,7 @@ import os
 class Controller:
 
     def __init__(self):
+
         self.adapter = Adapter()
         load_dotenv()
         self.MONGODB_URI = os.environ.get('MONGO_URI')
@@ -16,25 +17,43 @@ class Controller:
         self.db = self.client.get_database("Caturanga")
 
 
-    def run_simulation(self):
+    def run_simulation(self, simulation_id: str):
+
         sim = self.adapter.run_simulation()
-        self.store_simulation(sim)
+        self.store_simulation(sim, simulation_id)
+
         return sim
     
 
-    def store_simulation(self, result):
+    def store_simulation(self, result, object_id: str):
 
         load_dotenv()
         MONGODB_URI = os.environ.get('MONGO_URI')
         client = MongoClient(MONGODB_URI)
         db = client.Caturanga
         simulations_collection = db.simulations_results
-
         new_simulation = {}
         new_simulation["data"] = result
-        simulations_collection.insert_one(new_simulation)
+        simulations_collection.replace_one({"_id": ObjectID(object_id)}, new_simulation)
 
         client.close()
+
+    
+    async def store_dummy_simulation(self):
+
+        load_dotenv()
+        MONGODB_URI = os.environ.get('MONGO_URI')
+        client = MongoClient(MONGODB_URI)
+        db = client.Caturanga
+        collection = db.simulations_results
+
+        dummy_simulation = {}
+        dummy_simulation["data"] = {}
+        result = collection.insert_one(dummy_simulation)
+
+        client.close()
+
+        return result.inserted_id
 
     
     async def get_all_simulation_results(self):
