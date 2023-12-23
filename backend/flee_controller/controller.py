@@ -26,18 +26,19 @@ class Controller:
 
         simsettings = await self.get_simsetting(simsettings_id)
         filename = simsettings_id + ".yml"
-        path = os.path.join("flee", "stored_simsettings", filename)
+        path = os.path.join("flee_stored_files", "simsettings", filename)
 
-        if not os.path.exists(path):
-            try:
-                with open(path, 'w') as simsettings_file:
-                    yaml.dump(simsettings, simsettings_file, default_flow_style=False)
-            except Exception as e:
-                return "Error creating Yaml file"
+        try:
+            with open(path, 'w') as yaml_file:
+                yaml.dump(simsettings, yaml_file, default_flow_style=False, sort_keys=False)
+        except Exception as e:
+            return "Exception while storing the simsettings.yml file: {e}"
 
         sim = self.adapter.run_simulation(path)
         self.store_simulation(sim)
-        return sim
+
+        return str(type(simsettings)), simsettings
+
 
 
 
