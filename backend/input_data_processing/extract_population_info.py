@@ -10,6 +10,7 @@ def extract_population_info(country):
     city_data = {}
 
     # URL to scrape for ethiopia
+    # The population of all Ethiopian cities and towns with more than 20,000 inhabitants according to census results and latest official projections.
     url = f"https://www.citypopulation.de/en/{country}/cities/"
 
     response = requests.get(url)
