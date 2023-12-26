@@ -1,5 +1,6 @@
 import Map from "../components/Map";
 import "../styles/LandingPage.css";
+import { NavLink } from "react-router-dom";
 
 function LandingPage() {
   return (
@@ -21,12 +22,17 @@ function LandingPage() {
             </p>
 
             <div className="lp-title-buttons-container">
-              <button className="lp-title-button simple-button">
-                Start new Simulation
-              </button>
-              <button className="lp-title-button simple-button">
-                Analyze past Simulations
-              </button>
+              <NavLink to="/inputs">
+                <button className="lp-title-button simple-button">
+                  Start new Simulation
+                </button>
+              </NavLink>
+
+              <NavLink to="/inputs">
+                <button className="lp-title-button simple-button">
+                  Analyze past Simulations
+                </button>
+              </NavLink>
             </div>
           </div>
           <div className="lp-title-map-container lp-title-content-section">

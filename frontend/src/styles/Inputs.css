@@ -3,34 +3,96 @@
   flex-direction: row;
   justify-content: center;
   align-items: center;
-
-  width: 100%;
-  min-height: 100vh;
+  padding: 0;
 }
 
 .inputs-list-container {
-  height: 100%;
-  width: 20%;
+  background-color: var(--tea-green);
+  height: 100vh;
+  width: 25%;
+  padding: 2em 0;
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;
-  align-items: flex-start;
+  align-items: center;
+  justify-content: space-between;
 }
 
-.map-section {
-  width: 100%;
-  height: 88vh;
+.inputs-list-title {
+  font-family: "Cabin", sans-serif;
+  font-weight: 600;
+  font-size: 2rem;
+}
+
+.inputs-list {
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  position: relative;
+  width: 90%;
+  height: 75%;
+  overflow-y: scroll;
+}
+
+.inputs-list .simple-button {
+  margin: 0.2em 0;
+  width: 90%;
+  background-color: var(--white);
+  color: var(--black);
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+}
+
+.inputs-list .simple-button:hover {
+  background-color: var(--light-green);
+  color: var(--white);
+}
+
+.simple-button.selected-input {
+  background-color: var(--dark-green);
+  color: var(--white);
+}
+
+.inputs-list-item-icons {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  align-items: center;
+  position: fixed;
+  width: 20%;
+  color: var(--white);
+}
+
+.simple-button .inputs-list-item-icons,
+a .inputs-list-item-icons {
+  display: none;
+  right: 1em;
+  width: 20%;
+}
+
+.simple-button:hover .inputs-list-item-icons {
+  display: flex;
+}
+
+.input-icon:hover {
+  color: var(--dark-green);
+}
+
+.map-section {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  align-items: center;
 }
 
 .selected-input-title {
-  font-size: 2em;
-  font-weight: bold;
-  margin: 1em 0;
+}
+
+.map-background {
+  background-color: var(--dark-green);
 }
 
 .leaflet-container {

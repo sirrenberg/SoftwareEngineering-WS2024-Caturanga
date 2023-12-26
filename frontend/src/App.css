@@ -24,6 +24,11 @@ body {
   overflow-x: hidden;
 }
 
+a {
+  text-decoration: none;
+  color: var(--white);
+}
+
 .App {
   background-color: var(--white);
   min-height: 100vh;
@@ -50,10 +55,13 @@ body {
   box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
   cursor: pointer;
   transition: all 0.3s ease-in-out;
+  background-color: var(--dark-green);
+  color: var(--white);
 }
 
 .simple-button:hover {
   transform: scale(1.1);
+  background-color: var(--light-green);
 }
 
 .simple-button:active {
@@ -64,4 +72,5 @@ body {
   font-size: 3rem;
   font-weight: 700;
   margin-bottom: 2rem;
+  font-family: "Cabin", sans-serif;
 }

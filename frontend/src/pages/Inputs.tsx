@@ -1,14 +1,14 @@
 import "../styles/Inputs.css";
-import List from "@mui/material/List";
-import ListItem from "@mui/material/ListItem";
 import { useEffect, useState } from "react";
-import { ListItemButton, ListItemText, Button } from "@mui/material";
 import { Simulation } from "../types";
 import Map from "../components/Map";
 import { LatLngExpression } from "leaflet";
 import { Link } from "react-router-dom";
 import { useAPI } from "../hooks/useAPI";
 import { calcMapCenter } from "../helper/misc";
+import { NavLink } from "react-router-dom";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faPenToSquare, faTrash } from "@fortawesome/free-solid-svg-icons";
 
 function Inputs() {
   const { sendRequest } = useAPI();
@@ -18,11 +18,7 @@ function Inputs() {
   const [mapCenter, setMapCenter] = useState<LatLngExpression>([0, 0]); // [lat, lng
 
   useEffect(() => {
-    console.log("Fetching inputs");
-
     sendRequest("/simulations", "GET").then((data) => {
-      console.log(data);
-
       setInputs(data);
     });
   }, []);
@@ -34,40 +30,50 @@ function Inputs() {
   }, []);
 
   if (inputs.length === 0) {
-    console.log("No inputs");
-
     return <div>Loading...</div>;
   }
 
   return (
     <div className="inputs-container content-page">
       <div className="inputs-list-container">
-        <List
-          sx={{
-            width: "100%",
-            height: "100%",
-            maxWidth: 360,
-            bgcolor: "background.paper",
-          }}
-        >
+        <h2 className="inputs-list-title">Saved Inputs</h2>
+
+        <div className="inputs-list">
           {inputs.map((input, index) => {
             return (
-              <ListItem
-                button
-                key={index}
-                onClick={() => setSelectedInputIndex(index)}
+              <button
+                key={input._id}
+                className={
+                  "simple-button" +
+                  (index === selectedInputIndex ? " selected-input" : "")
+                }
+                onClick={() => {
+                  setSelectedInputIndex(index);
+                  setMapCenter(calcMapCenter(input.locations));
+                }}
               >
-                <ListItemButton selected={selectedInputIndex === index}>
-                  <ListItemText primary={input.region} />
-                </ListItemButton>
-              </ListItem>
+                <p>{input.region}</p>
+                <span className="inputs-list-item-icons">
+                  <NavLink to={"/inputs/" + input._id}>
+                    <FontAwesomeIcon
+                      icon={faPenToSquare}
+                      className="input-icon"
+                    />
+                  </NavLink>
+                  <FontAwesomeIcon icon={faTrash} className="input-icon" />
+                </span>
+              </button>
             );
           })}
-        </List>
+        </div>
+
+        <NavLink to="/inputs/new">
+          <button className="simple-button">Add New Input</button>
+        </NavLink>
       </div>
 
       <div className="map-section">
-        <h2 className="selected-input-title">
+        <h2 className="selected-input-title page-title">
           Preview: {inputs[selectedInputIndex].region}
         </h2>
 
@@ -75,9 +81,7 @@ function Inputs() {
 
         <div className="buttons-container">
           <Link to={"/inputs/" + inputs[selectedInputIndex]._id}>
-            <Button variant="contained" sx={{ width: "200px" }}>
-              Edit Conflict Input
-            </Button>
+            <button className="simple-button">Continue</button>
           </Link>
         </div>
       </div>

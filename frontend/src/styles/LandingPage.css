@@ -65,15 +65,6 @@
   max-width: 80%;
 }
 
-.lp-title-button {
-  background-color: var(--dark-green);
-  color: var(--white);
-}
-
-.lp-title-button:hover {
-  background-color: var(--light-green);
-}
-
 .lp-title-map-container {
   align-items: center;
 }
@@ -125,4 +116,8 @@
 
 #lp-simulation-title {
   color: var(--white);
+}
+
+.map-background {
+  background-color: var(--charcoal);
 }
