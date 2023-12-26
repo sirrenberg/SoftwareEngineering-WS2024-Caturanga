@@ -19,8 +19,8 @@ function Map({
   MapClickHandler,
   NodeClickHandler,
 }: {
-  input: Simulation;
-  center: LatLngExpression;
+  input?: Simulation;
+  center?: LatLngExpression;
   MapClickHandler?: () => null;
   NodeClickHandler?: (location: SimLocation) => void;
 }) {
@@ -90,7 +90,7 @@ function Map({
         />
 
         {/* Add locations */}
-        {input.locations.map((location) => {
+        {input?.locations.map((location) => {
           return (
             <Circle
               key={uuidv4()}
@@ -116,7 +116,7 @@ function Map({
         })}
 
         {/* Add routes */}
-        {input.routes.map((route) => {
+        {input?.routes.map((route) => {
           // search for from and to locations
           const fromLocation = input.locations.find(
             (location) => location.name === route.from
