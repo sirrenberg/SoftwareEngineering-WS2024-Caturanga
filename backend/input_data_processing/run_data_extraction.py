@@ -11,6 +11,7 @@ from extract_routes_csv import extract_routes_csv
 from add_camp_locations import add_camp_locations
 from create_closures_csv import create_empty_closure_csv
 from create_registration_corrections_csv import create_empty_registration_corrections_csv
+from create_sim_period_csv import create_sim_period_csv
 
 
 
@@ -62,6 +63,8 @@ def acled_data_to_csv(country, folder_name, start_year, end_year):
 
 
 def run_extraction(country_name, start_year, end_year):
+    # TODO: start&end date adjustable to the day. Right now the simulation only starts at the beginning of a year and ends at the end of a year. Change if necessary
+
     start_date = '01-01-' + str(start_year)
     end_date = '31-12-' + str(end_year)
 
@@ -97,15 +100,10 @@ def run_extraction(country_name, start_year, end_year):
     
     # 10. create empty registration_correction.csv
     create_empty_registration_corrections_csv(folder_name)
-
+    
     # 11. create sim_period.csv
-    # TODO: create sim_period.cvsv
-    # format: 
-        # "StartDate","2020-11-04"
-        # "Length",146
-
-
-
+    create_sim_period_csv(folder_name, start_date, end_date)
+    
 
 
 
