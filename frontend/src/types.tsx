@@ -6,7 +6,7 @@ enum LocationType {
 }
 
 enum MapOperatingMode {
-  vizualizing = "Vizualizing",
+  vizualizing = "Visualizing",
   adding_location = "Adding Location",
   adding_route = "Adding Route",
 }
@@ -30,12 +30,18 @@ interface Route {
   forced_redirection?: number;
 }
 
-interface Simulation {
+interface Input {
   _id: string;
   region: string;
   locations: SimLocation[];
   routes: Route[];
+  name: string;
+  // TODO: Remove Array (only one sim_period)
+  sim_period: {
+    date: Date;
+    length: number;
+  }[];
 }
 
-export type { SimLocation, Route, Simulation };
+export type { SimLocation, Route, Input };
 export { LocationType, MapOperatingMode };

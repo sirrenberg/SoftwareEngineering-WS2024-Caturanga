@@ -1,6 +1,6 @@
 import "../styles/Inputs.css";
 import { useEffect, useState } from "react";
-import { Simulation } from "../types";
+import { Input } from "../types";
 import Map from "../components/Map";
 import { LatLngExpression } from "leaflet";
 import { Link } from "react-router-dom";
@@ -13,8 +13,8 @@ import { faPenToSquare, faTrash } from "@fortawesome/free-solid-svg-icons";
 function Inputs() {
   const { sendRequest } = useAPI();
 
-  const [inputs, setInputs] = useState<Simulation[]>([]);
-  const [selectedInputIndex, setSelectedInputIndex] = useState<number>(0);
+  const [inputs, setInputs] = useState<Input[]>([]);
+  const [selectedInputIndex, setSelectedInputIndex] = useState<number>(-1);
   const [mapCenter, setMapCenter] = useState<LatLngExpression>([0, 0]); // [lat, lng
 
   useEffect(() => {
@@ -24,7 +24,7 @@ function Inputs() {
   }, []);
 
   useEffect(() => {
-    if (inputs.length > 0) {
+    if (inputs.length > 0 && selectedInputIndex !== -1) {
       setMapCenter(calcMapCenter(inputs[selectedInputIndex].locations));
     }
   }, []);
@@ -74,14 +74,27 @@ function Inputs() {
 
       <div className="map-section">
         <h2 className="selected-input-title page-title">
-          Preview: {inputs[selectedInputIndex].region}
+          {selectedInputIndex === -1
+            ? "Choose an Input"
+            : inputs[selectedInputIndex].region}
         </h2>
 
-        <Map input={inputs[selectedInputIndex]} center={mapCenter} />
+        <Map
+          input={
+            selectedInputIndex === -1 ? undefined : inputs[selectedInputIndex]
+          }
+          center={mapCenter}
+          shouldRecenter={true}
+        />
 
         <div className="buttons-container">
-          <Link to={"/inputs/" + inputs[selectedInputIndex]._id}>
-            <button className="simple-button">Continue</button>
+          <Link to={selectedInputIndex === -1 ? "/inputs/" : "/settings"}>
+            <button
+              className="simple-button"
+              disabled={selectedInputIndex === -1}
+            >
+              Continue
+            </button>
           </Link>
         </div>
       </div>

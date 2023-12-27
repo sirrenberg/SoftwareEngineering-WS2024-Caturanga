@@ -103,14 +103,10 @@ a .inputs-list-item-icons {
 }
 
 .buttons-container {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-around;
   padding: 1em;
-
-  width: 60%;
 }
 
-.input-links {
-  color: var(--black);
+.simple-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
 }

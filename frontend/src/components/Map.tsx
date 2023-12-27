@@ -7,10 +7,10 @@ import {
   Polyline,
 } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
-import { LocationType, SimLocation, Simulation } from "../types";
+import { LocationType, SimLocation, Input } from "../types";
 import { LatLngExpression } from "leaflet";
-// import { useMap } from "react-leaflet/hooks";
-// import { useEffect } from "react";
+import { useMap } from "react-leaflet/hooks";
+import { useEffect } from "react";
 import { v4 as uuidv4 } from "uuid";
 
 function Map({
@@ -18,24 +18,37 @@ function Map({
   center,
   MapClickHandler,
   NodeClickHandler,
+  NodeDoubleClickHandler,
+  shouldRecenter,
 }: {
-  input?: Simulation;
+  input?: Input;
   center?: LatLngExpression;
   MapClickHandler?: () => null;
   NodeClickHandler?: (location: SimLocation) => void;
+  NodeDoubleClickHandler?: (location: SimLocation) => void;
+  shouldRecenter?: boolean;
 }) {
   const zoomLevel = 5;
 
-  // function Recenter() {
-  //   console.log("recenter");
+  function Recenter() {
+    console.log("recenter");
 
-  //   const map = useMap();
-  //   useEffect(() => {
-  //     map.flyTo(center, zoomLevel, { duration: 1 });
-  //   }, [center]);
+    if (!shouldRecenter) {
+      return null;
+    }
 
-  //   return null;
-  // }
+    const map = useMap();
+
+    if (!center) {
+      return null;
+    }
+
+    useEffect(() => {
+      map.flyTo(center, zoomLevel, { duration: 1 });
+    }, [center]);
+
+    return null;
+  }
 
   function getNodeColor(location: SimLocation) {
     // get the color of the node based on the location type
@@ -67,7 +80,7 @@ function Map({
         doubleClickZoom={false}
       >
         <MapClickHandler />
-        {/* <Recenter /> */}
+        <Recenter />
         {/* Add a tile layer */}
         {/* OPEN STREEN MAPS TILES */}
         {/* <TileLayer
@@ -101,6 +114,11 @@ function Map({
                 click: () => {
                   if (NodeClickHandler) {
                     NodeClickHandler(location);
+                  }
+                },
+                dblclick: () => {
+                  if (NodeDoubleClickHandler) {
+                    NodeDoubleClickHandler(location);
                   }
                 },
               }}
@@ -139,6 +157,11 @@ function Map({
                 [fromLocation.latitude, fromLocation.longitude],
                 [toLocation.latitude, toLocation.longitude],
               ]}
+              eventHandlers={{
+                click: () => {
+                  console.log("route clicked");
+                },
+              }}
             >
               <Popup>
                 {fromLocation.name} to {toLocation.name}: {route.distance} km
