@@ -1,3 +1,5 @@
+import csv
+
 from pymongo import MongoClient
 from bson.objectid import ObjectId as ObjectID
 from dotenv import load_dotenv
@@ -68,43 +70,6 @@ class Controller:
 
         # Store simulation results together with simsettings_id and location string:
         self.store_simulation_config(sim, location, simsettings_id)
-
-
-    # Store simulation results: ----------------------------------------------------------------------------------------
-
-    # Store default simulation without custom location and simsettings:
-    def store_simulation(self, result):
-
-        load_dotenv()
-        MONGODB_URI = os.environ.get('MONGO_URI')
-        client = MongoClient(MONGODB_URI)
-        db = client.Caturanga
-        simulations_collection = db.simulations_results
-
-        new_simulation = {}
-        new_simulation["data"] = result
-
-        simulations_collection.insert_one(new_simulation)
-        client.close()
-
-    # Store custom simulation with location and simsettings:
-    def store_simulation_config(self, result, location, simsettings):
-
-        load_dotenv()
-        MONGODB_URI = os.environ.get('MONGO_URI')
-        client = MongoClient(MONGODB_URI)
-        db = client.Caturanga
-        simulations_collection = db.simulations_results
-
-        new_simulation = {}
-        new_simulation = {
-            "location": location,
-            "simsettings": simsettings,  # Add the relevant simsettings_ID to the dictionary
-            "data": result
-        }
-
-        simulations_collection.insert_one(new_simulation)
-        client.close()
 
 
     # Return simulation values from DB: --------------------------------------------------------------------------------
@@ -205,3 +170,84 @@ class Controller:
         return self.db.get_collection("simsettings").delete_one(
             {"_id": ObjectID(simsetting_id)}
         )
+
+
+    # Store simulation results: ----------------------------------------------------------------------------------------
+
+    # Store default simulation without custom location and simsettings:
+    def store_simulation(self, result):
+
+        load_dotenv()
+        MONGODB_URI = os.environ.get('MONGO_URI')
+        client = MongoClient(MONGODB_URI)
+        db = client.Caturanga
+        simulations_collection = db.simulations_results
+
+        new_simulation = {}
+        new_simulation["data"] = result
+
+        simulations_collection.insert_one(new_simulation)
+        client.close()
+
+    # Store custom simulation with location and simsettings:
+    def store_simulation_config(self, result, location, simsettings):
+
+        load_dotenv()
+        MONGODB_URI = os.environ.get('MONGO_URI')
+        client = MongoClient(MONGODB_URI)
+        db = client.Caturanga
+        simulations_collection = db.simulations_results
+
+        new_simulation = {}
+        new_simulation = {
+            "location": location,
+            "simsettings": simsettings,  # Add the relevant simsettings_ID to the dictionary
+            "data": result
+        }
+
+        simulations_collection.insert_one(new_simulation)
+        client.close()
+
+    # Store simulation data from DB in csv files for FLEE execution: ---------------------------------------------------
+
+    # Convert location data into .csv files (for FLEE simulation execution) - Returns location of simulation-data dir:
+    async def convert_simulations_to_csv(self, simulation_id: str):
+
+        # Fetch simulation data from DB by simulation_id:
+        simulations_collection = self.db.get_collection("simulations")
+        simulation = simulations_collection.find_one({"_id": ObjectID(simulation_id)})#
+
+        # Create all .csv files for simulation:
+        if simulation is not None:
+
+            # Create directory for simulation:
+            directory_name = os.path.join("flee_stored_files", "conflict_input", str(simulation["_id"]))
+            os.makedirs(directory_name, exist_ok=True)
+
+            # Cretae csv files using helper function export-csv (filename, data, fieldnames):
+            self.export_csv(os.path.join(directory_name, "closures.csv"), simulation["closures"],
+                            ["closure_type", "name1", "name2", "closure_start", "closure_end"])
+            self.export_csv(os.path.join(directory_name, "conflicts.csv"), simulation["conflicts"],
+                            simulation["conflicts"][0].keys())
+            self.export_csv(os.path.join(directory_name, "locations.csv"), simulation["locations"],
+                            ["name", "region", "country", "latitude", "longitude", "location_type", "conflict_date",
+                             "population"])
+            self.export_csv(os.path.join(directory_name, "registration_corrections.csv"),
+                            simulation["registration_corrections"], ["name", "date"])
+            self.export_csv(os.path.join(directory_name, "routes.csv"), simulation["routes"],
+                            ["from", "to", "distance", "forced_redirection"])
+            self.export_csv(os.path.join(directory_name, "sim_period.csv"), simulation["sim_period"],
+                            ["date", "length"])
+
+            return directory_name
+
+        else:
+            return "No simulations in Database"
+
+    # Helper Function to create csv-file from filename, data and fieldnames:
+    def export_csv(self, file_name, data, fieldnames):
+        with open(file_name, mode='w', newline='') as csvfile:
+            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+            writer.writeheader()
+            for row in data:
+                writer.writerow(row)

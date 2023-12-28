@@ -66,6 +66,12 @@ async def run_simulation_config(
         return "No proper location provided"
 
 
+@app.get("/test_csv")
+async def test_csv(
+        simulation_id: str = '65843761aef0c55ae04c33ad'
+):
+    return await controller.convert_simulations_to_csv(simulation_id)
+
 
 ### Simulation: --------------------------------------------------------------------------------------------------------
 
