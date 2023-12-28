@@ -49,6 +49,15 @@ async def run_simulation_simsettings(
     return await controller.run_simulation_simsettings(simsetting_id)
 
 
+# Run a simulation with the simsettings_id and the location name:
+@app.get("/run_simulation/config/")
+async def run_simulation_config(
+        location: str = 'Burundi',
+        simsettings_id: str = '65843761aef0c55ae04c33ad'        # Default ID der Simulation Settings
+):
+
+    return "simsettings" + simsettings_id + "location" + location
+
 
 
 ### Simulation: --------------------------------------------------------------------------------------------------------
