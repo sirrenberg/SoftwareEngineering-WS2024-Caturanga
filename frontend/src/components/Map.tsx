@@ -7,7 +7,7 @@ import {
   Polyline,
 } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
-import { LocationType, SimLocation, Input } from "../types";
+import { LocationType, SimLocation, Input, Route } from "../types";
 import { LatLngExpression } from "leaflet";
 import { useMap } from "react-leaflet/hooks";
 import { useEffect } from "react";
@@ -19,6 +19,7 @@ function Map({
   MapClickHandler,
   NodeClickHandler,
   NodeDoubleClickHandler,
+  RouteDoubleClickHandler,
   shouldRecenter,
 }: {
   input?: Input;
@@ -26,6 +27,7 @@ function Map({
   MapClickHandler?: () => null;
   NodeClickHandler?: (location: SimLocation) => void;
   NodeDoubleClickHandler?: (location: SimLocation) => void;
+  RouteDoubleClickHandler?: (route: Route) => void;
   shouldRecenter?: boolean;
 }) {
   const zoomLevel = 5;
@@ -158,8 +160,10 @@ function Map({
                 [toLocation.latitude, toLocation.longitude],
               ]}
               eventHandlers={{
-                click: () => {
-                  console.log("route clicked");
+                dblclick: () => {
+                  if (RouteDoubleClickHandler) {
+                    RouteDoubleClickHandler(route);
+                  }
                 },
               }}
             >

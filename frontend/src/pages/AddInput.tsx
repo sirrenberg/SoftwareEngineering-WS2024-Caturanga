@@ -2,13 +2,20 @@ import "../styles/AddInput.css";
 import { useParams } from "react-router-dom";
 import Map from "../components/Map";
 import { useEffect, useState } from "react";
-import { MapOperatingMode, Input, SimLocation, LocationType } from "../types";
+import {
+  MapOperatingMode,
+  Input,
+  SimLocation,
+  LocationType,
+  Route,
+} from "../types";
 import { useMapEvent } from "react-leaflet/hooks";
 import { LatLngExpression } from "leaflet";
 import { v4 as uuidv4 } from "uuid";
 import { useForm } from "../hooks/useForm";
 import { calcMapCenter, formatDate } from "../helper/misc";
 import LocationModal from "../components/LocationModal";
+import RouteModal from "../components/RouteModal";
 
 function AddInput() {
   const { id } = useParams<{ id: string }>();
@@ -40,13 +47,15 @@ function AddInput() {
   const [operationMode, setOperationMode] = useState<MapOperatingMode>(
     MapOperatingMode.vizualizing
   ); // ["visualizing", "add-location", "add-route"]
-  const [selectedNode, setSelectedNode] = useState<SimLocation | null>(null); // [node1, node2]
+  const [selectedNode, setSelectedNode] = useState<SimLocation | null>(null);
+  const [selectedRoute, setSelectedRoute] = useState<SimLocation | null>(null);
   const [mapCenter, setMapCenter] = useState<LatLngExpression>(
     calcMapCenter(values.locations)
   ); // [lat, lng]
 
   // use state for modal
   const [isLocationModalOpen, setLocationModalOpen] = useState(false);
+  const [isRouteModalOpen, setRouteModalOpen] = useState(false);
 
   useEffect(() => {
     if (!isNewInput) {
@@ -120,6 +129,13 @@ function AddInput() {
     console.log("double click");
     setSelectedNode(location);
     setLocationModalOpen(true);
+  }
+
+  function RouteDoubleClickHandler(route: Route): void {
+    // open modal
+    console.log("double click");
+    setSelectedRoute(route);
+    setRouteModalOpen(true);
   }
 
   // if editing existing input and data is not loaded yet
@@ -210,6 +226,7 @@ function AddInput() {
           MapClickHandler={MapClickHandler}
           NodeClickHandler={NodeClickHandler}
           NodeDoubleClickHandler={NodeDoubleClickHandler}
+          RouteDoubleClickHandler={RouteDoubleClickHandler}
         />
         <div className="map-content-buttons">
           <button
@@ -280,8 +297,16 @@ function AddInput() {
       {isLocationModalOpen && (
         <LocationModal
           location={selectedNode}
-          isLocationModalOpen={isLocationModalOpen}
           setLocationModalOpen={setLocationModalOpen}
+          setSimValues={setValues}
+          simValues={values}
+        />
+      )}
+
+      {isRouteModalOpen && (
+        <RouteModal
+          route={selectedRoute}
+          setRouteModalOpen={setRouteModalOpen}
           setSimValues={setValues}
           simValues={values}
         />

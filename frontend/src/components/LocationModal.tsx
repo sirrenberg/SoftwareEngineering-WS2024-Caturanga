@@ -2,28 +2,20 @@ import "../styles/Modal.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faX } from "@fortawesome/free-solid-svg-icons";
 import { useForm } from "../hooks/useForm";
-import { SimLocation, Input } from "../types";
+import { SimLocation, Input, LocationType } from "../types";
 
 function LocationModal({
-  isLocationModalOpen,
   setLocationModalOpen,
   location,
   setSimValues,
   simValues,
 }: {
-  isLocationModalOpen: boolean;
   setLocationModalOpen: any;
   location: SimLocation | null;
   setSimValues: any;
   simValues: Input;
 }) {
-  const {
-    values,
-    setValues,
-    handleInputChange,
-    handlePrefillData,
-    handleSubmit,
-  } = useForm(location);
+  const { values, handleInputChange } = useForm(location);
 
   console.log("values in Modal", values);
   console.log("simValues in Modal", simValues);
@@ -91,7 +83,7 @@ function LocationModal({
                 className="input-field"
                 type="number"
                 id="latitude"
-                name="laltitude"
+                name="latitude"
                 value={values.latitude}
                 onChange={handleInputChange}
               />
@@ -119,10 +111,14 @@ function LocationModal({
                 value={values.location_type}
                 onChange={handleInputChange}
               >
-                <option value="conflict_zone">Conflict Zone</option>
-                <option value="town">Town</option>
-                <option value="forwarding_hub">Forwarding Hub</option>
-                <option value="camp">Camp</option>
+                {/* generate options from location types */}
+                {Object.values(LocationType).map((type) => {
+                  return (
+                    <option key={type} value={type}>
+                      {type}
+                    </option>
+                  );
+                })}
               </select>
             </div>
             <div className="input-field-container">
