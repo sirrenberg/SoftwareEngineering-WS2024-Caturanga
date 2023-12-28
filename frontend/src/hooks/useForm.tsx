@@ -4,26 +4,32 @@ import { useAPI } from "../hooks/useAPI";
 export function useForm(initialFValues: any) {
   const [values, setValues] = useState(initialFValues);
 
+  function str2bool(value: any) {
+    if (value && typeof value === "string") {
+      if (value.toLowerCase() === "true") return true;
+      if (value.toLowerCase() === "false") return false;
+    }
+    return value;
+  }
+
   const handleInputChange = (
     e:
       | React.ChangeEvent<HTMLInputElement>
       | React.ChangeEvent<HTMLSelectElement>
   ) => {
-    const { name, value } = e.target;
+    let { name, value } = e.target;
 
-    console.log("name", name);
-    console.log("value", value);
+    // convert string to boolean
+    value = str2bool(value);
 
     // if name is date or length, then we need to update the sim_period object
     if (name === "date" || name === "length") {
       setValues({
         ...values,
-        sim_period: [
-          {
-            ...values.sim_period[0],
-            [name]: value,
-          },
-        ],
+        sim_period: {
+          ...values.sim_period,
+          [name]: value,
+        },
       });
       return;
     }
@@ -52,6 +58,8 @@ export function useForm(initialFValues: any) {
 
     // Spawn rules are nested in the sim_settings object
     if (["take_from_population", "insert_day0"].includes(name)) {
+      console.log("heerrrrrrrrrrrrrrrree");
+
       setValues({
         ...values,
         spawn_rules: {
@@ -113,7 +121,13 @@ export function useForm(initialFValues: any) {
     setValues(initialFValues);
   };
 
-  function handleSubmit(e: FormEvent, url: string, method: string) {}
+  function handleSubmit(e: FormEvent, url: string, method: string) {
+    e.preventDefault();
+    const { sendRequest } = useAPI();
+    sendRequest(url, method, values).then((data) => {
+      console.log(data);
+    });
+  }
 
   function handlePrefillData(url: string) {
     const { sendRequest } = useAPI();

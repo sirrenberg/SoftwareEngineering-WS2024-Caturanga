@@ -24,12 +24,11 @@ function AddInput() {
 
   const initialValues: Input = {
     region: "",
-    sim_period: [
-      {
-        date: new Date().toISOString().slice(0, 10),
-        length: 0,
-      },
-    ],
+    sim_period: {
+      date: new Date().toISOString().slice(0, 10),
+      length: 0,
+    },
+
     locations: [],
     routes: [],
     name: "",
@@ -193,7 +192,7 @@ function AddInput() {
                 placeholder="Start Date"
                 onChange={handleInputChange}
                 name="date"
-                value={formatDate(values.sim_period[0]["date"])}
+                value={formatDate(values.sim_period["date"])}
               />
             </label>
           </div>
@@ -206,7 +205,7 @@ function AddInput() {
                 placeholder="Duration"
                 onChange={handleInputChange}
                 name="length"
-                value={values.sim_period[0]["length"]}
+                value={values.sim_period["length"]}
               />
             </label>
           </div>
