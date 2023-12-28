@@ -192,6 +192,70 @@ def transform_sim_period_data(sim_period_data):
     return transformed_data
 
 
+def insert_test_data_into_DB(countries):
+    '''
+    Insert the test data into the MongoDB.
+        Parameters:
+            countries (list): List of country names
+    '''
+    load_dotenv()
+    MONGODB_URI = os.environ.get('MONGO_URI')
+
+    client = MongoClient(MONGODB_URI)
+    db = client.get_database("Caturanga")
+    simulations_collection = db.get_collection("simulations")
+
+    for country in countries:
+        # Get the current directory of file_converter.py
+        current_directory = os.path.dirname(os.path.realpath(__file__))
+
+        # Navigate to the locations.csv file using relative paths
+        data_dir = os.path.join(current_directory, f'..\\flee\\conflict_input\\{country}')
+
+
+        location_csv_path = os.path.join(data_dir, 'locations.csv')
+        routes_csv_path = os.path.join(data_dir, 'routes.csv')
+        conflicts_csv_path = os.path.join(data_dir, 'conflicts.csv')
+        closures_csv_path = os.path.join(data_dir, 'closures.csv')
+        reg_corrections_csv_path = os.path.join(data_dir, 'registration_corrections.csv')
+        sim_period_csv_path = os.path.join(data_dir, 'sim_period.csv')
+
+        # Convert CSV to lists of dictionaries
+        location_data = csv_to_list(location_csv_path)
+        routes_data = csv_to_list(routes_csv_path)
+        conflicts_data = csv_to_list(conflicts_csv_path)
+        closures_data = csv_to_list(closures_csv_path)
+        reg_corr_data = csv_to_list_reg_corr(reg_corrections_csv_path)
+        sim_period_data = csv_to_list_sim_period(sim_period_csv_path)
+
+
+        # Transform CSV data to match MongoDB schema
+        locations = transform_location_data(location_data)
+        routes = transform_routes_data(routes_data)
+        conflicts = transform_conflicts_data(conflicts_data)
+        closures = transform_closure_data(closures_data)
+        reg_corr = transform_reg_corr_data(reg_corr_data)
+        sim_period = transform_sim_period_data(sim_period_data)
+
+
+        # Create the JSON object to be inserted into the MongoDB
+        mongo_document = {
+            'region': country,
+            'closures': closures,
+            'conflicts': conflicts,
+            'locations': locations,
+            'registration_corrections': reg_corr,
+            'routes': routes,
+            'sim_period': sim_period[0] if sim_period else None  # Use the first element or None if the list is empty
+        }
+
+        # insert test data into the database
+        result = simulations_collection.insert_one(mongo_document)
+
+    client.close()
+
+
+
 def insert_data_into_DB(country, folder_path):
     '''
     Insert the data into the MongoDB.
@@ -242,7 +306,7 @@ def insert_data_into_DB(country, folder_path):
         'locations': locations,
         'registration_corrections': reg_corr,
         'routes': routes,
-        'sim_period': sim_period
+        'sim_period': sim_period[0] if sim_period else None  # Use the first element or None if the list is empty
     }
 
     # insert test data into the database
@@ -270,6 +334,15 @@ def delete_data_from_DB(id):
     client.close()
 
 
-# delete test data from the database
-# delete_id = "658dda557ca11fca9c2aa237"
-# delete_data_from_DB(delete_id)
+# insert test data from frontend folder into the database
+'''
+countries = ['burundi', 'car', 'ethiopia', 'mali', 'ssudan']
+insert_test_data_into_DB(countries)
+'''
+
+# delete  data from the database
+'''
+delete_ids = ["65843761aef0c55ae04c33ad", "65843762aef0c55ae04c33ae", "65843763aef0c55ae04c33af", "65843763aef0c55ae04c33b0", "65843841ac1d19e470d1c453", "658de7685d656af7ee6994c3"]
+for ids in delete_ids:
+    delete_data_from_DB(ids)
+'''
