@@ -142,9 +142,9 @@ class Controller:
     async def post_simsettings(self, simsetting):
         client, db = self.connect_db()
         simsettings_collection = db.simsettings
-        simsettings_collection.insert_one(dict(simsetting))
+        result = simsettings_collection.insert_one(dict(simsetting))
         client.close()
-        return 1
+        return result
 
     async def get_all_simsettings(self):
         client, db = self.connect_db()
@@ -172,11 +172,14 @@ class Controller:
 
     async def delete_simsetting(self, simsetting_id: str):
         client, db = self.connect_db()
-        db.get_collection("simsettings").delete_one(
+        simsetting = db.get_collection("simsettings").delete_one(
             {"_id": ObjectID(simsetting_id)}
         )
         client.close()
-        return 
+        if simsetting.deleted_count == 1:
+            return {"ID": simsetting_id, "deleted": True}
+        else:
+            return {"ID": simsetting_id, "deleted": False}
 
     def connect_db(self):
         """
