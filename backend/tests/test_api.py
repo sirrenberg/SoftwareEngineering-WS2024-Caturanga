@@ -31,7 +31,8 @@ class TestClass:
         Test the "/simulation_results/{id}" endpoint of the API with a
         non-existent ID.
         """
-        response = self.client.get("/simulation_results/12345")
+        response = \
+            self.client.get("/simulation_results/65843761aef0c55ae04c33ad")
         assert response.status_code == 404
 
     def test_get_simulation_result(self):
@@ -60,7 +61,7 @@ class TestClass:
         Test the "/simulations/{id}" endpoint of the API with a
         non-existent ID.
         """
-        response = self.client.get("/simulations/12345")
+        response = self.client.get("/simulations/65856b0c4661431a0f92969b")
         assert response.status_code == 404
 
     def test_get_simulation(self):
@@ -86,7 +87,7 @@ class TestClass:
         Test the "/simsettings/{id}" endpoint of the API with a
         non-existent ID.
         """
-        response = self.client.get("/simsettings/12345")
+        response = self.client.get("/simsettings/65856b0c4661431a0f92969c")
         assert response.status_code == 404
 
     def test_get_simsetting(self):
@@ -127,7 +128,7 @@ class TestClass:
         Test the DELETE request to the "/simsettings/{id}" endpoint of the API
         with a non-existent ID.
         """
-        response = self.client.delete("/simsettings/12345")
+        response = self.client.delete("/simsettings/65856b0c4661431a0f92969b")
         assert response.status_code == 404
 
     # TODO: add positive case
@@ -137,6 +138,6 @@ class TestClass:
         with a valid ID.
         """
         # TODO use ID that was created in post test
-        response = self.client.delete("/simsettings/12345")
+        response = self.client.delete("/simsettings/65856b0c4661431a0f92969b")
         assert response.status_code == 200
-        assert response.json() == {"ID": 12345}
+        assert response.json() == {"ID": "65856b0c4661431a0f92969b"}
