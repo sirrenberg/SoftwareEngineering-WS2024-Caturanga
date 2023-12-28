@@ -6,6 +6,8 @@ from typing import Any, Dict, AnyStr, List, Union
 
 app = FastAPI()
 controller = Controller()
+expected_simsettings = ["_id", "name", "log_levels", "spawn_rules",
+                        "move_rules", "optimisations"]
 
 # allow CORS (Cross Origin Resource Sharing) - allows us to access the API
 # from a different origin
@@ -162,8 +164,11 @@ async def post_simsetting(simsetting: JSONStructure = None):
         -H  "accept: application/json"
         -H  "Content-Type: application/json" -d "{\"test_key\":\"test_val\"}"
     """
-    await controller.post_simsettings(simsetting)
-    return {"data": simsetting}
+    if not all(key in expected_simsettings for key in simsetting.keys()):
+        raise HTTPException(status_code=400,
+                            detail="Invalid simsetting structure")
+    result = await controller.post_simsettings(simsetting)
+    return {"ID": str(result.inserted_id), "data": simsetting}
 
 
 @app.delete("/simsettings/{simsetting_id}")
@@ -173,7 +178,7 @@ async def delete_simsetting(
     ),
 ):
     result = await controller.delete_simsetting(simsetting_id)
-    if result is None:
+    if not result["deleted"]:
         raise HTTPException(status_code=404,
                             detail="Simulation settings not found")
     return result
