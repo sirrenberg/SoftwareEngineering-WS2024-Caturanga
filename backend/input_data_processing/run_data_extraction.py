@@ -12,7 +12,7 @@ from add_camp_locations import add_camp_locations
 from create_closures_csv import create_empty_closure_csv
 from create_registration_corrections_csv import create_empty_registration_corrections_csv
 from create_sim_period_csv import create_sim_period_csv
-
+from file_converter import insert_data_into_DB
 
 
 # global variables (default values)
@@ -62,14 +62,13 @@ def acled_data_to_csv(country, folder_name, start_year, end_year):
 
 
 
-def run_extraction(country_name, start_year, end_year):
-    # TODO: start&end date adjustable to the day. Right now the simulation only starts at the beginning of a year and ends at the end of a year. Change if necessary
-
-    start_date = '01-01-' + str(start_year)
-    end_date = '31-12-' + str(end_year)
+def run_extraction(country_name, start_date, end_date):
+    start_year = int(start_date.split('-')[2])
+    end_year = int(end_date.split('-')[2])
 
     # 1. create folder for country with start_year
     folder_name = country_name.lower() + str(start_year)
+    
     os.mkdir(folder_name)
 
     # 2. get acled data and create acled.csv
@@ -99,22 +98,27 @@ def run_extraction(country_name, start_year, end_year):
     create_empty_closure_csv(folder_name)
     
     # 10. create empty registration_correction.csv
+    # TODO: This has to be done with respect to the validation data
     create_empty_registration_corrections_csv(folder_name)
     
     # 11. create sim_period.csv
     create_sim_period_csv(folder_name, start_date, end_date)
     
+    # 12. insert data into DB
+    current_dir = os.getcwd()
+    folder_path = os.path.join(current_dir, folder_name)
+    insert_data_into_DB(country_name, folder_path)
 
-
+    
 
 
 # variables that can be changed
 country_name = 'Ethiopia'
-start_year = 2023
-end_year = 2023
+start_date = "01-01-2023"
+end_date =  "31-08-2023"
 
 
-run_extraction(country_name, start_year, end_year)
+run_extraction(country_name, start_date, end_date)
 
 
 
