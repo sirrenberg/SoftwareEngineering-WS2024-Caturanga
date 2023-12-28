@@ -6,9 +6,9 @@ import os
 import yaml
 
 
-
 class Controller:
 
+    # Setup of MongoDB DB Connection: ----------------------------------------------------------------------------------
     def __init__(self):
         self.adapter = Adapter()
         load_dotenv()
@@ -17,11 +17,15 @@ class Controller:
         self.db = self.client.get_database("Caturanga")
 
 
+    # Run simulations: -------------------------------------------------------------------------------------------------
+
+    # Run default simulation and store result:
     def run_simulation(self):
         sim = self.adapter.run_simulation()
         self.store_simulation(sim)
         return sim
 
+    # Run default (burundi) simulatino with custom simsettings and store result:
     async def run_simulation_simsettings(self, simsettings_id: str):
 
         simsettings = await self.get_simsetting(simsettings_id)
@@ -36,13 +40,39 @@ class Controller:
 
         sim = self.adapter.run_simulation(path)
         self.store_simulation(sim)
-        self.store_simulation_ss(sim, simsettings_id)
+        self.store_simulation_config(sim, 'burundi', simsettings_id)
 
         return sim
 
+    # Run simulation with provided simsettings-ID and location name:
+    async def run_simulation_config(self, location: str, simsettings_id: str):
+
+        # Add simsettings file to FLEE:
+        simsettings = await self.get_simsetting(simsettings_id)
+        filename = simsettings_id + ".yml"
+        simsettings_path = os.path.join("flee_stored_files", "simsettings", filename)
+
+        # Create new .yml file for simsettings
+        try:
+            with open(simsettings_path, 'w') as yaml_file:
+                yaml.dump(simsettings, yaml_file, default_flow_style=False, sort_keys=False)
+        except Exception as e:
+            return "Exception while storing the simsettings.yml file: {e}"
+
+        # Get Path to location data from location directory:
+        location_dir = os.path.join("flee_stored_files", "conflict_input", location)
+
+        # Run simulation with location data in location_dir and simsettings in simsettings_path:
+        sim = self.adapter.run_simulation(location_dir, simsettings_path)
+        self.store_simulation(sim)
+
+        # Store simulation results together with simsettings_id and location string:
+        self.store_simulation_config(sim, location, simsettings_id)
 
 
+    # Store simulation results: ----------------------------------------------------------------------------------------
 
+    # Store default simulation without custom location and simsettings:
     def store_simulation(self, result):
 
         load_dotenv()
@@ -53,13 +83,12 @@ class Controller:
 
         new_simulation = {}
         new_simulation["data"] = result
-        simulations_collection.insert_one(new_simulation)
 
+        simulations_collection.insert_one(new_simulation)
         client.close()
 
-    def store_simulation_ss(self, result, simsettings):
-
-        ### TBD Simsettings
+    # Store custom simulation with location and simsettings:
+    def store_simulation_config(self, result, location, simsettings):
 
         load_dotenv()
         MONGODB_URI = os.environ.get('MONGO_URI')
@@ -69,14 +98,18 @@ class Controller:
 
         new_simulation = {}
         new_simulation = {
-            "data": result,
-            "simsettings": simsettings  # Add the relevant simsettings to the dictionary
+            "location": location,
+            "simsettings": simsettings,  # Add the relevant simsettings_ID to the dictionary
+            "data": result
         }
 
         simulations_collection.insert_one(new_simulation)
         client.close()
 
-    
+
+    # Return simulation values from DB: --------------------------------------------------------------------------------
+
+    # Return all simulsation Results:
     async def get_all_simulation_results(self):
         """
         Retrieves all simulation results from the database.
@@ -92,7 +125,7 @@ class Controller:
             rl.append(simulation)
         return rl
 
-
+    # Return specific simulation by simulation_results_id:
     async def get_simulation_result(self, simulation_result_id: str):
         """
         Retrieves a simulation results from the database based on its ID.
@@ -105,8 +138,8 @@ class Controller:
         if simulation_results is not None:
             simulation_results["_id"] = str(simulation_results["_id"])
             return simulation_results
-    
 
+    # Get all simulations (not simulation results):
     async def get_all_simulations(self):
         """
         Return the data of all simulations.
@@ -125,6 +158,7 @@ class Controller:
             rl.append(simulation)
         return rl
 
+    # Get specific simulation by simulation_id:
     async def get_simulation(self, simulation_id: str):
         """
         Return the data of a simulation based on its ID.
@@ -138,11 +172,16 @@ class Controller:
             simulation["_id"] = str(simulation["_id"])
             return simulation
 
+
+    # Manage simsettings in DB: ----------------------------------------------------------------------------------------
+
+    # Store dict of simsettings in DB:
     async def post_simsettings(self, simsetting):
         simsettings_collection = self.db.simsettings
         simsettings_collection.insert_one(dict(simsetting))
         return 1
 
+    # Return all stored simsettings of DB:
     async def get_all_simsettings(self):
         simsettings = self.db.get_collection("simsettings").find({})
         rl = []
@@ -151,6 +190,7 @@ class Controller:
             rl.append(simsetting)
         return rl
 
+    # Get specific simsettings by simsetting_id:
     async def get_simsetting(self, simsetting_id: str):
         simsetting = self.db.get_collection("simsettings").find_one(
             {"_id": ObjectID(simsetting_id)}
@@ -160,6 +200,7 @@ class Controller:
             simsetting["_id"] = str(simsetting["_id"])
             return simsetting
 
+    # Delete specfici simsettings by simsetting_id:
     async def delete_simsetting(self, simsetting_id: str):
         return self.db.get_collection("simsettings").delete_one(
             {"_id": ObjectID(simsetting_id)}
