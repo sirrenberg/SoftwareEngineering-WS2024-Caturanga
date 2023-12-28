@@ -46,9 +46,6 @@ async def run_simulation_simsettings(
         description="The ID of the simulation you want to run"
     ),
 ):
-
-    print("Inside the run_simulation_simsettings Endpoint: -------------------------")
-
     return await controller.run_simulation_simsettings(simsetting_id)
 
 

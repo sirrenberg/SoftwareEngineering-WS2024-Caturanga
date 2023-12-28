@@ -36,8 +36,9 @@ class Controller:
 
         sim = self.adapter.run_simulation(path)
         self.store_simulation(sim)
+        self.store_simulation_ss(sim, simsettings_id)
 
-        return str(type(simsettings)), simsettings
+        return sim
 
 
 
@@ -54,6 +55,25 @@ class Controller:
         new_simulation["data"] = result
         simulations_collection.insert_one(new_simulation)
 
+        client.close()
+
+    def store_simulation_ss(self, result, simsettings):
+
+        ### TBD Simsettings
+
+        load_dotenv()
+        MONGODB_URI = os.environ.get('MONGO_URI')
+        client = MongoClient(MONGODB_URI)
+        db = client.Caturanga
+        simulations_collection = db.simulations_results
+
+        new_simulation = {}
+        new_simulation = {
+            "data": result,
+            "simsettings": simsettings  # Add the relevant simsettings to the dictionary
+        }
+
+        simulations_collection.insert_one(new_simulation)
         client.close()
 
     
