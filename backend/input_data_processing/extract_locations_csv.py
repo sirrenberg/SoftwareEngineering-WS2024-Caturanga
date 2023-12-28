@@ -25,8 +25,14 @@ import numpy as np
 import pandas as pd
 
 
-# Function to format a date string into "dd-mm-yyyy" format
 def date_format(in_date):
+    '''
+    Function to format "dd-mm-yyyy" into "yyyy-mm-dd" format
+        Parameters:
+            in_date (str): Date in "dd-mm-yyyy" format
+        Returns:
+            (str): Date in "yyyy-mm-dd" format
+    '''
     if "-" in in_date:
         split_date = in_date.split("-")
     else:
@@ -36,8 +42,14 @@ def date_format(in_date):
     return out_date
 
 
-# Function to convert month names to month numbers
 def month_convert(month_name):
+    '''
+    Function to convert month names to month numbers.
+        Parameters:
+            month_name (str): Name of the month
+        Returns:
+            (str): Number of the month
+    '''
     months = {
         "jan": "01", "january": "01",
         "feb": "02", "february": "02",
@@ -65,8 +77,15 @@ def month_convert(month_name):
     return month_num
 
 
-# Function to calculate the number of days between two dates in "dd-mm-yyyy" format
 def between_date(d1, d2):
+    '''
+    Function to calculate the number of days between two dates in "dd-mm-yyyy" format
+        Parameters:
+            d1 (str): First date in "dd-mm-yyyy" format
+            d2 (str): Second date in "dd-mm-yyyy" format
+        Returns:
+            (int): Number of days between the two dates
+    '''
     d1list = d1.split("-")
     d2list = d2.split("-")
     date1 = datetime(int(d1list[2]), int(d1list[1]), int(d1list[0]))
@@ -75,16 +94,33 @@ def between_date(d1, d2):
     return abs((date1 - date2).days)
 
 
-# Function to drop rows in a DataFrame based on a condition
 def drop_rows(inputdata, columnname, dropparameter):
+    '''
+    Function to drop rows in a DataFrame based on a condition
+        
+        Parameters: 
+            inputdata (DataFrame): Input DataFrame
+            columnname (str): Name of the column to filter
+            dropparameter (int): Value to filter by
+        Returns:
+            outputdata (DataFrame): Filtered DataFrame
+    '''
     removedrows = inputdata.index[inputdata[columnname] <= dropparameter].tolist()
     outputdata = inputdata.drop(removedrows)
 
     return outputdata
 
 
-# Function to filter a DataFrame by location based on column name
 def filter_by_location(inputdata, columnname):
+    '''
+    Function to filter a DataFrame by location based on column name
+        
+        Parameters: 
+            inputdata (DataFrame): Input DataFrame
+            columnname (str): Name of the column to filter
+        Returns:
+            outputdata (DataFrame): Filtered DataFrame
+    '''
     if columnname == "admin1":
         location_list = inputdata.admin1.unique()
     elif columnname == "admin2":
@@ -106,8 +142,16 @@ def filter_by_location(inputdata, columnname):
     return outputdata
 
 
-# Main function to extract and process location data
-def extract_locations_csv(country, folder_name, start_date, location_type, fatalities_threshold, conflict_threshold):
+def extract_locations_csv(folder_name, start_date, location_type, fatalities_threshold, conflict_threshold):
+    '''
+    Main function to extract location data from ACLED data and write it to a CSV file.
+        Parameters:
+            folder_name (str): Name of the folder containing the CSV files
+            start_date (str): The starting date to consider when calculating conflict periods
+            location_type (str): The type of location to focus on
+            fatalities_threshold (int): Minimum fatalities count for including a location
+            conflict_threshold (int): Conflict period threshold for classifying locations
+    '''
     # Get the current directory
     current_dir = os.getcwd()
 

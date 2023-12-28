@@ -25,6 +25,16 @@ ADDED_CONFLICT_DAYS = 7
 
 
 def acled_data_to_csv(country, folder_name, start_year, end_year):
+    '''
+    Extracts the ACLED data for the given country and time period and saves it to a CSV file.
+
+        Parameters:
+            country (str): Country name
+            folder_name (str): Folder name for the CSV file
+            start_year (int): Start year of the time period
+            end_year (int): End year of the time period	
+    '''
+
     # get the API key and email from the environment variables
     load_dotenv()
     ACLED_API_KEY = os.environ.get('ACLED_API_KEY')
@@ -63,6 +73,14 @@ def acled_data_to_csv(country, folder_name, start_year, end_year):
 
 
 def run_extraction(country_name, start_date, end_date):
+    '''
+    Runs the data extraction process for the given country and time period.
+    
+            Parameters:
+                country_name (str): Country name
+                start_date (str): Start date of the time period
+                end_date (str): End date of the time period
+    '''
     start_year = int(start_date.split('-')[2])
     end_year = int(end_date.split('-')[2])
 
@@ -78,13 +96,13 @@ def run_extraction(country_name, start_date, end_date):
     extract_population_info_from_web(country_name, folder_name, POPULATION_THRESHOLD)
 
     # 4. extract location data and create locations.csv
-    extract_locations_csv(country_name, folder_name, start_date, LOCATION_TYPE, FATALITIES_THRESHOLD, CONFLICT_THRESHOLD)
+    extract_locations_csv(folder_name, start_date, LOCATION_TYPE, FATALITIES_THRESHOLD, CONFLICT_THRESHOLD)
 
     # 5. extract conflict data and create conflict_info.csv
     extract_conflict_info(country_name, folder_name, start_date, end_date, LOCATION_TYPE, ADDED_CONFLICT_DAYS)
 
     # 6. extract conflict information from conflict_info.csv, modify data and create conflict.csv
-    extract_conflicts_csv(country_name, folder_name, start_date, end_date)
+    extract_conflicts_csv(folder_name, start_date, end_date)
 
     # 7. add camps to locations.csv
     # Caution: This has to be done manually. 
@@ -92,7 +110,7 @@ def run_extraction(country_name, start_date, end_date):
     add_camp_locations(folder_name)
 
     # 8. extract routes from locations.csv and create routes.csv
-    extract_routes_csv(country_name, folder_name)
+    extract_routes_csv(folder_name)
     
     # 9. create empty closures.csv
     create_empty_closure_csv(folder_name)

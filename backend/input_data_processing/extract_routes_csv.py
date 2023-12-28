@@ -29,9 +29,29 @@ import pandas as pd
 import numpy as np
 
 def calculate_distance(lat1, lon1, lat2, lon2):
+    '''
+    Calculate the Euclidean distance between two locations.
+        Parameters:
+            lat1 (float): Latitude of the first location
+            lon1 (float): Longitude of the first location
+            lat2 (float): Latitude of the second location
+            lon2 (float): Longitude of the second location
+        Returns:
+            (float): Euclidean distance between the two locations
+    '''
     return np.sqrt((lat1 - lat2)**2 + (lon1 - lon2)**2) * 1000
 
 def find_nearest_neighbor(current_index, visited, locations_df):
+    '''
+    Find the nearest neighbor for the current location.
+        Parameters:
+            current_index (int): Index of the current location
+            visited (list): List of booleans indicating whether a location has been visited
+            locations_df (DataFrame): DataFrame containing location data
+        Returns:
+            nearest_index (int): Index of the nearest neighbor
+            nearest_distance (float): Distance to the nearest neighbor
+    '''
     nearest_distance = float('inf')
     nearest_index = None
     for i in range(len(locations_df)):
@@ -43,7 +63,13 @@ def find_nearest_neighbor(current_index, visited, locations_df):
                 nearest_index = i
     return nearest_index, nearest_distance
 
-def extract_routes_csv(country, folder_name):
+def extract_routes_csv(folder_name):
+    '''
+    Extract the routes.csv file for the specified country.
+        Parameters:
+            country (str): Name of the country or dataset.
+            folder_name (str): Name of the folder containing the CSV files.
+    '''
 
     # Get the current directory
     current_dir = os.getcwd()

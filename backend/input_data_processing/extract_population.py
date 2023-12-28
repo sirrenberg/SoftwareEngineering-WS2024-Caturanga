@@ -6,8 +6,10 @@ import csv
 def extract_population_info_from_web(country, folder_name, threshold):
     """
     Extracts population information from citypopulation.de
-    :param country: country name
-    :return: A dictionary containing city information
+        Parameters:
+            country (str): Name of the country
+            folder_name (str): Name of the folder containing the CSV files
+            threshold (int): The minimum population threshold
     """
     city_data = {}
 

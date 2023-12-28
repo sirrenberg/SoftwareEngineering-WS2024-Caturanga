@@ -26,8 +26,15 @@ import pprint
 
 pp = pprint.PrettyPrinter(indent=4)
 
-# Function to format a date string into "dd-mm-yyyy" format
+
 def date_format(in_date):
+    '''
+    Function to format "dd-mm-yyyy" into "yyyy-mm-dd" format
+        Parameters:
+            in_date (str): Date in "dd-mm-yyyy" format
+        Returns:
+            (str): Date in "yyyy-mm-dd" format
+    '''
     if "-" in in_date:
         split_date = in_date.split("-")
     else:
@@ -38,8 +45,14 @@ def date_format(in_date):
     return out_date
 
 
-# Function to convert month names to month numbers
 def month_convert(month_name):
+    '''
+    Function to convert month names to month numbers.
+        Parameters:
+            month_name (str): Name of the month
+        Returns:
+            (str): Number of the month
+    '''
     months = {
         "jan": "01", "january": "01",
         "feb": "02", "february": "02",
@@ -67,8 +80,15 @@ def month_convert(month_name):
     return month_num
 
 
-# Function to calculate the number of days between two dates in "dd-mm-yyyy" format
 def between_date(d1, d2):
+    '''
+    Function to calculate the number of days between two dates in "dd-mm-yyyy" format
+        Parameters:
+            d1 (str): First date in "dd-mm-yyyy" format
+            d2 (str): Second date in "dd-mm-yyyy" format
+        Returns:
+            (int): Number of days between the two dates
+    '''
     d1list = d1.split("-")
     d2list = d2.split("-")
     date1 = datetime(int(d1list[2]), int(d1list[1]), int(d1list[0]))
@@ -78,6 +98,16 @@ def between_date(d1, d2):
 
 
 def extract_conflict_info(country, folder_name, start_date, end_date, location_type, added_conflict_days):
+    '''
+    Extract conflict information from ACLED data and write it to a CSV file.
+        Parameters:
+            country (str): Name of the country or dataset
+            folder_name (str): Name of the folder containing the CSV files
+            start_date (str): The starting date to consider when calculating conflict periods
+            end_date (str): The end date to consider when calculating conflict periods
+            location_type (str): The type of location to focus on
+            added_conflict_days (int): The number of days to add to the calculated conflict periods for estimating event periods
+    '''
     # Get the current directory
     current_dir = os.getcwd()
 
@@ -116,6 +146,7 @@ def extract_conflict_info(country, folder_name, start_date, end_date, location_t
                                "modified_conflict_date"]
                               )
 
+    # Iterate through the grouped locations and calculate the conflict period for each location
     for name, group in grouped:
         event_dates = group['event_date'].tolist()
         event_count = len(event_dates)

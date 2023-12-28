@@ -6,8 +6,14 @@ from datetime import datetime
 from dotenv import load_dotenv
 
 
-# Function to convert CSV to lists of dictionaries
 def csv_to_list(file_path):
+    '''
+    Function to convert generic CSV to lists of dictionaries
+        Parameters:
+            file_path (str): Path to the CSV file
+        Returns:
+            data (list): List of dictionaries
+    '''
     with open(file_path, 'r', newline='', encoding='utf-8') as csv_file:
         csv_reader = csv.DictReader(csv_file, delimiter=',', quotechar='"')
         data = list(csv_reader)
@@ -15,7 +21,11 @@ def csv_to_list(file_path):
 
 def csv_to_list_reg_corr(file_path):
     '''
-    In the header of the CSV file, no header is given. Therefore we add the header manually.
+    Function to convert registration_corrections.csv to lists of dictionaries. No header in the CSV file.
+        Parameters:
+            file_path (str): Path to the CSV file
+        Returns:
+            data (list): List with dictionary
     '''
     data = []
 
@@ -35,6 +45,10 @@ def csv_to_list_sim_period(file_path):
     '''
     Convert the simulation period CSV file to a dictionary.
     The rows and columns must be transposed.
+        Parameters:
+            file_path (str): Path to the CSV file
+        Returns:
+            data (list): List with dictionary
     '''
     with open(file_path, 'r') as file:
         csv_reader = csv.reader(file)
@@ -45,8 +59,14 @@ def csv_to_list_sim_period(file_path):
     return transposed_data_list
 
 
-# Function to transform location data
 def transform_location_data(location_data):
+    '''
+    Transform the location data to match the MongoDB schema.
+        Parameters:
+            location_data (list): List of dictionaries
+        Returns:
+            transformed_data (list): List of dictionaries
+    '''
     transformed_data = []
     for row in location_data:
         name_key = '#name' if '#name' in row else '#"name"'
@@ -64,8 +84,15 @@ def transform_location_data(location_data):
         })
     return transformed_data
 
-# Function to transform routes data
+
 def transform_routes_data(routes_data):
+    '''
+    Transform the routes data to match the MongoDB schema.
+        Parameters:
+            routes_data (list): List of dictionaries
+        Returns:
+            transformed_data (list): List of dictionaries
+    '''
     transformed_data = []
     for row in routes_data:
         name1_key = 'name1'
@@ -79,7 +106,15 @@ def transform_routes_data(routes_data):
         })
     return transformed_data
 
+
 def transform_closure_data(closure_data):
+    '''
+    Transform the closure data to match the MongoDB schema.
+        Parameters:
+            closure_data (list): List of dictionaries
+        Returns:
+            transformed_data (list): List of dictionaries
+    '''
     transformed_data = []
     for row in closure_data:
         transformed_data.append({
@@ -91,7 +126,15 @@ def transform_closure_data(closure_data):
         })
     return transformed_data
 
+
 def transform_conflicts_data(conflicts_data):
+    '''
+    Transform the conflicts data to match the MongoDB schema.
+        Parameters:
+            conflicts_data (list): List of dictionaries
+        Returns:
+            transformed_data (list): List of dictionaries
+    '''
     transformed_data = []
 
     for row in conflicts_data:
@@ -106,9 +149,14 @@ def transform_conflicts_data(conflicts_data):
         transformed_data.append(transformed_row)
     return transformed_data
 
+
 def transform_reg_corr_data(reg_corr_data):
     '''
     Transform the registration corrections data to match the MongoDB schema.
+        Parameters:
+            reg_corr_data (list): List of dictionaries
+        Returns:
+            transformed_data (list): List of dictionaries
     '''
     transformed_data = []
     for row in reg_corr_data:
@@ -122,7 +170,15 @@ def transform_reg_corr_data(reg_corr_data):
         })
     return transformed_data
 
+
 def transform_sim_period_data(sim_period_data):
+    '''
+    Transform the simulation period data to match the MongoDB schema.
+        Parameters:
+            sim_period_data (list): List of dictionaries
+        Returns:
+            transformed_data (list): List of dictionaries
+    '''
     transformed_data = []
     for row in sim_period_data:
         date = row['date']
@@ -137,6 +193,12 @@ def transform_sim_period_data(sim_period_data):
 
 
 def insert_data_into_DB(country, folder_path):
+    '''
+    Insert the data into the MongoDB.
+        Parameters:
+            country (str): Country name
+            folder_path (str): Path to the folder containing the CSV files
+    '''
     load_dotenv()
     MONGODB_URI = os.environ.get('MONGO_URI')
 
@@ -190,6 +252,11 @@ def insert_data_into_DB(country, folder_path):
 
 
 def delete_data_from_DB(id):
+    '''
+    Delete the data from the MongoDB.
+        Parameters:
+            id (str): ID of the document to be deleted
+    '''
     load_dotenv()
     MONGODB_URI = os.environ.get('MONGO_URI')
 
@@ -204,5 +271,5 @@ def delete_data_from_DB(id):
 
 
 # delete test data from the database
-# delete_id = "65843763aef0c55ae04c33b1"
-# delete_test_data(delete_id)
+# delete_id = "658dda557ca11fca9c2aa237"
+# delete_data_from_DB(delete_id)

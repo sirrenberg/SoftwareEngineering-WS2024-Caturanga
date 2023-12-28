@@ -2,6 +2,11 @@ import csv
 import os
 
 def add_camp_locations(folder_name):
+    '''
+    Add camp locations to locations.csv
+        Parameters:
+            folder_name (str): Name of the folder containing the CSV files
+    '''
 
     # camp data (manually added from https://reliefweb.int/report/ethiopia/ethiopia-refugee-population-camp-site-and-settlement-31-may-2023)
     # gps data: https://www.gpskoordinaten.de/

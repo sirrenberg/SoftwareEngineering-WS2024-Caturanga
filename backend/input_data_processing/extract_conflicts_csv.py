@@ -30,8 +30,15 @@ import pandas as pd
 from datetime import datetime
 
 
-# Function to calculate the number of days between two dates in "dd-mm-yyyy" format
 def between_date(d1, d2):
+    '''
+    Function to calculate the number of days between two dates in "dd-mm-yyyy" format
+        Parameters:
+            d1 (str): First date in "dd-mm-yyyy" format
+            d2 (str): Second date in "dd-mm-yyyy" format
+        Returns:
+            (int): Number of days between the two dates
+    '''
     d1list = d1.split("-")
     d2list = d2.split("-")
     date1 = datetime(int(d1list[2]), int(d1list[1]), int(d1list[0]))
@@ -40,7 +47,15 @@ def between_date(d1, d2):
     return abs((date1 - date2).days)
 
 
-def extract_conflicts_csv(country, folder_name, start_date, end_date):
+def extract_conflicts_csv(folder_name, start_date, end_date):
+    '''
+    Extract the conflicts.csv file for the specified country and date range.
+        Parameters:
+            folder_name (str): Name of the folder containing the CSV files.
+            start_date (str): The starting date to consider when calculating conflict periods (e.g., "01-01-2023").
+            end_date (str): The ending date to limit the number of days in the conflicts.csv file (e.g., "31-12-2023").
+    '''
+
     # Get the current directory
     current_dir = os.getcwd()
 

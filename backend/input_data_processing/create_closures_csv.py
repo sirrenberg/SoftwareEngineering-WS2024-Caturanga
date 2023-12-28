@@ -2,6 +2,11 @@ import os
 import csv
 
 def create_empty_closure_csv(folder_name):
+    '''
+    Create empty closures.csv
+        Parameters:
+            folder_name (str): Name of the folder containing the CSV files
+    '''
     # Get the current directory
     current_dir = os.getcwd()
     #open locations.csv
