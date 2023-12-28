@@ -1,5 +1,5 @@
 from fastapi.testclient import TestClient
-from main import app
+from main import app, expected_simsettings
 
 
 class TestClass:
@@ -8,7 +8,6 @@ class TestClass:
     """
 
     client = TestClient(app)
-    settings = []
 
     def test_root(self):
         """
@@ -34,6 +33,7 @@ class TestClass:
         response = \
             self.client.get("/simulation_results/65843761aef0c55ae04c33ad")
         assert response.status_code == 404
+        assert response.json() == {"detail": "Simulation result not found"}
 
     def test_get_simulation_result(self):
         """
@@ -55,6 +55,7 @@ class TestClass:
         """
         response = self.client.get("/simulation_results")
         assert response.status_code == 200
+        assert isinstance(response.json(), list)
 
     def test_get_simulation_bad_id(self):
         """
@@ -63,6 +64,7 @@ class TestClass:
         """
         response = self.client.get("/simulations/65856b0c4661431a0f92969b")
         assert response.status_code == 404
+        assert response.json() == {"detail": "Simulation input not found"}
 
     def test_get_simulation(self):
         """
@@ -81,6 +83,7 @@ class TestClass:
         """
         response = self.client.get("/simulations")
         assert response.status_code == 200
+        assert isinstance(response.json(), list)
 
     def test_get_simsetting_bad_id(self):
         """
@@ -89,16 +92,16 @@ class TestClass:
         """
         response = self.client.get("/simsettings/65856b0c4661431a0f92969c")
         assert response.status_code == 404
+        assert response.json() == {"detail": "Simulation settings not found"}
 
     def test_get_simsetting(self):
         """
         Test the "/simsettings/{id}" endpoint of the API with a valid ID.
         """
-        expected_keys = ["_id", "name", "log_levels", "spawn_rules",
-                         "move_rules", "optimisations"]
         response = self.client.get("/simsettings/6570f624987cdd647c68bc7d")
         assert response.status_code == 200
-        assert all(key in expected_keys for key in response.json().keys())
+        assert all(key in expected_simsettings
+                   for key in response.json().keys())
 
     def test_get_all_simsettings(self):
         """
@@ -106,22 +109,28 @@ class TestClass:
         """
         response = self.client.get("/simsettings")
         assert response.status_code == 200
+        assert isinstance(response.json(), list)
 
     def test_post_simsettings(self):
         """
         Test the POST request to the "/simsettings" endpoint of the API.
         """
-        response = self.client.post("/simsettings", json={"hasten": 5})
+        response = \
+            self.client.post("/simsettings",
+                             json={"name": "dummy"})
         assert response.status_code == 200
-        assert response.json() == {"data": {"hasten": 5}}
+        assert response.json()["data"] == {"name": "dummy"}
+        # clean up
+        self.client.delete(f"/simsettings/{response.json()['ID']}")
 
-    # TODO: add negative case
     def test_post_simsettings_bad_structure(self):
         """
         Test the POST request to the "/simsettings" endpoint of the API with
         an invalid JSON structure.
         """
-        pass
+        response = self.client.post("/simsettings", json={"hasten": 5})
+        assert response.status_code == 400
+        assert response.json() == {"detail": "Invalid simsetting structure"}
 
     def test_delete_simsettings_bad_id(self):
         """
@@ -130,14 +139,20 @@ class TestClass:
         """
         response = self.client.delete("/simsettings/65856b0c4661431a0f92969b")
         assert response.status_code == 404
+        assert response.json() == {"detail": "Simulation settings not found"}
 
-    # TODO: add positive case
     def test_delete_simsettings(self):
         """
         Test the DELETE request to the "/simsettings/{id}" endpoint of the API
         with a valid ID.
         """
-        # TODO use ID that was created in post test
-        response = self.client.delete("/simsettings/65856b0c4661431a0f92969b")
+        # create a dummy simsetting
+        post_response = \
+            self.client.post("/simsettings",
+                             json={"name": "dummy"})
+        dummy_simsetting_id = post_response.json()["ID"]
+        response = \
+            self.client.delete(f"/simsettings/{dummy_simsetting_id}")
         assert response.status_code == 200
-        assert response.json() == {"ID": "65856b0c4661431a0f92969b"}
+        assert response.json() == {"ID": dummy_simsetting_id,
+                                   "deleted": True}
