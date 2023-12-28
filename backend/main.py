@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Path, Request, BackgroundTasks, HTTPException
+from fastapi import FastAPI, Path, BackgroundTasks, HTTPException
 from flee_controller.controller import Controller
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -7,8 +7,10 @@ from typing import Any, Dict, AnyStr, List, Union
 app = FastAPI()
 controller = Controller()
 
-# allow CORS (Cross Origin Resource Sharing) - allows us to access the API from a different origin
-# e.g. if we have a frontend on localhost:3000 and the API on localhost:8000, we need to allow the frontend to access the API
+# allow CORS (Cross Origin Resource Sharing) - allows us to access the API
+# from a different origin
+# e.g. if we have a frontend on localhost:3000 and the API on localhost:8000,
+# we need to allow the frontend to access the API
 
 origins = ["*"]
 app.add_middleware(
@@ -26,7 +28,7 @@ def read_root():
 
 
 # this runs the Burundi simulation and returns the result
-# TODO - this should take a simulation ID as a parameter and run that simulation
+# TODO - should take a simulation ID as parameter and run that simulation
 @app.get("/run_simulation")
 async def run_simulation(background_tasks: BackgroundTasks):
     """
@@ -36,20 +38,23 @@ async def run_simulation(background_tasks: BackgroundTasks):
         The object id of the dummy simulation result.
 
     Background Tasks:
-        The simulation is run in the background using FastAPI's BackgroundTasks.
-        This allows the user to continue using the application without waiting for the simulation to complete.
+        The simulation is run in the background using FastAPI's
+        BackgroundTasks.
+        This allows the user to continue using the application without waiting
+        for the simulation to complete.
 
     References:
-        - FastAPI Background Tasks: https://fastapi.tiangolo.com/tutorial/background-tasks/
-        - Celery: https://docs.celeryproject.org/en/stable/
-            Celery is an alternative to FastAPI's BackgroundTasks that provides more complex setup but can be used
-            for heavy background computation.
+        - FastAPI Background Tasks:
+            https://fastapi.tiangolo.com/tutorial/background-tasks/
+        - Celery:
+            https://docs.celeryproject.org/en/stable/
+            Celery is an alternative to FastAPI's BackgroundTasks that
+            provides more complex setup but can be used for
+            heavy background computation.
 
     """
     object_id = await controller.store_dummy_simulation()
-
     background_tasks.add_task(controller.run_simulation, object_id)
-
     return {"dummy simulation": str(object_id)}
 
 
@@ -62,7 +67,6 @@ async def get_all_simulation_results():
         A list of simulation results.
     """
     return await controller.get_all_simulation_results()
-
 
 
 @app.get("/simulation_results/{simulation_result_id}")
@@ -154,7 +158,9 @@ async def get_simsetting(
 async def post_simsetting(simsetting: JSONStructure = None):
     """
     Example:
-        # curl -X POST "http://127.0.0.1:8080/simsettings" -H  "accept: application/json" -H  "Content-Type: application/json" -d "{\"test_key\":\"test_val\"}"
+        # curl -X POST "http://127.0.0.1:8080/simsettings"
+        -H  "accept: application/json"
+        -H  "Content-Type: application/json" -d "{\"test_key\":\"test_val\"}"
     """
     await controller.post_simsettings(simsetting)
     return {"data": simsetting}
