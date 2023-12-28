@@ -1,5 +1,6 @@
-import "../styles/Inputs.css";
-import { useEffect, useState } from "react";
+import "../styles/Menu.css";
+import { useEffect, useState, useContext } from "react";
+import { StartSimContext } from "../contexts/StartSimContext";
 import { Input } from "../types";
 import Map from "../components/Map";
 import { LatLngExpression } from "leaflet";
@@ -17,6 +18,8 @@ function Inputs() {
   const [selectedInputIndex, setSelectedInputIndex] = useState<number>(-1);
   const [mapCenter, setMapCenter] = useState<LatLngExpression>([0, 0]); // [lat, lng
 
+  const { input_id, setInput_id } = useContext(StartSimContext);
+
   useEffect(() => {
     sendRequest("/simulations", "GET").then((data) => {
       setInputs(data);
@@ -29,38 +32,35 @@ function Inputs() {
     }
   }, []);
 
-  if (inputs.length === 0) {
-    return <div>Loading...</div>;
-  }
-
   return (
-    <div className="inputs-container content-page">
-      <div className="inputs-list-container">
-        <h2 className="inputs-list-title">Saved Inputs</h2>
+    <div className="menu-items-container content-page">
+      <div className="items-list-container">
+        <h2 className="items-list-title">Saved Inputs</h2>
 
-        <div className="inputs-list">
+        <div className="items-list">
           {inputs.map((input, index) => {
             return (
               <button
                 key={input._id}
                 className={
                   "simple-button" +
-                  (index === selectedInputIndex ? " selected-input" : "")
+                  (index === selectedInputIndex ? " selected-item" : "")
                 }
                 onClick={() => {
                   setSelectedInputIndex(index);
                   setMapCenter(calcMapCenter(input.locations));
+                  setInput_id(inputs[index]._id);
                 }}
               >
                 <p>{input.region}</p>
-                <span className="inputs-list-item-icons">
+                <span className="items-list-item-icons">
                   <NavLink to={"/inputs/" + input._id}>
                     <FontAwesomeIcon
                       icon={faPenToSquare}
-                      className="input-icon"
+                      className="item-icon"
                     />
                   </NavLink>
-                  <FontAwesomeIcon icon={faTrash} className="input-icon" />
+                  <FontAwesomeIcon icon={faTrash} className="item-icon" />
                 </span>
               </button>
             );
@@ -72,8 +72,8 @@ function Inputs() {
         </NavLink>
       </div>
 
-      <div className="map-section">
-        <h2 className="selected-input-title page-title">
+      <div className="content-section">
+        <h2 className="selected-item-title page-title">
           {selectedInputIndex === -1
             ? "Choose an Input"
             : inputs[selectedInputIndex].region}

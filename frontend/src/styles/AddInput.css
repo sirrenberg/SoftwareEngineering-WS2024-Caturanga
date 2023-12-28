@@ -64,3 +64,8 @@
   width: 50%;
   margin: 1em 0;
 }
+
+#submit-settings-button {
+  background-color: var(--charcoal);
+  color: var(--white);
+}

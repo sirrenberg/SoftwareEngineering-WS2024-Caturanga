@@ -1,4 +1,4 @@
-import "../styles/Inputs.css";
+import "../styles/Menu.css";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import { useEffect, useState } from "react";
@@ -74,13 +74,7 @@ function Simulations() {
 
         <div className="slider-container">
           <Box sx={{ width: 300 }}>
-            <Slider
-              valueLabelDisplay="auto"
-              step={1}
-              marks
-              min={0}
-              max={14}
-            />
+            <Slider valueLabelDisplay="auto" step={1} marks min={0} max={14} />
           </Box>
         </div>
       </div>

@@ -1,4 +1,4 @@
-.inputs-container {
+.menu-items-container {
   display: flex;
   flex-direction: row;
   justify-content: center;
@@ -6,7 +6,11 @@
   padding: 0;
 }
 
-.inputs-list-container {
+#settings-menu-container .simple-button {
+  background-color: var(--charcoal);
+}
+
+.items-list-container {
   background-color: var(--tea-green);
   height: 100vh;
   width: 25%;
@@ -17,13 +21,17 @@
   justify-content: space-between;
 }
 
-.inputs-list-title {
+#settings-list-container {
+  background-color: var(--air-superiority-blue);
+}
+
+.items-list-title {
   font-family: "Cabin", sans-serif;
   font-weight: 600;
   font-size: 2rem;
 }
 
-.inputs-list {
+.items-list {
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -33,7 +41,7 @@
   overflow-y: scroll;
 }
 
-.inputs-list .simple-button {
+.items-list .simple-button {
   margin: 0.2em 0;
   width: 90%;
   background-color: var(--white);
@@ -44,17 +52,27 @@
   align-items: center;
 }
 
-.inputs-list .simple-button:hover {
+.items-list .simple-button:hover {
   background-color: var(--light-green);
   color: var(--white);
 }
 
-.simple-button.selected-input {
-  background-color: var(--dark-green);
+#settings-items-list .simple-button {
+  background-color: var(--white);
+  color: var(--black);
+}
+
+#settings-items-list .simple-button:hover {
+  background-color: var(--light-charcoal);
   color: var(--white);
 }
 
-.inputs-list-item-icons {
+.simple-button.selected-item {
+  background-color: var(--charcoal);
+  color: var(--white);
+}
+
+.items-list-item-icons {
   display: flex;
   flex-direction: row;
   justify-content: space-around;
@@ -64,31 +82,30 @@
   color: var(--white);
 }
 
-.simple-button .inputs-list-item-icons,
-a .inputs-list-item-icons {
+.simple-button .items-list-item-icons,
+a .items-list-item-icons {
   display: none;
   right: 1em;
   width: 20%;
 }
 
-.simple-button:hover .inputs-list-item-icons {
+.simple-button:hover .items-list-item-icons {
   display: flex;
 }
 
-.input-icon:hover {
+.item-icon:hover {
   color: var(--dark-green);
 }
 
-.map-section {
+.content-section {
   width: 100%;
   height: 100vh;
   display: flex;
   flex-direction: column;
-  justify-content: space-around;
   align-items: center;
-}
 
-.selected-input-title {
+  overflow-y: scroll;
+  padding: 2em 0;
 }
 
 .map-background {
@@ -100,6 +117,23 @@ a .inputs-list-item-icons {
   min-width: 50vw;
   width: 80%;
   height: 100%;
+}
+
+.settings-preview-container {
+  width: 90%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 2em 0;
+}
+
+.settings-input-section {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
 }
 
 .buttons-container {

@@ -33,8 +33,6 @@ function Map({
   const zoomLevel = 5;
 
   function Recenter() {
-    console.log("recenter");
-
     if (!shouldRecenter) {
       return null;
     }

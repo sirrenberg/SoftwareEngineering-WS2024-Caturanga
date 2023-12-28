@@ -48,7 +48,7 @@ function AddInput() {
     MapOperatingMode.vizualizing
   ); // ["visualizing", "add-location", "add-route"]
   const [selectedNode, setSelectedNode] = useState<SimLocation | null>(null);
-  const [selectedRoute, setSelectedRoute] = useState<SimLocation | null>(null);
+  const [selectedRoute, setSelectedRoute] = useState<Route | null>(null);
   const [mapCenter, setMapCenter] = useState<LatLngExpression>(
     calcMapCenter(values.locations)
   ); // [lat, lng]
@@ -62,11 +62,7 @@ function AddInput() {
       handlePrefillData(`/simulations/${id}`);
     }
 
-    console.log("useEffect", values);
-
     if (values.locations.length > 0) {
-      console.log(calcMapCenter(values.locations));
-
       setMapCenter(calcMapCenter(values.locations));
     }
   }, []);

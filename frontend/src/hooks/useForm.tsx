@@ -11,6 +11,9 @@ export function useForm(initialFValues: any) {
   ) => {
     const { name, value } = e.target;
 
+    console.log("name", name);
+    console.log("value", value);
+
     // if name is date or length, then we need to update the sim_period object
     if (name === "date" || name === "length") {
       setValues({
@@ -21,6 +24,80 @@ export function useForm(initialFValues: any) {
             [name]: value,
           },
         ],
+      });
+      return;
+    }
+
+    // Log levels are nested in the sim_settings object
+    if (
+      [
+        "agent",
+        "link",
+        "camp",
+        "conflict",
+        "init",
+        "idp_totals",
+        "granularity",
+      ].includes(name)
+    ) {
+      setValues({
+        ...values,
+        log_levels: {
+          ...values.log_levels,
+          [name]: value,
+        },
+      });
+      return;
+    }
+
+    // Spawn rules are nested in the sim_settings object
+    if (["take_from_population", "insert_day0"].includes(name)) {
+      setValues({
+        ...values,
+        spawn_rules: {
+          ...values.spawn_rules,
+          [name]: value,
+        },
+      });
+      return;
+    }
+
+    // Move rules are nested in the sim_settings object
+    if (
+      [
+        "max_move_speed",
+        "max_walk_speed",
+        "foreign_weight",
+        "conflict_weight",
+        "camp_weight",
+        "conflict_movechance",
+        "camp_movechance",
+        "default_movechance",
+        "awareness_level",
+        "capacity_scaling",
+        "avoid_short_stints",
+        "start_on_foot",
+        "weight_power",
+      ].includes(name)
+    ) {
+      setValues({
+        ...values,
+        move_rules: {
+          ...values.move_rules,
+          [name]: value,
+        },
+      });
+      return;
+    }
+
+    // Optimisations are nested in the sim_settings object
+    if (["hasten"].includes(name)) {
+      setValues({
+        ...values,
+        optimisations: {
+          ...values.optimisations,
+          [name]: value,
+        },
       });
       return;
     }

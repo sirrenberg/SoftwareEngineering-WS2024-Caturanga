@@ -65,6 +65,17 @@ interface SimSettings {
     foreign_weight: number;
     conflict_weight: number;
     camp_weight: number;
+    conflict_movechance: number;
+    camp_movechance: number;
+    default_movechance: number;
+    awareness_level: number;
+    capacity_scaling: number;
+    avoid_short_stints: boolean;
+    start_on_foot: boolean;
+    weight_power: number;
+  };
+  optimisations: {
+    hasten: number;
   };
 }
 
