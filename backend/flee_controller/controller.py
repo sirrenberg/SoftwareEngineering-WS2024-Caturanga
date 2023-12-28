@@ -15,11 +15,6 @@ class Controller:
         Initializes the Controller object.
         """
         self.adapter = Adapter()
-        load_dotenv()
-        self.MONGODB_URI = os.environ.get('MONGO_URI')
-        self.client = MongoClient(self.MONGODB_URI)
-        self.db = self.client.get_database("Caturanga")
-
 
     def run_simulation(self, simulation_id: str):
         """
@@ -72,12 +67,15 @@ class Controller:
         Returns:
             list: A list of simulation results, where each result is a dictionary.
         """
-        simulations_results_collection = self.db.get_collection("simulations_results")
+        client, db = self.connect_db()
+        simulations_results_collection = db.get_collection("simulations_results")
         simulations_results = simulations_results_collection.find({})
         rl = []
         for simulation in simulations_results:
             simulation["_id"] = str(simulation["_id"])
             rl.append(simulation)
+
+        client.close()
         return rl
 
 
@@ -91,11 +89,16 @@ class Controller:
         Returns:
             dict: The simulation result.
         """
-        simulations_results_collection = self.db.get_collection("simulations_results")
+        client, db = self.connect_db()
+        simulations_results_collection = db.get_collection("simulations_results")
         simulation_results = simulations_results_collection.find_one({"_id": ObjectID(simulation_result_id)})
         if simulation_results is not None:
             simulation_results["_id"] = str(simulation_results["_id"])
+            client.close()
             return simulation_results
+        else:
+            client.close()
+            return None
     
     
     async def get_all_simulations(self):
@@ -105,12 +108,14 @@ class Controller:
         Returns:
             list: A list of simulations, where each simulation is a dictionary.
         """
-        simulations_collection = self.db.get_collection("simulations")
+        client, db = self.connect_db()
+        simulations_collection = db.get_collection("simulations")
         simulations = simulations_collection.find({})
         rl = []
         for simulation in simulations:
             simulation["_id"] = str(simulation["_id"])
             rl.append(simulation)
+        client.close()
         return rl
 
     async def get_simulation(self, simulation_id: str):
@@ -123,38 +128,55 @@ class Controller:
         Returns:
             dict: The simulation.
         """
-        simulations_collection = self.db.get_collection("simulations")
+        client, db = self.connect_db()
+        simulations_collection = db.get_collection("simulations")
         simulation = simulations_collection.find_one({"_id": ObjectID(simulation_id)})
         if simulation is not None:
             simulation["_id"] = str(simulation["_id"])
+            client.close()
             return simulation
+        else:
+            client.close()
+            return None
 
     async def post_simsettings(self, simsetting):
-        simsettings_collection = self.db.simsettings
+        client, db = self.connect_db()
+        simsettings_collection = db.simsettings
         simsettings_collection.insert_one(dict(simsetting))
+        client.close()
         return 1
 
     async def get_all_simsettings(self):
-        simsettings = self.db.get_collection("simsettings").find({})
+        client, db = self.connect_db()
+        simsettings = db.get_collection("simsettings").find({})
         rl = []
         for simsetting in simsettings:
             simsetting["_id"] = str(simsetting["_id"])
             rl.append(simsetting)
+        client.close()
         return rl
 
     async def get_simsetting(self, simsetting_id: str):
-        simsetting = self.db.get_collection("simsettings").find_one(
+        client, db = self.connect_db()
+        simsetting = db.get_collection("simsettings").find_one(
             {"_id": ObjectID(simsetting_id)}
         )
         print(simsetting)
         if simsetting is not None:
             simsetting["_id"] = str(simsetting["_id"])
+            client.close()
             return simsetting
+        else:
+            client.close()
+            return None
 
     async def delete_simsetting(self, simsetting_id: str):
-        return self.db.get_collection("simsettings").delete_one(
+        client, db = self.connect_db()
+        db.get_collection("simsettings").delete_one(
             {"_id": ObjectID(simsetting_id)}
         )
+        client.close()
+        return 
 
     def connect_db(self):
         """
