@@ -14,15 +14,19 @@ function Settings() {
   const [settings, setSettings] = useState<SimSettings[]>([]);
   const [selectedSettingIndex, setSelectedSettingIndex] = useState<number>(-1);
 
-  const { settings_id, setSettings_id } = useContext(StartSimContext);
-
-  console.log(settings_id);
+  const context = useContext(StartSimContext);
+  if (!context) {
+    throw new Error("StartSimContext is null");
+  }
+  const { setSettings_id } = context;
 
   useEffect(() => {
     sendRequest("/simsettings", "GET").then((data) => {
       setSettings(data);
     });
   }, []);
+
+  console.log("settings", settings);
 
   return (
     <div
@@ -209,7 +213,7 @@ function Settings() {
                       type="checkbox"
                       placeholder="0"
                       name="take_from_population"
-                      value={
+                      checked={
                         settings[selectedSettingIndex].spawn_rules
                           .take_from_population
                       }
@@ -225,9 +229,8 @@ function Settings() {
                       type="checkbox"
                       placeholder="0"
                       name="take_from_population"
-                      value={
-                        settings[selectedSettingIndex].spawn_rules
-                          .take_from_population
+                      checked={
+                        settings[selectedSettingIndex].spawn_rules.insert_day0
                       }
                       disabled={true}
                     />
@@ -432,7 +435,7 @@ function Settings() {
                       type="checkbox"
                       placeholder="0"
                       name="avoid_short_stints"
-                      value={
+                      checked={
                         settings[selectedSettingIndex].move_rules
                           .avoid_short_stints
                       }
@@ -448,7 +451,7 @@ function Settings() {
                       type="checkbox"
                       placeholder="0"
                       name="start_on_foot"
-                      value={
+                      checked={
                         settings[selectedSettingIndex].move_rules.start_on_foot
                       }
                       disabled={true}

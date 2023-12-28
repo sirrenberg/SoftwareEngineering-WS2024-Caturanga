@@ -2,7 +2,7 @@ import "../styles/Modal.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faX } from "@fortawesome/free-solid-svg-icons";
 import { useForm } from "../hooks/useForm";
-import { SimLocation, Input } from "../types";
+import { Input, Route } from "../types";
 
 function RouteModal({
   setRouteModalOpen,
@@ -11,7 +11,7 @@ function RouteModal({
   simValues,
 }: {
   setRouteModalOpen: any;
-  route: SimLocation | null;
+  route: Route | null;
   setSimValues: any;
   simValues: Input;
 }) {

@@ -17,7 +17,16 @@ export function useForm(initialFValues: any) {
       | React.ChangeEvent<HTMLInputElement>
       | React.ChangeEvent<HTMLSelectElement>
   ) => {
-    let { name, value } = e.target;
+    console.log("e", e.target);
+
+    let { name, value, type } = e.target;
+
+    // handle type = checkbox
+    if (type === "checkbox") {
+      if (type === "checkbox") {
+        value = (e.target as HTMLInputElement).checked.toString();
+      }
+    }
 
     // convert string to boolean
     value = str2bool(value);

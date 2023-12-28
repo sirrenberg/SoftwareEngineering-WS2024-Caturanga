@@ -258,7 +258,7 @@ function AddInput() {
             </tr>
           </thead>
           <tbody>
-            {values.locations.map((location) => {
+            {values.locations.map((location: SimLocation) => {
               return (
                 <tr>
                   <td>{location.name}</td>

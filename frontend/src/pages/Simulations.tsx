@@ -3,7 +3,7 @@ import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import { useEffect, useState } from "react";
 import { ListItemButton, ListItemText, Slider, Box } from "@mui/material";
-import { Simulation } from "../types";
+import { Input } from "../types";
 import Map from "../components/Map";
 import { LatLngExpression } from "leaflet";
 import { useAPI } from "../hooks/useAPI";
@@ -12,7 +12,7 @@ import { calcMapCenter } from "../helper/misc";
 function Simulations() {
   const { sendRequest } = useAPI();
 
-  const [inputs, setInputs] = useState<Simulation[]>([]);
+  const [inputs, setInputs] = useState<Input[]>([]);
   const [selectedInputIndex, setSelectedInputIndex] = useState<number>(0);
   const [mapCenter, setMapCenter] = useState<LatLngExpression>([0, 0]); // [lat, lng
 

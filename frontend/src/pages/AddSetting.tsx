@@ -190,7 +190,7 @@ function AddSetting() {
                 type="checkbox"
                 placeholder="0"
                 name="take_from_population"
-                value={values.spawn_rules.take_from_population}
+                checked={values.spawn_rules.take_from_population}
                 onChange={handleInputChange}
               />
             </label>
@@ -202,8 +202,8 @@ function AddSetting() {
                 className="input-field"
                 type="checkbox"
                 placeholder="0"
-                name="take_from_population"
-                value={values.spawn_rules.take_from_population}
+                name="insert_day0"
+                checked={values.spawn_rules.insert_day0}
                 onChange={handleInputChange}
               />
             </label>
@@ -379,7 +379,7 @@ function AddSetting() {
                 type="checkbox"
                 placeholder="0"
                 name="avoid_short_stints"
-                value={values.move_rules.avoid_short_stints}
+                checked={values.move_rules.avoid_short_stints}
                 onChange={handleInputChange}
               />
             </label>
@@ -392,7 +392,7 @@ function AddSetting() {
                 type="checkbox"
                 placeholder="0"
                 name="start_on_foot"
-                value={values.move_rules.start_on_foot}
+                checked={values.move_rules.start_on_foot}
                 onChange={handleInputChange}
               />
             </label>
@@ -424,7 +424,7 @@ function AddSetting() {
           id="submit-settings-button"
           className="simple-button"
           onClick={(e) => {
-            handleSubmit(e, "/simsettings/", "POST");
+            handleSubmit(e, "/simsettings", isNewSetting ? "POST" : "PUT");
           }}
         >
           Save

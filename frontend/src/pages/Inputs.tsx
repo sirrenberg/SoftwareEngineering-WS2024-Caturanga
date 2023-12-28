@@ -18,7 +18,11 @@ function Inputs() {
   const [selectedInputIndex, setSelectedInputIndex] = useState<number>(-1);
   const [mapCenter, setMapCenter] = useState<LatLngExpression>([0, 0]); // [lat, lng
 
-  const { input_id, setInput_id } = useContext(StartSimContext);
+  const context = useContext(StartSimContext);
+  if (!context) {
+    throw new Error("StartSimContext is null");
+  }
+  const { setInput_id } = context;
 
   useEffect(() => {
     sendRequest("/simulations", "GET").then((data) => {
