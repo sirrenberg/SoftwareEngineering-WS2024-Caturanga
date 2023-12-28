@@ -34,7 +34,7 @@ def add_camp_locations(folder_name):
 
 
     # open locations.csv and add camps in the following structures:
-    # name,country,latitude,longitude,location_type,conflict_period,population
+    # name,country,latitude,longitude,location_type,conflict_date,population
 
     # Get the current directory
     current_dir = os.getcwd()

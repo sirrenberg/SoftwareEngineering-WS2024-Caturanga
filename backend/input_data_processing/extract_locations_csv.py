@@ -101,7 +101,7 @@ def filter_by_location(inputdata, columnname):
         tempdf.sort_values(columnname, ascending=True)
         outputdata = pd.concat([outputdata, tempdf.tail(1)])
 
-    outputdata = outputdata[['event_date', 'country', columnname, 'admin1', 'latitude', 'longitude', 'fatalities', 'conflict_period']]
+    outputdata = outputdata[['event_date', 'country', columnname, 'admin1', 'latitude', 'longitude', 'fatalities', 'conflict_date']]
 
     return outputdata
 
@@ -154,18 +154,18 @@ def extract_locations_csv(country, folder_name, start_date, location_type, fatal
     # Process event dates and calculate conflict periods
     event_dates = acled_df["event_date"].tolist()
     formatted_event_dates = [date_format(date) for date in event_dates]
-    conflict_period = [between_date(d, start_date) for d in formatted_event_dates]
-    acled_df['conflict_period'] = conflict_period
+    conflict_date = [between_date(d, start_date) for d in formatted_event_dates]
+    acled_df['conflict_date'] = conflict_date
 
 
     # Filter ACLED data based on location type, fatalities threshold, and sort by conflict period
     acled_df = filter_by_location(acled_df, location_type)
     acled_df = acled_df.loc[acled_df['fatalities'] > fatalities_threshold]
-    acled_df = acled_df.sort_values('conflict_period')
+    acled_df = acled_df.sort_values('conflict_date')
     
     # Split ACLED data into towns and conflict zones
-    towns_df = acled_df[acled_df['conflict_period'] <= conflict_threshold].copy()
-    conflict_zones_df = acled_df[acled_df['conflict_period'] > conflict_threshold].copy()
+    towns_df = acled_df[acled_df['conflict_date'] <= conflict_threshold].copy()
+    conflict_zones_df = acled_df[acled_df['conflict_date'] > conflict_threshold].copy()
 
     # Add location type labels to the dataframes
     towns_df['location_type'] = 'town'
@@ -181,8 +181,8 @@ def extract_locations_csv(country, folder_name, start_date, location_type, fatal
 
     # Select and rename columns for the final output
     # show index of merged_df
-    merged_df = merged_df[[location_type, 'admin1', 'country', 'latitude', 'longitude', 'location_type', 'conflict_period', 'population']]
-    merged_df.columns = ['#name', 'region', 'country',  'latitude', 'longitude', 'location_type', 'conflict_period', 'population']
+    merged_df = merged_df[[location_type, 'admin1', 'country', 'latitude', 'longitude', 'location_type', 'conflict_date', 'population']]
+    merged_df.columns = ['#name', 'region', 'country',  'latitude', 'longitude', 'location_type', 'conflict_date', 'population']
 
     # Write the merged dataframe to a CSV file
     output_file = os.path.join(current_dir, folder_name, "locations.csv")

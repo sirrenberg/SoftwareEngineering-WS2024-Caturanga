@@ -18,7 +18,7 @@ It populates the DataFrame with 1s for days that fall within the conflict period
 
 Usage:
 1. Prepare conflict information data for the desired country and save it as a CSV file ("conflict_info.csv").
-2. Ensure the "conflict_info.csv" file includes columns for "name," "start_date," and "conflict_period."
+2. Ensure the "conflict_info.csv" file includes columns for "name," "start_date," and "conflict_date."
 3. Specify the desired parameters:
    - <country>: Name of the country or dataset (e.g., "nigeria2016").
    - <start_date>: The starting date to consider when calculating conflict periods (e.g., "1-1-2016").
@@ -62,7 +62,7 @@ def extract_conflicts_csv(country, folder_name, start_date, end_date):
     for index, row in conflict_info_df.iterrows():
         location = row['name']
         date = row['start_date']
-        days = row['conflict_period']
+        days = row['conflict_date']
 
         # Convert the start_date to datetime format
         start_datetime = datetime.strptime(date, "%d-%m-%Y")

@@ -6,7 +6,7 @@ Input:
 - 'locations.csv': A CSV file containing geographical locations for a specific country or dataset. This file should include columns for 'name', 'latitude', and 'longitude' of each location.
 
 Output: 
-- 'routes.csv': A CSV file generated in the specified country's directory, containing the routes between locations. Each entry in the file includes the starting location ('name1'), the destination location ('name2'), the distance between these locations, and a placeholder for 'force_redirection'.
+- 'routes.csv': A CSV file generated in the specified country's directory, containing the routes between locations. Each entry in the file includes the starting location ('name1'), the destination location ('name2'), the distance between these locations, and a placeholder for 'forced_redirection'.
 
 Description:
 This script, '05_extract_routes_csv.py', processes geographical location data to generate a set of routes between locations within a specified country or dataset. It uses a nearest neighbor approach, enhanced with the consideration of intermediate stops, to determine the most efficient routes based on Euclidean distance. 
@@ -85,7 +85,7 @@ def extract_routes_csv(country, folder_name):
     # Save the routes to a CSV file
     with open(f'{folder_name}/routes.csv', mode='w', newline='') as file:
         writer = csv.writer(file)
-        writer.writerow(['name1', 'name2', 'distance', 'force_redirection'])
+        writer.writerow(['name1', 'name2', 'distance', 'forced_redirection'])
         for route in routes:
             writer.writerow(route)
 
