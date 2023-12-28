@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Path, Request, BackgroundTasks
+from fastapi import FastAPI, Path, Request, BackgroundTasks, HTTPException
 from flee_controller.controller import Controller
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -80,7 +80,11 @@ async def get_simulation_result(
     Returns:
         The data of the simulation result.
     """
-    return await controller.get_simulation_result(simulation_result_id)
+    result = await controller.get_simulation_result(simulation_result_id)
+    if result is None:
+        raise HTTPException(status_code=404,
+                            detail="Simulation result not found")
+    return result
 
 
 @app.get("/simulations")
@@ -106,7 +110,11 @@ async def get_simulation(
     Returns:
         dict: The data of the simulation.
     """
-    return await controller.get_simulation(simulation_id)
+    result = await controller.get_simulation(simulation_id)
+    if result is None:
+        raise HTTPException(status_code=404,
+                            detail="Simulation input not found")
+    return result
 
 
 class SimulationSetting(BaseModel):
@@ -130,16 +138,20 @@ async def get_all_simsettings():
 
 
 @app.get("/simsettings/{simsetting_id}")
-async def get_simulation(
+async def get_simsetting(
     simsetting_id: str = Path(
         description="The ID of the simsetting whose data you want to view."
     ),
 ):
-    return await controller.get_simsetting(simsetting_id)
+    result = await controller.get_simsetting(simsetting_id)
+    if result is None:
+        raise HTTPException(status_code=404,
+                            detail="Simulation settings not found")
+    return result
 
 
 @app.post("/simsettings")
-async def post_simsettings(simsetting: JSONStructure = None):
+async def post_simsetting(simsetting: JSONStructure = None):
     """
     Example:
         # curl -X POST "http://127.0.0.1:8080/simsettings" -H  "accept: application/json" -H  "Content-Type: application/json" -d "{\"test_key\":\"test_val\"}"
@@ -154,4 +166,8 @@ async def delete_simsetting(
         description="The ID of the simsetting you want to delete."
     ),
 ):
-    return await controller.delete_simsetting(simsetting_id)
+    result = await controller.delete_simsetting(simsetting_id)
+    if result is None:
+        raise HTTPException(status_code=404,
+                            detail="Simulation settings not found")
+    return result
