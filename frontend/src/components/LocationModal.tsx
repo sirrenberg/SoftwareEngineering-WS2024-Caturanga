@@ -17,9 +17,6 @@ function LocationModal({
 }) {
   const { values, handleInputChange } = useForm(location);
 
-  console.log("values in Modal", values);
-  console.log("simValues in Modal", simValues);
-
   if (!location) {
     return null;
   }
@@ -138,15 +135,31 @@ function LocationModal({
         <button
           className="simple-button"
           onClick={() => {
+            // update the location in the simValues
+            // and adapt the routes to use the new name
+            const updatedLocations = simValues.locations.map((loc) => {
+              if (loc.name === location.name) {
+                return values;
+              }
+              return loc;
+            });
+
+            const updatedRoutes = simValues.routes.map((route) => {
+              if (route.from === location.name) {
+                return { ...route, from: values.name };
+              }
+              if (route.to === location.name) {
+                return { ...route, to: values.name };
+              }
+              return route;
+            });
+
             setSimValues({
               ...simValues,
-              locations: [
-                ...simValues.locations.filter(
-                  (loc: SimLocation) => loc.name !== location.name
-                ),
-                values,
-              ],
+              locations: updatedLocations,
+              routes: updatedRoutes,
             });
+
             setLocationModalOpen(false);
           }}
         >

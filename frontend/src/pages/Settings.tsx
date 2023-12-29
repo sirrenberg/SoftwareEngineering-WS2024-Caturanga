@@ -26,8 +26,6 @@ function Settings() {
     });
   }, []);
 
-  console.log("settings", settings);
-
   return (
     <div
       className="menu-items-container content-page"

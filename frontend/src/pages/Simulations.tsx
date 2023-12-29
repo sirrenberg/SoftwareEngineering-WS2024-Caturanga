@@ -17,11 +17,7 @@ function Simulations() {
   const [mapCenter, setMapCenter] = useState<LatLngExpression>([0, 0]); // [lat, lng
 
   useEffect(() => {
-    console.log("Fetching inputs");
-
     sendRequest("/simulations", "GET").then((data) => {
-      console.log(data);
-
       setInputs(data);
     });
   }, []);
@@ -33,8 +29,6 @@ function Simulations() {
   }, []);
 
   if (inputs.length === 0) {
-    console.log("No inputs");
-
     return <div>Loading...</div>;
   }
 
