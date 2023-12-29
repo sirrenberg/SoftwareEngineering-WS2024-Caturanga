@@ -68,7 +68,12 @@
 }
 
 .simple-button.selected-item {
-  background-color: var(--charcoal);
+  background-color: var(--dark-green);
+  color: var(--white);
+}
+
+#settings-items-list .simple-button.selected-item {
+  background-color: var(--dark-charcoal);
   color: var(--white);
 }
 

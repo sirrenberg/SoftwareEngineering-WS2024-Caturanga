@@ -143,7 +143,7 @@ function AddInput() {
   return (
     <div className="add-input-container content-page">
       <h1 className="page-title">
-        {isNewInput ? "New Simulation: " : "Edit Simulation: "}
+        {isNewInput ? "New Input: " : "Edit Input: "}
         {values.region}
       </h1>
 
