@@ -41,7 +41,7 @@ def create_sim_period_csv(folder_name, start_date, end_date):
     '''
     Create sim_period.csv
         Parameters:
-            folder_name (str): Name of the folder containing the CSV files
+            folder_name (str): Name of the folder where the file will be saved
             start_date (str): Start date of the time period
             end_date (str): End date of the time period
     '''

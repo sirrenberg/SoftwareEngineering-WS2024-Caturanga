@@ -146,7 +146,7 @@ def extract_locations_csv(folder_name, start_date, location_type, fatalities_thr
     '''
     Main function to extract location data from ACLED data and write it to a CSV file.
         Parameters:
-            folder_name (str): Name of the folder containing the CSV files
+            folder_name (str): Name of the folder containing the CSV files and where it will be saved
             start_date (str): The starting date to consider when calculating conflict periods
             location_type (str): The type of location to focus on
             fatalities_threshold (int): Minimum fatalities count for including a location

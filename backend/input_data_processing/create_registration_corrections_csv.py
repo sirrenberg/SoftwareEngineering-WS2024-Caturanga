@@ -8,7 +8,8 @@ def create_empty_registration_corrections_csv(folder_name):
     '''
     Create empty registration_corrections.csv
         Parameters:
-            folder_name (str): Name of the folder containing the CSV files'''
+            folder_name (str): Name of the folder where the file will be saved
+            '''
     # Get the current directory
     current_dir = os.getcwd()
     #open locations.csv
