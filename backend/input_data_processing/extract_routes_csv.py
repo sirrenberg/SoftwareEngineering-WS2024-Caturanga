@@ -1,26 +1,6 @@
 # This script is based on https://github.com/djgroen/FabFlee/blob/master/scripts/05_extract_routes_csv.py 
 # but changed where necessary to work automatically with the data from the ACLED API and the population data
 
-"""
-Input: 
-- 'locations.csv': A CSV file containing geographical locations for a specific country or dataset. This file should include columns for 'name', 'latitude', and 'longitude' of each location.
-
-Output: 
-- 'routes.csv': A CSV file generated in the specified country's directory, containing the routes between locations. Each entry in the file includes the starting location ('name1'), the destination location ('name2'), the distance between these locations, and a placeholder for 'forced_redirection'.
-
-Description:
-This script, '05_extract_routes_csv.py', processes geographical location data to generate a set of routes between locations within a specified country or dataset. It uses a nearest neighbor approach, enhanced with the consideration of intermediate stops, to determine the most efficient routes based on Euclidean distance. 
-
-The script functions as follows:
-1. Reads location data from 'locations.csv' within a directory named after the specified country.
-2. For each location, it finds the nearest neighbor and considers possible intermediate stops to optimize the route.
-3. Records the routes, including the start and end locations and the calculated distances, in a 'routes.csv' file within the same country-specific directory.
-
-Usage:
-1. Prepare location data in 'locations.csv' with 'name', 'latitude', and 'longitude' columns.
-2. Place this file within a directory named after the country or dataset.
-3. Run the script with the country or dataset name as a command-line argument.
-"""
 
 import os 
 import csv
@@ -66,6 +46,8 @@ def find_nearest_neighbor(current_index, visited, locations_df):
 def extract_routes_csv(folder_name):
     '''
     Extract the routes.csv file for the specified country.
+    The function processes location data to generate a set of routes between locations. It uses a nearest neighbor approach, enhanced with the consideration of intermediate stops, to determine the most efficient routes based on Euclidean distance. 
+
         Parameters:
             country (str): Name of the country or dataset.
             folder_name (str): Name of the folder containing the CSV files.

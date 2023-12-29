@@ -1,24 +1,6 @@
 # This script is based on https://github.com/djgroen/FabFlee/blob/master/scripts/03_extract_conflict_info.py 
 # but changed where necessary to work automatically with the data from the ACLED API and the population data
 
-'''
-Input: ACLED data (acled.csv)
-Output: Conflict information data (conflict_info.csv)
-
-Description:
-This script processes ACLED conflict data for a specified country and extracts information about conflict periods and their estimated durations for different locations. It calculates the conflict period for each location based on the provided start date, and it adds an estimated conflict duration based on the number of added conflict days.
-
-Usage:
-1. Prepare ACLED conflict data for the desired country and save it as a CSV file (acled.csv).
-2. Ensure the ACLED data includes columns for "event_date," "country," and the relevant location type (e.g., "admin2").
-3. Specify the desired parameters:
-    - <country>: Name of the country or dataset (e.g., nigeria2016).
-    - <start_date>: The starting date to consider when calculating conflict periods (e.g., "01-01-2016").
-    - <end_date>: The end date to consider when calculating conflict periods (e.g., "31-12-2016").
-    - <location_type>: The type of location to focus on (e.g., "admin2" for administrative region level 2).
-    - <added_conflict_days>: The number of days to add to the calculated conflict periods for estimating event periods.
-'''
-
 import os
 from datetime import datetime
 import pandas as pd
@@ -100,6 +82,8 @@ def between_date(d1, d2):
 def extract_conflict_info(country, folder_name, start_date, end_date, location_type, added_conflict_days):
     '''
     Extract conflict information from ACLED data and write it to a CSV file.
+    The function calculates the conflict period for each location based on the provided start date, and it adds an estimated conflict duration based on the number of added conflict days.
+
         Parameters:
             country (str): Name of the country or dataset
             folder_name (str): Name of the folder containing the CSV files

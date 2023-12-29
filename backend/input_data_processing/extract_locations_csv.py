@@ -1,24 +1,6 @@
 # This script is based on https://github.com/djgroen/FabFlee/blob/master/scripts/02_extract_locations_csv.py 
 # but changed where necessary to work automatically with the data from the ACLED API and the population data
 
-'''
-Input: ACLED data (acled.csv) & Population data (population.csv)
-Output: Location data (locations.csv)
-
-Description:
-This script processes ACLED conflict data for a specified country and extracts location-based information such as town or administrative region names, their populations, and other relevant data. It then classifies locations into "towns" and "conflict zones" based on predefined conflict thresholds and combines this information with population data obtained separately.
-
-Usage:
-1. Prepare ACLED conflict data for the desired country and save it as a CSV file (acled.csv).
-2. Ensure the ACLED data includes columns for "event_date," "country," "admin1" (administrative region level 1), "admin2" (administrative region level 2), "location," "latitude," "longitude," and "fatalities."
-3. Specify the desired parameters:
-    - <country>: Name of the country or dataset (e.g., nigeria2016).
-    - <start_date>: The starting date to consider when calculating conflict periods (e.g., "01-01-2016").
-    - <location_type>: The type of location to focus on (e.g., "admin2" for administrative region level 2).
-    - <fatalities_threshold>: Minimum fatalities count for including a location.
-    - <conflict_threshold>: Conflict period threshold for classifying locations.
-'''
-
 import os
 from datetime import datetime
 import numpy as np

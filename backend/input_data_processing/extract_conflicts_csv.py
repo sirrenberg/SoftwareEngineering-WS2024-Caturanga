@@ -1,30 +1,6 @@
 # This script is based on https://github.com/djgroen/FabFlee/blob/master/scripts/04_extract_conflicts_csv.py 
 # but changed where necessary to work automatically with the data from the ACLED API and the population data
 
-"""
-Input:
-- country: Name of the country or dataset (e.g., "nigeria2016").
-- start_date: The starting date to consider when calculating conflict periods (e.g., "1-1-2016").
-- end_date: The ending date to limit the number of days in the conflicts.csv file (e.g., "31-12-2016").
-
-Output:
-The script generates a "conflicts.csv" file containing conflict data for the specified country and date range.
-
-Description:
-This script processes conflict information for a specified country and generates a conflicts.csv file. It reads conflict
-data from the "conflict_info.csv" file, which includes location names, their corresponding start dates, and conflict periods. The script
-calculates the number of days between the start_date and end_date, then creates a DataFrame with a range of days as columns.
-It populates the DataFrame with 1s for days that fall within the conflict periods of each location and 0s for the rest.
-
-Usage:
-1. Prepare conflict information data for the desired country and save it as a CSV file ("conflict_info.csv").
-2. Ensure the "conflict_info.csv" file includes columns for "name," "start_date," and "conflict_date."
-3. Specify the desired parameters:
-   - <country>: Name of the country or dataset (e.g., "nigeria2016").
-   - <start_date>: The starting date to consider when calculating conflict periods (e.g., "1-1-2016").
-   - <end_date>: The ending date to limit the number of days in the conflicts.csv file (e.g., "31-12-2016").
-"""
-
 import os
 import pandas as pd
 from datetime import datetime
@@ -49,7 +25,11 @@ def between_date(d1, d2):
 
 def extract_conflicts_csv(folder_name, start_date, end_date):
     '''
-    Extract the conflicts.csv file for the specified country and date range.
+    Extract the conflicts.csv file for the specified country and date range. Reads conflict data from the "conflict_info.csv" file, 
+    which includes location names, their corresponding start dates, and conflict periods. The function calculates the number of days 
+    between the start_date and end_date, then creates a DataFrame with a range of days as columns.
+    It populates the DataFrame with 1s for days that fall within the conflict periods of each location and 0s for the rest.
+
         Parameters:
             folder_name (str): Name of the folder containing the CSV files.
             start_date (str): The starting date to consider when calculating conflict periods (e.g., "01-01-2023").
