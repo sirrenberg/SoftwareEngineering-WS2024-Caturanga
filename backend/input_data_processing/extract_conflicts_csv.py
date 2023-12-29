@@ -59,7 +59,7 @@ def extract_conflicts_csv(folder_name, start_date, end_date):
     # Get the current directory
     current_dir = os.getcwd()
 
-    # Load conflict info from log.csv
+    # Load conflict info 
     conflict_info_file = os.path.join(current_dir, folder_name, "conflict_info.csv")
     conflict_info_df = pd.read_csv(conflict_info_file)
 
