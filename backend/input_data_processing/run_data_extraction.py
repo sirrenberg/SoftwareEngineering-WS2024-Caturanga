@@ -13,6 +13,7 @@ from create_closures_csv import create_empty_closure_csv
 from create_registration_corrections_csv import create_empty_registration_corrections_csv
 from create_sim_period_csv import create_sim_period_csv
 from file_converter import insert_data_into_DB
+from create_validation_data import create_refugee_csv
 
 
 # global variables (default values)
@@ -88,7 +89,7 @@ def run_extraction(country_name, start_date, end_date):
     folder_name = country_name.lower() + str(start_year)
     
     os.mkdir(folder_name)
-
+    
     # 2. get acled data and create acled.csv
     acled_data_to_csv(country_name, folder_name, start_year, end_year)
 
@@ -96,6 +97,7 @@ def run_extraction(country_name, start_date, end_date):
     extract_population_info_from_web(country_name, folder_name, POPULATION_THRESHOLD)
 
     # 4. extract location data and create locations.csv
+    # TODO: check how the code (from FabFlee) handels the fact that locations can appear multiple times in the ACLED data
     extract_locations_csv(folder_name, start_date, LOCATION_TYPE, FATALITIES_THRESHOLD, CONFLICT_THRESHOLD)
 
     # 5. extract conflict data and create conflict_info.csv
@@ -126,14 +128,24 @@ def run_extraction(country_name, start_date, end_date):
     current_dir = os.getcwd()
     folder_path = os.path.join(current_dir, folder_name)
     insert_data_into_DB(country_name, folder_path)
+    
+    # 13. create validation data
+    # create folder in conflict_validation
+    os.mkdir(os.path.join('conflict_validation', folder_name))
+
+    # create refugee.csv
+    create_refugee_csv(folder_name, start_date, end_date)
+
+
 
     
 
 
 # variables that can be changed
+# date format: dd-mm-yyyy
 country_name = 'Ethiopia'
 start_date = "01-01-2023"
-end_date =  "31-08-2023"
+end_date =  "31-12-2023"
 
 
 run_extraction(country_name, start_date, end_date)
