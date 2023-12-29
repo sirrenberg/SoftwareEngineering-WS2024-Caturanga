@@ -121,14 +121,12 @@ function AddInput() {
 
   function NodeDoubleClickHandler(location: SimLocation): void {
     // open modal
-    console.log("double click");
     setSelectedNode(location);
     setLocationModalOpen(true);
   }
 
   function RouteDoubleClickHandler(route: Route): void {
     // open modal
-    console.log("double click");
     setSelectedRoute(route);
     setRouteModalOpen(true);
   }
@@ -137,8 +135,6 @@ function AddInput() {
   if (!isNewInput && values._id === "") {
     return <div>Loading...</div>;
   }
-
-  console.log("values", values);
 
   return (
     <div className="add-input-container content-page">

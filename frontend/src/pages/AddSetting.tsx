@@ -54,8 +54,6 @@ function AddSetting() {
     }
   }, []);
 
-  console.log("values in AddSetting", values);
-
   return (
     <div className="add-input-container content-page">
       <h1 className="page-title">
