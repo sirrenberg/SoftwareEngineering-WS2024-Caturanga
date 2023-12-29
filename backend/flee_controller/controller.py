@@ -30,29 +30,58 @@ class Controller:
     # Run default (burundi) simulatino with custom simsettings and store result:
     async def run_simulation_simsettings(self, simsettings_id: str):
 
+        """
+
+        Runs a simulation with custom simsettings, whcih are stored in the DB with simsettings_id.
+        Running a custom simulation
+        Storing simulation results in DB in connection with Simsettings_id and default location 'burundi'
+
+        :param simsettings_id: Simulation Settings ID in DB
+        :return: Simulation results
+
+        """
+
         simsettings = await self.get_simsetting(simsettings_id)
-        filename = simsettings_id + ".yml"
-        path = os.path.join("flee_stored_files", "simsettings", filename)
+        filename = str(simsettings_id) + ".yml"
+        current_dir = os.getcwd()
+        file_path = os.path.join(current_dir, "flee_stored_files", "simsettings", filename)
 
         try:
-            with open(path, 'w') as yaml_file:
-                yaml.dump(simsettings, yaml_file, default_flow_style=False, sort_keys=False)
+            with open(file_path, 'w') as yml_file:
+                yaml.dump(simsettings, yml_file, default_flow_style=False, sort_keys=False)
+                return "File should be written in dir"
         except Exception as e:
             return "Exception while storing the simsettings.yml file: {e}"
 
-        sim = self.adapter.run_simulation(path)
+
+        sim = self.adapter.run_simulation(file_path)
         self.store_simulation(sim)
         self.store_simulation_config(sim, 'burundi', simsettings_id)
 
         return sim
 
+
+
     # Run simulation with provided simsettings-ID and location name:
-    async def run_simulation_config(self, location: str, simsettings_id: str):
+    async def run_simulation_config(self, simulation_id: str, simsettings_id: str):
+
+        '''
+
+        Runs a simulation with custom simsettings, whcih are stored in the DB with simsettings_id.
+        Running a custom simulation
+        Storing simulation results in DB in connection with Simsettings_id and custom location name
+
+        :param location: String of location name e.g. 'burundi'
+        :param simsettings_id: Simulation Settings ID in DB
+        :return: Returns simulation results
+
+        '''
 
         # Add simsettings file to FLEE:
         simsettings = await self.get_simsetting(simsettings_id)
-        filename = simsettings_id + ".yml"
-        simsettings_path = os.path.join("flee_stored_files", "simsettings", filename)
+        filename = str(simsettings_id) + ".yml"
+        current_dir = os.getcwd()
+        simsettings_path = os.path.join(current_dir, "flee_stored_files", "simsettings", filename)
 
         # Create new .yml file for simsettings
         try:
@@ -62,14 +91,16 @@ class Controller:
             return "Exception while storing the simsettings.yml file: {e}"
 
         # Get Path to location data from location directory:
-        location_dir = os.path.join("flee_stored_files", "conflict_input", location)
+        location_dir = os.path.join(current_dir, "flee_stored_files", "conflict_input", simulation_id)
 
         # Run simulation with location data in location_dir and simsettings in simsettings_path:
         sim = self.adapter.run_simulation(location_dir, simsettings_path)
         self.store_simulation(sim)
 
         # Store simulation results together with simsettings_id and location string:
-        self.store_simulation_config(sim, location, simsettings_id)
+        self.store_simulation_config(sim, simulation_id, simsettings_id)
+
+        return sim
 
 
     # Return simulation values from DB: --------------------------------------------------------------------------------
@@ -190,7 +221,7 @@ class Controller:
         client.close()
 
     # Store custom simulation with location and simsettings:
-    def store_simulation_config(self, result, location, simsettings):
+    def store_simulation_config(self, result, simulation_id, simsettings_id):
 
         load_dotenv()
         MONGODB_URI = os.environ.get('MONGO_URI')
@@ -200,8 +231,8 @@ class Controller:
 
         new_simulation = {}
         new_simulation = {
-            "location": location,
-            "simsettings": simsettings,  # Add the relevant simsettings_ID to the dictionary
+            "simulation_id": simulation_id,
+            "simsettings_id": simsettings_id,  # Add the relevant simsettings_ID to the dictionary
             "data": result
         }
 
@@ -213,20 +244,37 @@ class Controller:
     # Convert location data into .csv files (for FLEE simulation execution) - Returns location of simulation-data dir:
     async def convert_simulations_to_csv(self, simulation_id: str):
 
+        '''
+        Read all data from simulation-collection in DB
+        Convert Data into .csv files, which are required by FLEE (closures, conflicts, locations,
+        registration_corrections, routes, sim_period)
+        
+        :param simulation_id:
+        :return:
+        '''
+
         # Fetch simulation data from DB by simulation_id:
         simulations_collection = self.db.get_collection("simulations")
-        simulation = simulations_collection.find_one({"_id": ObjectID(simulation_id)})#
+        simulation = simulations_collection.find_one({"_id": ObjectID(simulation_id)})
 
         # Create all .csv files for simulation:
         if simulation is not None:
+            simulation_id = str(simulation["_id"])
+            region_value = simulation["region"]
+
+            # delete simulation_id and region_value from simulation:
+            del simulation["_id"]
+            del simulation["region"]
 
             # Create directory for simulation:
-            directory_name = os.path.join("flee_stored_files", "conflict_input", str(simulation["_id"]))
+            current_dir = os.getcwd()
+            directory_name = os.path.join(current_dir, "flee_stored_files", "conflict_input", simulation_id)
             os.makedirs(directory_name, exist_ok=True)
 
             # Cretae csv files using helper function export-csv (filename, data, fieldnames):
-            self.export_csv(os.path.join(directory_name, "closures.csv"), simulation["closures"],
+            return self.export_csv(os.path.join(directory_name, "closures.csv"), simulation["closures"],
                             ["closure_type", "name1", "name2", "closure_start", "closure_end"])
+            '''
             self.export_csv(os.path.join(directory_name, "conflicts.csv"), simulation["conflicts"],
                             simulation["conflicts"][0].keys())
             self.export_csv(os.path.join(directory_name, "locations.csv"), simulation["locations"],
@@ -238,16 +286,41 @@ class Controller:
                             ["from", "to", "distance", "forced_redirection"])
             self.export_csv(os.path.join(directory_name, "sim_period.csv"), simulation["sim_period"],
                             ["date", "length"])
-
-            return directory_name
+            
+            return closures_file
 
         else:
             return "No simulations in Database"
 
+        '''
+
     # Helper Function to create csv-file from filename, data and fieldnames:
     def export_csv(self, file_name, data, fieldnames):
-        with open(file_name, mode='w', newline='') as csvfile:
-            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-            writer.writeheader()
-            for row in data:
-                writer.writerow(row)
+
+        '''
+
+        :param file_name: New path of file incl. filename
+        :param data: Row data
+        :param fieldnames: Name of columns in .csv files
+        :return: Returns nothin, only creates and stores files
+
+        '''
+
+        return file_name
+
+        '''
+        try:
+            with open(file_name, mode='w', newline='') as csv_file:
+                writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
+
+                # Write header:
+                writer.writeheader()
+
+                # Write data:
+                writer.writerows(data)
+
+                return "File created succesfully"
+
+        except Exception as e:
+            return e
+        '''
