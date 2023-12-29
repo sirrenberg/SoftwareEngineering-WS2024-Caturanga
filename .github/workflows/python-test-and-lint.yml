@@ -39,5 +39,5 @@ jobs:
         echo "PYTHONPATH=home/runner/work/SoftwareEngineering-WS2024-Caturanga/SoftwareEngineering-WS2024-Caturanga/backend/flee" >> $GITHUB_ENV
     - name: Test with pytest
       run: |
-        pytest
+        python -m pytest
       working-directory: backend
