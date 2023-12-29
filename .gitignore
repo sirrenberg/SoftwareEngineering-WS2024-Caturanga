@@ -28,3 +28,8 @@ dist-ssr
 
 # database
 *.ini
+
+# Pycache files
+__pycache__/
+*.pyc 
+*.pyo
