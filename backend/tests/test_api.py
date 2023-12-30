@@ -80,7 +80,7 @@ class TestClass:
         expected_keys = ["_id", "name", "region", "closures", "conflicts",
                          "locations", "registration_corrections", "routes",
                          "sim_period"]
-        response = self.client.get("/simulations/65843761aef0c55ae04c33ad")
+        response = self.client.get("/simulations/658dec24819bd1bc1ff738cd")
         assert response.status_code == 200
         assert all(key in expected_keys for key in response.json().keys())
 
