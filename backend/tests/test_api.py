@@ -1,5 +1,12 @@
 from fastapi.testclient import TestClient
-from main import app, expected_simsettings
+from pathlib import Path
+import sys
+
+# add backend directory to PYTHONPATH
+backend = Path(__file__).parent.parent
+sys.path.append(str(backend))
+
+from main import app, expected_simsettings  # noqa: E402
 
 
 class TestClass:
