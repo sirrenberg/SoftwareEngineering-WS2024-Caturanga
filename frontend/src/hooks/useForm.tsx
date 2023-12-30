@@ -17,8 +17,6 @@ export function useForm(initialFValues: any) {
       | React.ChangeEvent<HTMLInputElement>
       | React.ChangeEvent<HTMLSelectElement>
   ) => {
-    console.log("e", e.target);
-
     let { name, value, type } = e.target;
 
     // handle type = checkbox
@@ -67,8 +65,6 @@ export function useForm(initialFValues: any) {
 
     // Spawn rules are nested in the sim_settings object
     if (["take_from_population", "insert_day0"].includes(name)) {
-      console.log("heerrrrrrrrrrrrrrrree");
-
       setValues({
         ...values,
         spawn_rules: {

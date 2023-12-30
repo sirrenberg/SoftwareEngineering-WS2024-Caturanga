@@ -17,9 +17,6 @@ function RouteModal({
 }) {
   const { values, handleInputChange } = useForm(route);
 
-  console.log("values in Modal", values);
-  console.log("simValues in Modal", simValues);
-
   if (!route) {
     return null;
   }
