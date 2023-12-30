@@ -35,7 +35,6 @@
 .lp-title-container {
   display: flex;
   flex-direction: column;
-  margin-bottom: 2rem;
 }
 
 .main-title {
