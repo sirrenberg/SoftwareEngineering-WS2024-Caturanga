@@ -36,7 +36,11 @@ function LandingPage() {
             </div>
           </div>
           <div className="lp-title-map-container lp-title-content-section">
-            <img id="lp-title-map" src="./dotted-world-map.png" alt="map" />
+            <img
+              className="lp-title-map"
+              src="./dotted-world-map.png"
+              alt="map"
+            />
           </div>
         </div>
       </div>

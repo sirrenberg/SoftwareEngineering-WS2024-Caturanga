@@ -61,12 +61,16 @@
   display: flex;
   justify-content: space-around;
   align-items: center;
-  margin-top: 12rem;
+  margin-top: 4rem;
   max-width: 80%;
 }
 
 .lp-title-map-container {
   align-items: center;
+}
+
+.lp-title-map {
+  width: 100%;
 }
 
 .lp-sources {
@@ -120,4 +124,37 @@
 
 .map-background {
   background-color: var(--charcoal);
+}
+
+@media (max-width: 1280px) {
+  .lp-title-content-section {
+    height: 50vh;
+  }
+
+  .main-title {
+    font-size: 2rem;
+  }
+
+  .sub-title {
+    font-size: 1.2rem;
+  }
+
+  .lp-title-description {
+    font-size: 1rem;
+  }
+  .lp-title-buttons-container {
+    margin-top: 1rem;
+  }
+
+  .lp-title-map-container {
+    align-items: center;
+  }
+
+  .source-logo {
+    width: 150px;
+  }
+
+  #wf-logo {
+    width: 40px;
+  }
 }

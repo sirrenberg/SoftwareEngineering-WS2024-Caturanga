@@ -181,7 +181,7 @@ function AddSetting() {
         <h2 className="page-subtitle">Spawn Rules</h2>
         <div className="fields-container">
           <div className="input-field-container">
-            <label htmlFor="">
+            <label htmlFor="" className="checkbox-label">
               Take From Population: <br />
               <input
                 className="input-field"
@@ -194,7 +194,7 @@ function AddSetting() {
             </label>
           </div>
           <div className="input-field-container">
-            <label htmlFor="">
+            <label htmlFor="" className="checkbox-label">
               Insert Day0: <br />
               <input
                 className="input-field"
@@ -370,7 +370,7 @@ function AddSetting() {
 
         <div className="fields-container">
           <div className="input-field-container">
-            <label htmlFor="">
+            <label htmlFor="" className="checkbox-label">
               Avoid Short Stints: <br />
               <input
                 className="input-field"
@@ -383,7 +383,7 @@ function AddSetting() {
             </label>
           </div>
           <div className="input-field-container">
-            <label htmlFor="">
+            <label htmlFor="" className="checkbox-label">
               Start On Foot: <br />
               <input
                 className="input-field"

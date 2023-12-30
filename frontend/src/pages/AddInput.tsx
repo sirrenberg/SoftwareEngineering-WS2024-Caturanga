@@ -201,6 +201,8 @@ function AddInput() {
                 placeholder="Duration"
                 onChange={handleInputChange}
                 name="length"
+                min={1}
+                max={800}
                 value={values.sim_period["length"]}
               />
             </label>

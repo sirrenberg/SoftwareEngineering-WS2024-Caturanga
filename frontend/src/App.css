@@ -83,3 +83,17 @@ a {
   font-family: "Cabin", sans-serif;
   color: var(--gray);
 }
+
+@media (max-width: 1280px) {
+  .simple-button {
+    font-size: 1rem;
+  }
+
+  .page-title {
+    font-size: 1.5rem;
+  }
+
+  .page-subtitle {
+    font-size: 1.2rem;
+  }
+}

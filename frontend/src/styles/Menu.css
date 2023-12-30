@@ -28,7 +28,7 @@
 .items-list-title {
   font-family: "Cabin", sans-serif;
   font-weight: 600;
-  font-size: 2rem;
+  font-size: 1.4rem;
 }
 
 .items-list {
@@ -43,6 +43,7 @@
 
 .items-list .simple-button {
   margin: 0.2em 0;
+  padding: 0.5em;
   width: 90%;
   background-color: var(--white);
   color: var(--black);
@@ -73,7 +74,7 @@
 }
 
 #settings-items-list .simple-button.selected-item {
-  background-color: var(--dark-charcoal);
+  background-color: var(--charcoal);
   color: var(--white);
 }
 
@@ -83,19 +84,27 @@
   justify-content: space-around;
   align-items: center;
   position: fixed;
-  width: 20%;
+  width: 30%;
   color: var(--white);
 }
 
 .simple-button .items-list-item-icons,
 a .items-list-item-icons {
   display: none;
-  right: 1em;
+  justify-self: flex-end;
+  right: 0.4em;
   width: 20%;
 }
 
 .simple-button:hover .items-list-item-icons {
   display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  align-items: center;
+}
+
+.item-icon {
+  font-size: 1rem;
 }
 
 .item-icon:hover {
