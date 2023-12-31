@@ -4,8 +4,9 @@ from pymongo import MongoClient
 from bson.objectid import ObjectId as ObjectID
 from dotenv import load_dotenv
 from flee_adapter.adapter import Adapter
-import os
+from pathlib import Path
 import yaml
+import os
 
 
 class Controller:
@@ -42,19 +43,23 @@ class Controller:
         """
 
         simsettings = await self.get_simsetting(simsettings_id)
-        filename = str(simsettings_id) + ".yml"
-        current_dir = os.getcwd()
-        file_path = os.path.join(current_dir, "flee_stored_files", "simsettings", filename)
+
+        backend_root_dir = Path(__file__).resolve().parent
+        simsettings_dir = backend_root_dir / "flee_stored_files" / "simsettings"
+        filename = simsettings_id + ".yml"
+        simsettings_filename = simsettings_dir / filename
+
+        if not simsettings_dir.exists():
+            simsettings_dir.mkdir(parents=True)
 
         try:
-            with open(file_path, 'w') as yml_file:
+            with open(simsettings_filename, 'w') as yml_file:
                 yaml.dump(simsettings, yml_file, default_flow_style=False, sort_keys=False)
-                return "File should be written in dir"
+
         except Exception as e:
             return "Exception while storing the simsettings.yml file: {e}"
 
-
-        sim = self.adapter.run_simulation(file_path)
+        sim = self.adapter.run_simulation_ss(simsettings_filename)
         self.store_simulation(sim)
         self.store_simulation_config(sim, 'burundi', simsettings_id)
 
@@ -77,24 +82,35 @@ class Controller:
 
         '''
 
-        # Add simsettings file to FLEE:
+        # Get Simsettings from DB:
         simsettings = await self.get_simsetting(simsettings_id)
-        filename = str(simsettings_id) + ".yml"
-        current_dir = os.getcwd()
-        simsettings_path = os.path.join(current_dir, "flee_stored_files", "simsettings", filename)
 
-        # Create new .yml file for simsettings
+        # Get current working drectory:
+        backend_root_dir = Path(__file__).resolve().parent
+
+        # Total path to simsettings-file:
+        simsettings_dir = backend_root_dir / "flee_stored_files" / "simsettings"
+        filename = simsettings_id + ".yml"
+        simsettings_filename = simsettings_dir / filename
+
+        #Create simsettings-file:
+        if not simsettings_dir.exists():
+            simsettings_dir.mkdir(parents=True)
+
         try:
-            with open(simsettings_path, 'w') as yaml_file:
-                yaml.dump(simsettings, yaml_file, default_flow_style=False, sort_keys=False)
+            with open(simsettings_filename, 'w') as yml_file:
+                yaml.dump(simsettings, yml_file, default_flow_style=False, sort_keys=False)
         except Exception as e:
             return "Exception while storing the simsettings.yml file: {e}"
 
         # Get Path to location data from location directory:
-        location_dir = os.path.join(current_dir, "flee_stored_files", "conflict_input", simulation_id)
+        self.convert_simulations_to_csv(simulation_id)
+
+        # Path to simulation directory (.csv - FLEE files of simulation):
+        simulation_dir = backend_root_dir / "flee_stored_files" / "conflict_input" / simulation_id
 
         # Run simulation with location data in location_dir and simsettings in simsettings_path:
-        sim = self.adapter.run_simulation(location_dir, simsettings_path)
+        sim = self.adapter.run_simulation(simulation_dir, simsettings_filename)
         self.store_simulation(sim)
 
         # Store simulation results together with simsettings_id and location string:
@@ -196,6 +212,19 @@ class Controller:
             simsetting["_id"] = str(simsetting["_id"])
             return simsetting
 
+    async def get_simsetting_dict(self, simsetting_id: str):
+        simsetting = self.db.get_collection("simsettings").find_one(
+            {"_id": ObjectID(simsetting_id)}
+        )
+        print(type(simsetting), simsetting)
+
+        if simsetting is not None:
+            # Convert the MongoDB document to a dictionary
+            simsetting_dict = dict(simsetting)
+            simsetting_dict["_id"] = str(simsetting_dict["_id"])
+            return simsetting_dict
+
+
     # Delete specfici simsettings by simsetting_id:
     async def delete_simsetting(self, simsetting_id: str):
         return self.db.get_collection("simsettings").delete_one(
@@ -259,40 +288,39 @@ class Controller:
 
         # Create all .csv files for simulation:
         if simulation is not None:
-            simulation_id = str(simulation["_id"])
-            region_value = simulation["region"]
-
-            # delete simulation_id and region_value from simulation:
-            del simulation["_id"]
-            del simulation["region"]
 
             # Create directory for simulation:
-            current_dir = os.getcwd()
-            directory_name = os.path.join(current_dir, "flee_stored_files", "conflict_input", simulation_id)
-            os.makedirs(directory_name, exist_ok=True)
+            backend_root_dir = Path(__file__).resolve().parent
+            simulation_dir = backend_root_dir / "flee_stored_files" / "conflict_input" / simulation_id
+            os.makedirs(simulation_dir, exist_ok=True)
 
             # Cretae csv files using helper function export-csv (filename, data, fieldnames):
-            return self.export_csv(os.path.join(directory_name, "closures.csv"), simulation["closures"],
+            self.export_csv(os.path.join(simulation_dir, "closures.csv"), simulation["closures"],
                             ["closure_type", "name1", "name2", "closure_start", "closure_end"])
-            '''
-            self.export_csv(os.path.join(directory_name, "conflicts.csv"), simulation["conflicts"],
+
+            self.export_csv(os.path.join(simulation_dir, "conflicts.csv"), simulation["conflicts"],
                             simulation["conflicts"][0].keys())
-            self.export_csv(os.path.join(directory_name, "locations.csv"), simulation["locations"],
+
+            self.export_csv(os.path.join(simulation_dir, "locations.csv"), simulation["locations"],
                             ["name", "region", "country", "latitude", "longitude", "location_type", "conflict_date",
                              "population"])
-            self.export_csv(os.path.join(directory_name, "registration_corrections.csv"),
+
+            self.export_csv(os.path.join(simulation_dir, "registration_corrections.csv"),
                             simulation["registration_corrections"], ["name", "date"])
-            self.export_csv(os.path.join(directory_name, "routes.csv"), simulation["routes"],
-                            ["from", "to", "distance", "forced_redirection"])
-            self.export_csv(os.path.join(directory_name, "sim_period.csv"), simulation["sim_period"],
-                            ["date", "length"])
-            
-            return closures_file
+
+            self.export_csv(os.path.join(simulation_dir, "routes.csv"), simulation["routes"],
+                            ["from", "to", "distance", "forced_redirection"])       # Kommas hinten dran
+
+            self.export_csv(os.path.join(simulation_dir, "sim_period.csv"), simulation["sim_period"],
+                            ["date", "length"])     # TBD Hier fehlen Werte für date und length
+
+
+            return "All files created"
 
         else:
             return "No simulations in Database"
 
-        '''
+
 
     # Helper Function to create csv-file from filename, data and fieldnames:
     def export_csv(self, file_name, data, fieldnames):
@@ -306,9 +334,6 @@ class Controller:
 
         '''
 
-        return file_name
-
-        '''
         try:
             with open(file_name, mode='w', newline='') as csv_file:
                 writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
@@ -323,4 +348,40 @@ class Controller:
 
         except Exception as e:
             return e
-        '''
+
+
+
+
+
+# ----------------------------------------------------------------------------------------------------------------------
+    def testread_ss(self):
+        """
+        Read a dummy simulation result from the database.
+        """
+        from pathlib import Path
+
+        filename = "6570f624987cdd647c68bc7d" + ".yml"
+        backend_root_dir = Path(__file__).resolve().parent
+        simsettings_dir = backend_root_dir / "flee_stored_files" / "simsettings"
+        simsettings_filename = simsettings_dir / "6570f624987cdd647c68bc7d.yml"
+
+        try:
+            with open(simsettings_filename, 'r') as f:
+                return f.read()
+        except Exception as e:
+                return "File nicht vorhanden"
+
+    # ---------------------------------------
+    def testread_csv(self):
+
+        from pathlib import Path
+
+        backend_root_dir = Path(__file__).resolve().parent
+        sim_dir = backend_root_dir / "flee_stored_files" / "conflict_input" / "658dec24819bd1bc1ff738cd"
+        sim_filename = sim_dir / "sim_period.csv"
+
+        try:
+            with open(sim_filename, 'r') as f:
+                return f.read()
+        except Exception as e:
+            return "File nicht vorhanden"

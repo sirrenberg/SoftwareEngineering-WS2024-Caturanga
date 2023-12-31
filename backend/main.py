@@ -190,3 +190,32 @@ async def delete_simsetting(
         ),
 ):
     return await controller.delete_simsetting(simsetting_id)
+
+
+# ----------------------------------------------------------------------------------------------------------------------
+@app.get("/teststore/{simsetting_id}")
+async def teststore(
+    simsetting_id: str = Path(
+        description="The ID of the simsetting you want to delete."
+    )
+):
+    """
+    Store a dummy simulation result in the database.
+    """
+
+    return await controller.teststore_ss(simsetting_id)
+
+@app.get("/testread")
+def testread():
+    """
+    Read a dummy simulation result from the database.
+    """
+    return controller.testread_ss()
+
+
+@app.get("/testread_csv")
+def testread():
+    """
+    Read a dummy simulation result from the database.
+    """
+    return controller.testread_csv()
