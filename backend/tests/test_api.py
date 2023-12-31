@@ -11,6 +11,7 @@ sys.path.insert(0, str(backend / "flee"))
 print(sys.path)
 
 from main import app, expected_simsettings  # noqa: E402
+import runscripts
 
 
 class TestClass:
