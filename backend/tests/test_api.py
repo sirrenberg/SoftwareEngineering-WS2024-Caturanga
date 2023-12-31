@@ -3,9 +3,12 @@ from pathlib import Path
 import sys
 
 # add backend directory to PYTHONPATH
-backend = Path(__file__).parent.parent
+backend = Path(__file__).resolve().parent.parent
 sys.path.append(str(backend))
 sys.path.insert(0, str(backend / "flee"))
+
+# print sys.path
+print(sys.path)
 
 from main import app, expected_simsettings  # noqa: E402
 
