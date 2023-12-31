@@ -5,6 +5,7 @@ import sys
 # add backend directory to PYTHONPATH
 backend = Path(__file__).parent.parent
 sys.path.append(str(backend))
+sys.path.insert(0, str(backend / "flee"))
 
 from main import app, expected_simsettings  # noqa: E402
 

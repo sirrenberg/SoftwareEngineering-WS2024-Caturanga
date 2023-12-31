@@ -3,10 +3,9 @@ import sys
 
 # add flee directory to PYTHONPATH
 backend = pathlib.Path(__file__).parent.parent
-flee = backend / "flee"
-sys.path.append(str(flee))
+sys.path.insert(0, str(backend / "flee"))
 
-from runscripts.runner import Simulation  # noqa: E402
+from flee.runscripts.runner import Simulation  # noqa: E402
 
 class Adapter:
     def __init__(self):
