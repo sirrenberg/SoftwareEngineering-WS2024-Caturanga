@@ -87,7 +87,7 @@ def run_extraction(country_name, start_date, end_date):
 
     # 1. create folder for country with start_year
     folder_name = country_name.lower() + str(start_year)
-    
+
     os.mkdir(folder_name)
     
     # 2. get acled data and create acled.csv
@@ -127,7 +127,7 @@ def run_extraction(country_name, start_date, end_date):
     # 12. insert data into DB
     current_dir = os.getcwd()
     folder_path = os.path.join(current_dir, folder_name)
-    insert_data_into_DB(country_name, folder_path)
+    insert_data_into_DB([country_name], folder_path)
     
     # 13. create validation data
     # create folder in conflict_validation
@@ -135,11 +135,10 @@ def run_extraction(country_name, start_date, end_date):
 
     # create refugee.csv
     create_refugee_csv(folder_name, start_date, end_date)
-
+    
 
 
     
-
 
 # variables that can be changed
 # date format: dd-mm-yyyy

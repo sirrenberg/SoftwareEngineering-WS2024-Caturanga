@@ -192,11 +192,14 @@ def transform_sim_period_data(sim_period_data):
     return transformed_data
 
 
-def insert_test_data_into_DB(countries):
+
+def insert_data_into_DB(country_list, folder_path, is_test_data=False):
     '''
-    Insert the test data into the MongoDB.
+    Insert the data into the MongoDB.
         Parameters:
-            countries (list): List of country names
+            country_list (list): List of country names
+            folder_path (str): Path to the folder containing the CSV files
+            is_test_data (bool): Whether the data is test data or not
     '''
     load_dotenv()
     MONGODB_URI = os.environ.get('MONGO_URI')
@@ -205,13 +208,15 @@ def insert_test_data_into_DB(countries):
     db = client.get_database("Caturanga")
     simulations_collection = db.get_collection("simulations")
 
-    for country in countries:
-        # Get the current directory of file_converter.py
-        current_directory = os.path.dirname(os.path.realpath(__file__))
-
-        # Navigate to the locations.csv file using relative paths
-        data_dir = os.path.join(current_directory, f'..\\flee\\conflict_input\\{country}')
-
+    for country in country_list:
+        if is_test_data:
+            # Get the current directory of file_converter.py
+            current_directory = os.path.dirname(os.path.realpath(__file__))
+            # Navigate to the locations.csv file using relative paths
+            data_dir = os.path.join(current_directory, folder_path, country)
+            print(data_dir)
+        else: 
+            data_dir = folder_path
 
         location_csv_path = os.path.join(data_dir, 'locations.csv')
         routes_csv_path = os.path.join(data_dir, 'routes.csv')
@@ -255,66 +260,6 @@ def insert_test_data_into_DB(countries):
     client.close()
 
 
-
-def insert_data_into_DB(country, folder_path):
-    '''
-    Insert the data into the MongoDB.
-        Parameters:
-            country (str): Country name
-            folder_path (str): Path to the folder containing the CSV files
-    '''
-    load_dotenv()
-    MONGODB_URI = os.environ.get('MONGO_URI')
-
-    client = MongoClient(MONGODB_URI)
-    db = client.get_database("Caturanga")
-    simulations_collection = db.get_collection("simulations")
-
-    data_dir = folder_path
-
-
-    location_csv_path = os.path.join(data_dir, 'locations.csv')
-    routes_csv_path = os.path.join(data_dir, 'routes.csv')
-    conflicts_csv_path = os.path.join(data_dir, 'conflicts.csv')
-    closures_csv_path = os.path.join(data_dir, 'closures.csv')
-    reg_corrections_csv_path = os.path.join(data_dir, 'registration_corrections.csv')
-    sim_period_csv_path = os.path.join(data_dir, 'sim_period.csv')
-
-    # Convert CSV to lists of dictionaries
-    location_data = csv_to_list(location_csv_path)
-    routes_data = csv_to_list(routes_csv_path)
-    conflicts_data = csv_to_list(conflicts_csv_path)
-    closures_data = csv_to_list(closures_csv_path)
-    reg_corr_data = csv_to_list_reg_corr(reg_corrections_csv_path)
-    sim_period_data = csv_to_list_sim_period(sim_period_csv_path)
-
-
-    # Transform CSV data to match MongoDB schema
-    locations = transform_location_data(location_data)
-    routes = transform_routes_data(routes_data)
-    conflicts = transform_conflicts_data(conflicts_data)
-    closures = transform_closure_data(closures_data)
-    reg_corr = transform_reg_corr_data(reg_corr_data)
-    sim_period = transform_sim_period_data(sim_period_data)
-
-
-    # Create the JSON object to be inserted into the MongoDB
-    mongo_document = {
-        'region': country,
-        'closures': closures,
-        'conflicts': conflicts,
-        'locations': locations,
-        'registration_corrections': reg_corr,
-        'routes': routes,
-        'sim_period': sim_period[0] if sim_period else None  # Use the first element or None if the list is empty
-    }
-
-    # insert test data into the database
-    result = simulations_collection.insert_one(mongo_document)
-
-    client.close()
-
-
 def delete_data_from_DB(id):
     '''
     Delete the data from the MongoDB.
@@ -337,12 +282,13 @@ def delete_data_from_DB(id):
 # insert test data from frontend folder into the database
 '''
 countries = ['burundi', 'car', 'ethiopia', 'mali', 'ssudan']
-insert_test_data_into_DB(countries)
+folder_path = "..\\flee\\conflict_input\\"
+insert_data_into_DB(countries, folder_path, is_test_data=True)
 '''
 
 # delete  data from the database
 '''
-delete_ids = ["65843761aef0c55ae04c33ad", "65843762aef0c55ae04c33ae", "65843763aef0c55ae04c33af", "65843763aef0c55ae04c33b0", "65843841ac1d19e470d1c453", "658de7685d656af7ee6994c3"]
+delete_ids = ["65931f6880f964659eb571aa", "65931f6a80f964659eb571ab", "65931f6b80f964659eb571ac", "65931f6d80f964659eb571ad", "65931f6f80f964659eb571ae", "65931f7080f964659eb571af", "65931f7280f964659eb571b0", "65931f7380f964659eb571b1", "65931fb919013eb159fef04b", "65931fbc19013eb159fef04c", "65931fbd19013eb159fef04d", "65931fbf19013eb159fef04e", "65931fc019013eb159fef04f", "65931fc119013eb159fef050", "65931fc319013eb159fef051", "65931fc419013eb159fef052"]
 for ids in delete_ids:
     delete_data_from_DB(ids)
 '''
