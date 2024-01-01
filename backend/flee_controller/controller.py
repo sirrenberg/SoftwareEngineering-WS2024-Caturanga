@@ -1,5 +1,4 @@
-import csv
-
+from datetime import datetime
 from pymongo import MongoClient
 from bson.objectid import ObjectId as ObjectID
 from dotenv import load_dotenv
@@ -7,7 +6,7 @@ from flee_adapter.adapter import Adapter
 from pathlib import Path
 import yaml
 import os
-
+import csv
 
 class Controller:
 
@@ -19,69 +18,27 @@ class Controller:
         self.client = MongoClient(self.MONGODB_URI)
         self.db = self.client.get_database("Caturanga")
 
+# Run simulations: -------------------------------------------------------------------------------------------------
 
-    # Run simulations: -------------------------------------------------------------------------------------------------
-
-    # Run default simulation and store result:
+    # Run default simulation (burundi, default simsettings) and store result:
     def run_simulation(self):
         sim = self.adapter.run_simulation()
         self.store_simulation(sim)
         return sim
 
-    # Run default (burundi) simulatino with custom simsettings and store result:
+    # Run default simulation (burundi) with custom simsettings and store result:
     async def run_simulation_simsettings(self, simsettings_id: str):
 
         """
-
         Runs a simulation with custom simsettings, whcih are stored in the DB with simsettings_id.
         Running a custom simulation
         Storing simulation results in DB in connection with Simsettings_id and default location 'burundi'
 
         :param simsettings_id: Simulation Settings ID in DB
         :return: Simulation results
-
         """
 
-        simsettings = await self.get_simsetting(simsettings_id)
-
-        backend_root_dir = Path(__file__).resolve().parent
-        simsettings_dir = backend_root_dir / "flee_stored_files" / "simsettings"
-        filename = simsettings_id + ".yml"
-        simsettings_filename = simsettings_dir / filename
-
-        if not simsettings_dir.exists():
-            simsettings_dir.mkdir(parents=True)
-
-        try:
-            with open(simsettings_filename, 'w') as yml_file:
-                yaml.dump(simsettings, yml_file, default_flow_style=False, sort_keys=False)
-
-        except Exception as e:
-            return "Exception while storing the simsettings.yml file: {e}"
-
-        sim = self.adapter.run_simulation_ss(simsettings_filename)
-        self.store_simulation(sim)
-        self.store_simulation_config(sim, 'burundi', simsettings_id)
-
-        return sim
-
-
-
-    # Run simulation with provided simsettings-ID and location name:
-    async def run_simulation_config(self, simulation_id: str, simsettings_id: str):
-
-        '''
-
-        Runs a simulation with custom simsettings, whcih are stored in the DB with simsettings_id.
-        Running a custom simulation
-        Storing simulation results in DB in connection with Simsettings_id and custom location name
-
-        :param location: String of location name e.g. 'burundi'
-        :param simsettings_id: Simulation Settings ID in DB
-        :return: Returns simulation results
-
-        '''
-
+        ### Store simsettings in filesystem:
         # Get Simsettings from DB:
         simsettings = await self.get_simsetting(simsettings_id)
 
@@ -93,33 +50,97 @@ class Controller:
         filename = simsettings_id + ".yml"
         simsettings_filename = simsettings_dir / filename
 
-        #Create simsettings-file:
+        # Create simsettings-file:
         if not simsettings_dir.exists():
             simsettings_dir.mkdir(parents=True)
 
+        # Create simsettings-file:
         try:
             with open(simsettings_filename, 'w') as yml_file:
                 yaml.dump(simsettings, yml_file, default_flow_style=False, sort_keys=False)
         except Exception as e:
             return "Exception while storing the simsettings.yml file: {e}"
 
-        # Get Path to location data from location directory:
-        self.convert_simulations_to_csv(simulation_id)
+        ### Execute simulation with location data in location_dir and simsettings in simsettings_path:
+        sim = self.adapter.run_simulation_ss(simsettings_filename)
+        self.store_simulation(sim)
+
+        # Store simulation results together with simsettings_id and location string:
+        self.store_simulation_config(sim, 'burundi', simsettings_id)
+
+        return sim
+
+    # Run simulation with provided simulation_id and simsettings_id and store results in DB:
+    async def run_simulation_config(self, simulation_id: str, simsettings_id: str):
+
+        """
+        Runs a simulation with custom simsettings, whcih are stored in the DB with simsettings_id.
+        Running a custom simulation
+        Storing simulation results in DB in connection with Simsettings_id and custom location name
+
+        :param simulation_id: String of location name e.g. 'burundi'
+        :param simsettings_id: Simulation Settings ID in DB
+        :return: Returns simulation results
+        """
+
+        print("1")
+
+        ### Store simsettings in filesystem:
+        # Get Simsettings from DB:
+        simsettings = await self.get_simsetting(simsettings_id)
+
+        print("2")
+
+        # Get current working drectory:
+        backend_root_dir = Path(__file__).resolve().parent
+
+        print("3")
+
+        # Total path to simsettings-file:
+        simsettings_dir = backend_root_dir / "flee_stored_files" / "simsettings"
+        filename = simsettings_id + ".yml"
+        simsettings_filename = simsettings_dir / filename
+
+        print("4")
+
+        # Create simsettings-directory:
+        if not simsettings_dir.exists():
+            simsettings_dir.mkdir(parents=True)
+
+        # Create simsettings-file:
+        try:
+            with open(simsettings_filename, 'w') as yml_file:
+                yaml.dump(simsettings, yml_file, default_flow_style=False, sort_keys=False)
+        except Exception as e:
+            return "Exception while storing the simsettings.yml file: {e}"
+
+        print("5")
+
+        ### Store location / simulation data in filesystem:
+        await self.convert_simulations_to_csv(simulation_id)
+
+        print("6")
 
         # Path to simulation directory (.csv - FLEE files of simulation):
         simulation_dir = backend_root_dir / "flee_stored_files" / "conflict_input" / simulation_id
 
-        # Run simulation with location data in location_dir and simsettings in simsettings_path:
-        sim = self.adapter.run_simulation(simulation_dir, simsettings_filename)
+        print("7")
+
+        ### Execute simulation with location data in location_dir and simsettings in simsettings_path:
+        sim = self.adapter.run_simulation_config(simulation_dir, simsettings_filename)
         self.store_simulation(sim)
+
+        print("8")
 
         # Store simulation results together with simsettings_id and location string:
         self.store_simulation_config(sim, simulation_id, simsettings_id)
 
+        print("9")
+
         return sim
 
 
-    # Return simulation values from DB: --------------------------------------------------------------------------------
+# Return simulation values from DB: --------------------------------------------------------------------------------
 
     # Return all simulsation Results:
     async def get_all_simulation_results(self):
@@ -185,7 +206,7 @@ class Controller:
             return simulation
 
 
-    # Manage simsettings in DB: ----------------------------------------------------------------------------------------
+# Manage simsettings in DB: ----------------------------------------------------------------------------------------
 
     # Store dict of simsettings in DB:
     async def post_simsettings(self, simsetting):
@@ -212,6 +233,7 @@ class Controller:
             simsetting["_id"] = str(simsetting["_id"])
             return simsetting
 
+    # Get specific simsettings by simsetting_id and return as dict:
     async def get_simsetting_dict(self, simsetting_id: str):
         simsetting = self.db.get_collection("simsettings").find_one(
             {"_id": ObjectID(simsetting_id)}
@@ -224,7 +246,6 @@ class Controller:
             simsetting_dict["_id"] = str(simsetting_dict["_id"])
             return simsetting_dict
 
-
     # Delete specfici simsettings by simsetting_id:
     async def delete_simsetting(self, simsetting_id: str):
         return self.db.get_collection("simsettings").delete_one(
@@ -232,7 +253,7 @@ class Controller:
         )
 
 
-    # Store simulation results: ----------------------------------------------------------------------------------------
+# Store simulation results: ----------------------------------------------------------------------------------------
 
     # Store default simulation without custom location and simsettings:
     def store_simulation(self, result):
@@ -249,7 +270,7 @@ class Controller:
         simulations_collection.insert_one(new_simulation)
         client.close()
 
-    # Store custom simulation with location and simsettings:
+    # Store custom simulation with simulation_id and simsettings_id:
     def store_simulation_config(self, result, simulation_id, simsettings_id):
 
         load_dotenv()
@@ -268,19 +289,21 @@ class Controller:
         simulations_collection.insert_one(new_simulation)
         client.close()
 
-    # Store simulation data from DB in csv files for FLEE execution: ---------------------------------------------------
 
-    # Convert location data into .csv files (for FLEE simulation execution) - Returns location of simulation-data dir:
+# Helper functions - Storing .csv-files for given data and path: -------------------------------------------------------
+
+    # Store simulation data from DB in csv files for FLEE execution:
     async def convert_simulations_to_csv(self, simulation_id: str):
 
-        '''
+        """
+        Convert location data into .csv files (for FLEE simulation execution) - Returns location of simulation-data dir:
         Read all data from simulation-collection in DB
         Convert Data into .csv files, which are required by FLEE (closures, conflicts, locations,
         registration_corrections, routes, sim_period)
-        
+
         :param simulation_id:
         :return:
-        '''
+        """
 
         # Fetch simulation data from DB by simulation_id:
         simulations_collection = self.db.get_collection("simulations")
@@ -295,44 +318,75 @@ class Controller:
             os.makedirs(simulation_dir, exist_ok=True)
 
             # Cretae csv files using helper function export-csv (filename, data, fieldnames):
-            self.export_csv(os.path.join(simulation_dir, "closures.csv"), simulation["closures"],
-                            ["closure_type", "name1", "name2", "closure_start", "closure_end"])
+            # Closures.csv file:
+            self.export_closures_csv(os.path.join(simulation_dir, "closures.csv"), simulation["closures"])
 
+            # conflicts.csv file:
             self.export_csv(os.path.join(simulation_dir, "conflicts.csv"), simulation["conflicts"],
-                            simulation["conflicts"][0].keys())
+                            simulation["conflicts"][0].keys())  # In DB hinten null-objekt: :null -> Daher hier ein Komma hinten angehängt
+            self.remove_trailing_commas(os.path.join(simulation_dir, "conflicts.csv"))
 
-            self.export_csv(os.path.join(simulation_dir, "locations.csv"), simulation["locations"],
+            # locations.csv file:
+            self.export_locations_csv(os.path.join(simulation_dir, "locations.csv"), simulation["locations"],
                             ["name", "region", "country", "latitude", "longitude", "location_type", "conflict_date",
                              "population"])
 
-            self.export_csv(os.path.join(simulation_dir, "registration_corrections.csv"),
-                            simulation["registration_corrections"], ["name", "date"])
+            # registration_corrections.csv file:
+            self.export_registration_corrections_csv(os.path.join(simulation_dir, "registration_corrections.csv"),
+                            simulation["registration_corrections"])
 
-            self.export_csv(os.path.join(simulation_dir, "routes.csv"), simulation["routes"],
-                            ["from", "to", "distance", "forced_redirection"])       # Kommas hinten dran
+            # routes.csv file:
+            self.export_routes_csv(os.path.join(simulation_dir, "routes.csv"), simulation["routes"],
+                            ["from", "to", "distance",
+                             "forced_redirection"])  # null werte ignoriert -> Freie kommas hinten
 
-            self.export_csv(os.path.join(simulation_dir, "sim_period.csv"), simulation["sim_period"],
-                            ["date", "length"])     # TBD Hier fehlen Werte für date und length
+            # sim_period.csv file (values are single data points, not directories themselves -> unnested function):
+            self.export_csv_sim_period(os.path.join(simulation_dir, "sim_period.csv"), simulation["sim_period"])
 
-
-            return "All files created"
+            return "All files written"
 
         else:
             return "No simulations in Database"
 
 
+    # Helper Function to create csv-file from filename, data and fieldnames:
+    def export_closures_csv(self, file_name, data):
+
+        """
+        :param file_name: New path of file incl. filename
+        :param data: Row data
+        :return: Returns nothin, only creates and stores files
+        """
+
+        try:
+            with open(file_name, mode='w', newline='') as csv_file:
+                fieldnames = ['#closure_type', 'name1', 'name2', 'closure_start', 'closure_end']
+                writer = csv.writer(csv_file)
+
+                # Write header:
+                writer.writerow(fieldnames)
+
+                # Write data & Skip rows with empty keys
+                for row in data:
+                    writer.writerow([
+                        int(value) if value and isinstance(value, (int, float)) else value
+                        for value in row.values()
+                    ])
+
+                return "File created succesfully"
+
+        except Exception as e:
+            return e
 
     # Helper Function to create csv-file from filename, data and fieldnames:
     def export_csv(self, file_name, data, fieldnames):
 
-        '''
-
+        """
         :param file_name: New path of file incl. filename
         :param data: Row data
         :param fieldnames: Name of columns in .csv files
         :return: Returns nothin, only creates and stores files
-
-        '''
+        """
 
         try:
             with open(file_name, mode='w', newline='') as csv_file:
@@ -341,29 +395,161 @@ class Controller:
                 # Write header:
                 writer.writeheader()
 
-                # Write data:
-                writer.writerows(data)
+                # Write data & Skip rows with empty keys
+                for row in data:
+                    if any(value == '' for value in row.values()):
+                        continue
+                    writer.writerow(row)
 
                 return "File created succesfully"
 
         except Exception as e:
             return e
 
+    # Helper Function to create csv-file from filename, data and fieldnames:
+    def export_locations_csv(self, file_name, data, fieldnames):
+
+        """
+        :param file_name: New path of file incl. filename
+        :param data: Row data
+        :param fieldnames: Name of columns in .csv files
+        :return: Returns nothin, only creates and stores files
+        """
+
+        try:
+            with open(file_name, mode='w', newline='', encoding='utf-8') as csv_file:
+                writer = csv.writer(csv_file, quoting=csv.QUOTE_NONNUMERIC)
+
+                # Write header:
+                writer.writerow(['#' + field if field == 'name' else field for field in fieldnames])
+
+                # Write data & Skip rows with empty keys
+                for row in data:
+                    if any(value == '' for value in row.values()):
+                        continue
+                    writer.writerow(
+                        [str(value) if value and not isinstance(value, (int, float)) else value for value in
+                         row.values()])
+
+                return "File created successfully"
+
+        except Exception as e:
+            return e
+
+    # Helper Function to create csv-file from filename, data and fieldnames:
+    def export_registration_corrections_csv(self, file_name, data):
+
+        """
+        :param file_name: New path of file incl. filename
+        :param data: Row data
+        :return: Returns nothin, only creates and stores files
+        """
+
+        try:
+            with open(file_name, mode='w', newline='') as csv_file:
+                writer = csv.writer(csv_file)
+
+                # Write data
+                for row in data:
+                    name = row['name']
+                    date_str = row['date'].strftime('%Y-%m-%d')
+                    writer.writerow([name, date_str])
+
+                return "File created succesfully"
+
+        except Exception as e:
+            return e
+
+    # Helper Function to create csv-file from filename, data and fieldnames:
+    def export_routes_csv(self, file_name, data, fieldnames):
+
+        """
+        :param file_name: New path of file incl. filename
+        :param data: Row data
+        :param fieldnames: Name of columns in .csv files
+        :return: Returns nothin, only creates and stores files
+        """
+
+        try:
+            with open(file_name, mode='w', newline='') as csv_file:
+                fieldnames = ['#name1', 'name2', 'distance', 'forced_redirection']
+                writer = csv.writer(csv_file)
+
+                # Write header:
+                writer.writerow(fieldnames)
+
+                # Write data & Skip rows with empty keys
+                for row in data:
+                    writer.writerow([
+                        int(value) if value and isinstance(value, (int, float)) else value
+                        for value in row.values()
+                    ])
+
+        except Exception as e:
+            return e
+
+    # Helper function for single value pairs, where values don´t represent own dictionaries themselves (sim_period)
+    def export_csv_sim_period(self, file_name, data):
+
+        """
+        :param file_name: New path of file incl. filename
+        :param data: Row data
+        :param fieldnames: Name of columns in .csv files
+        :return: Returns nothin, only creates and stores files
+        """
+
+        print(data)
+
+        try:
+            with open(file_name, mode='w', newline='') as csv_file:
+                writer = csv.writer(csv_file)
+
+                # Write data:
+                for key, value in data.items():
+                    if isinstance(value, datetime):
+                        formatted_date = value.strftime('%Y-%m-%d')
+                        writer.writerow(["StartDate", formatted_date])
+                    else:
+                        writer.writerow([key, value])
+
+                return "File created successfully"
+
+        except Exception as e:
+            return str(e)
+
+    # Function to remove trailing commas from .csv file (conflicts.csv):
+    def remove_trailing_commas(self, file_name):
+
+        input_file_path = file_name
+        output_file_path = file_name
+
+        # Read data from the input file
+        with open(input_file_path, 'r') as input_file:
+            reader = csv.reader(input_file)
+            rows = list(reader)
+
+        # Remove trailing commas:
+        processed_rows = [row[:-1] if row[-1] == '' else row for row in rows]
+
+        # Write the processed data back to the same file
+        with open(output_file_path, 'w', newline='') as file:
+            # Write the processed rows back to the CSV file
+            writer = csv.writer(file)
+            writer.writerows(processed_rows)
 
 
+# Helper functions - reading files: ------------------------------------------------------------------------------------
 
-
-# ----------------------------------------------------------------------------------------------------------------------
-    def testread_ss(self):
+    # Read .yml file for given simsettings:
+    def testread_ss(self, simsettings_id: str):
         """
         Read a dummy simulation result from the database.
         """
-        from pathlib import Path
 
-        filename = "6570f624987cdd647c68bc7d" + ".yml"
+        filename = simsettings_id + ".yml"
         backend_root_dir = Path(__file__).resolve().parent
         simsettings_dir = backend_root_dir / "flee_stored_files" / "simsettings"
-        simsettings_filename = simsettings_dir / "6570f624987cdd647c68bc7d.yml"
+        simsettings_filename = simsettings_dir / filename
 
         try:
             with open(simsettings_filename, 'r') as f:
@@ -371,17 +557,46 @@ class Controller:
         except Exception as e:
                 return "File nicht vorhanden"
 
-    # ---------------------------------------
-    def testread_csv(self):
-
-        from pathlib import Path
+    # Read all .csv files for given simulation:
+    def testread_csv(self, simulation_id):
 
         backend_root_dir = Path(__file__).resolve().parent
-        sim_dir = backend_root_dir / "flee_stored_files" / "conflict_input" / "658dec24819bd1bc1ff738cd"
-        sim_filename = sim_dir / "sim_period.csv"
+        sim_dir = backend_root_dir / "flee_stored_files" / "conflict_input" / simulation_id
+        sim_filename1 = sim_dir / "closures.csv"
+        sim_filename2 = sim_dir / "conflicts.csv"
+        sim_filename3 = sim_dir / "locations.csv"
+        sim_filename4 = sim_dir / "registration_corrections.csv"
+        sim_filename5 = sim_dir / "routes.csv"
+        sim_filename6 = sim_dir / "sim_period.csv"
 
         try:
-            with open(sim_filename, 'r') as f:
-                return f.read()
+            with open(sim_filename1, 'r') as f:
+                f1 = f.read()
         except Exception as e:
-            return "File nicht vorhanden"
+            return "File1 nicht vorhanden"
+        try:
+            with open(sim_filename2, 'r') as f:
+                f2 = f.read()
+        except Exception as e:
+            return "File2 nicht vorhanden"
+        try:
+            with open(sim_filename3, 'r') as f:
+                f3 = f.read()
+        except Exception as e:
+            return "File3 nicht vorhanden"
+        try:
+            with open(sim_filename4, 'r') as f:
+                f4 = f.read()
+        except Exception as e:
+            return "File4 nicht vorhanden"
+        try:
+            with open(sim_filename5, 'r') as f:
+                f5 = f.read()
+        except Exception as e:
+            return "File5 nicht vorhanden"
+        try:
+            with open(sim_filename6, 'r') as f:
+                f6 = f.read()
+        except Exception as e:
+            return "File6 nicht vorhanden"
+        return f1, f2, f3, f4, f5, f6

@@ -19,8 +19,8 @@ class Adapter:
         result = sim.run()
         return result
 
-    # Run Simulation iwth custom location and simsettings:
-    def run_simulation_config(self, location_dir: str, simsettings_file: str):
-        sim = Simulation(location_dir, "flee/conflict_validation/burundi2015", 0, simsettings_file)
+    # Run Simulation with custom simulation and simsettings:
+    def run_simulation_config(self, simulation_dir: str, simsettings_file: str):
+        sim = Simulation(simulation_dir, "flee/conflict_validation/burundi2015", 0, simsettings_file)
         result = sim.run()
         return result

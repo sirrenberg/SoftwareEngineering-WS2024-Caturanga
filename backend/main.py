@@ -54,25 +54,10 @@ async def run_simulation_simsettings(
 # Run a simulation with the simsettings_id and the location name:
 @app.get("/run_simulation/config/")  # E.g. /run/simulation/config/?location=Ethipia&simsettings_id=abcde
 async def run_simulation_config(
-        location: str = 'Burundi',
-        simsettings_id: str = '65843761aef0c55ae04c33ad'  # Default ID der Simulation Settings
+        simulation_id: str = '658dec24819bd1bc1ff738cd',
+        simsettings_id: str = '6570f624987cdd647c68bc7d'  # Default ID der Simulation Settings
 ):
-
-    location_list = ['burundi', 'car', 'ethiopia', 'mali', 'ssudan', 'syria']
-
-    if location in location_list:
-        return await controller.run_simulation_config(location, simsettings_id)
-    else:
-        return "No proper location provided"
-
-
-@app.get("/test_csv")
-async def test_csv(
-        simulation_id: str = '658dec24819bd1bc1ff738cd'
-):
-    return await controller.convert_simulations_to_csv(simulation_id)
-
-
+    return await controller.run_simulation_config(simulation_id, simsettings_id)
 
 
 ### Simulation: --------------------------------------------------------------------------------------------------------
@@ -192,7 +177,9 @@ async def delete_simsetting(
     return await controller.delete_simsetting(simsetting_id)
 
 
-# ----------------------------------------------------------------------------------------------------------------------
+# Helper Functions -----------------------------------------------------------------------------------------------------
+
+# Retrieve simsettings from the DB and store them in a .yml file in the filesystem:
 @app.get("/teststore/{simsetting_id}")
 async def teststore(
     simsetting_id: str = Path(
@@ -200,22 +187,41 @@ async def teststore(
     )
 ):
     """
-    Store a dummy simulation result in the database.
+    Store a simsetting, given by the simsetting_id in the filesystem
     """
-
     return await controller.teststore_ss(simsetting_id)
 
-@app.get("/testread")
-def testread():
+# Read a stored simsettings.yml file from the filesystem:
+@app.get("/testread_ss/{simsetting_id}")
+def testread(
+        simsetting_id: str = Path(
+            description="The ID of the simsetting you want to read the yml file from."
+        )
+):
     """
-    Read a dummy simulation result from the database.
+    Read a simsettings.yml file for a given simsettings_id, stored in the filesystem
     """
-    return controller.testread_ss()
+    return controller.testread_ss(simsetting_id)
+
+# Store all data (in the DB) in .csv files in the filesystem, for a given simulation_id:
+@app.get("/test_csv/{simulation_id}")
+async def test_csv(
+        simulation_id: str = '658dec24819bd1bc1ff738cd'
+):
+    """
+    Convert all data in DB, stored for given simulation, to .csv files and store them in filesystem
+    """
+    return await controller.convert_simulations_to_csv(simulation_id)
 
 
-@app.get("/testread_csv")
-def testread():
+# Read all stored .csv in the filesystem for given simulation_id:
+@app.get("/testread_csv/{simulation_id}")
+def testread(
+        simulation_id = Path(
+            description="ID of simulation of .csv file, which should be returned"
+        )
+):
     """
-    Read a dummy simulation result from the database.
+    Read all data for given simulation from stored .csv files in filesystem
     """
-    return controller.testread_csv()
+    return controller.testread_csv(simulation_id)
