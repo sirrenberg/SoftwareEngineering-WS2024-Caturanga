@@ -83,25 +83,17 @@ class Controller:
         :return: Returns simulation results
         """
 
-        print("1")
-
         ### Store simsettings in filesystem:
         # Get Simsettings from DB:
         simsettings = await self.get_simsetting(simsettings_id)
 
-        print("2")
-
         # Get current working drectory:
         backend_root_dir = Path(__file__).resolve().parent
-
-        print("3")
 
         # Total path to simsettings-file:
         simsettings_dir = backend_root_dir / "flee_stored_files" / "simsettings"
         filename = simsettings_id + ".yml"
         simsettings_filename = simsettings_dir / filename
-
-        print("4")
 
         # Create simsettings-directory:
         if not simsettings_dir.exists():
@@ -114,28 +106,18 @@ class Controller:
         except Exception as e:
             return "Exception while storing the simsettings.yml file: {e}"
 
-        print("5")
-
         ### Store location / simulation data in filesystem:
         await self.convert_simulations_to_csv(simulation_id)
 
-        print("6")
-
         # Path to simulation directory (.csv - FLEE files of simulation):
         simulation_dir = backend_root_dir / "flee_stored_files" / "conflict_input" / simulation_id
-
-        print("7")
 
         ### Execute simulation with location data in location_dir and simsettings in simsettings_path:
         sim = self.adapter.run_simulation_config(simulation_dir, simsettings_filename)
         self.store_simulation(sim)
 
-        print("8")
-
         # Store simulation results together with simsettings_id and location string:
         self.store_simulation_config(sim, simulation_id, simsettings_id)
-
-        print("9")
 
         return sim
 
@@ -238,7 +220,6 @@ class Controller:
         simsetting = self.db.get_collection("simsettings").find_one(
             {"_id": ObjectID(simsetting_id)}
         )
-        print(type(simsetting), simsetting)
 
         if simsetting is not None:
             # Convert the MongoDB document to a dictionary
