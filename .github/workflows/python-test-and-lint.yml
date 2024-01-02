@@ -34,9 +34,20 @@ jobs:
         flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
-    - name: Print contents of flee directory
+    - name: Checkout flee
+      uses: actions/checkout@v2
+      with:
+        repository: nicleosch/flee.git
+        path: backend/flee
+    - name: Print contents of backend directory
       run: |
         ls backend
+    - name: Print contents of flee directory
+      run: |
+        ls backend/flee
+    - name: Print contents of runscripts directory
+      run: |
+        ls backend/flee/runscripts
     - name: Test with pytest
       run: |
         python -m pytest
