@@ -1,4 +1,4 @@
-from runscripts.runner import Simulation  # noqa: E402
+from runner import Simulation  # noqa: E402
 
 class Adapter:
     def __init__(self):
