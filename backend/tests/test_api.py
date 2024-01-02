@@ -10,7 +10,6 @@ sys.path.insert(0, str(backend / "flee"))
 # print sys.path
 print(sys.path)
 
-import flee.runscripts
 from main import app, expected_simsettings  # noqa: E402
 
 
