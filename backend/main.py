@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Path, Request
+from fastapi import FastAPI, Path, Query, Request
 from flee_controller.controller import Controller
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -50,12 +50,27 @@ async def run_simulation_simsettings(
 ):
     return await controller.run_simulation_simsettings(simsetting_id)
 
-
+'''
 # Run a simulation with the simsettings_id and the location name:
 @app.get("/run_simulation/config/")  # E.g. /run/simulation/config/?location=Ethipia&simsettings_id=abcde
 async def run_simulation_config(
         simulation_id: str = '658dec24819bd1bc1ff738cd',
         simsettings_id: str = '6570f624987cdd647c68bc7d'  # Default ID der Simulation Settings
+):
+    return await controller.run_simulation_config(simulation_id, simsettings_id)
+    '''
+
+# Run a simulation with the simsettings_id and the location name:
+@app.get("/run_simulation/config/")  # E.g. /run/simulation/config/?location=Ethipia&simsettings_id=abcde
+async def run_simulation_config(
+        simulation_id: str = Query(
+            description="Id der config simulation",
+            example="658dec24819bd1bc1ff738cd"
+        ),
+        simsettings_id: str = Query(
+            description="Id der Id der simsetttings",
+            example="6570f624987cdd647c68bc7d"
+        )
 ):
     return await controller.run_simulation_config(simulation_id, simsettings_id)
 

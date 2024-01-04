@@ -40,7 +40,10 @@ class Controller:
 
         ### Store simsettings in filesystem:
         # Get Simsettings from DB:
-        simsettings = await self.get_simsetting(simsettings_id)
+        try:
+            simsettings = await self.get_simsetting(simsettings_id)
+        except Exception as e:
+            return f"No simsettings with ID {simsettings_id} stored in DB"
 
         # Get current working drectory:
         backend_root_dir = Path(__file__).resolve().parent
@@ -63,7 +66,6 @@ class Controller:
 
         ### Execute simulation with location data in location_dir and simsettings in simsettings_path:
         sim = self.adapter.run_simulation_ss(simsettings_filename)
-        self.store_simulation(sim)
 
         # Store simulation results together with simsettings_id and location string:
         self.store_simulation_config(sim, 'burundi', simsettings_id)
@@ -85,7 +87,10 @@ class Controller:
 
         ### Store simsettings in filesystem:
         # Get Simsettings from DB:
-        simsettings = await self.get_simsetting(simsettings_id)
+        try:
+            simsettings = await self.get_simsetting(simsettings_id)
+        except Exception as e:
+            return f"No simsettings with ID {simsettings_id} stored in DB"
 
         # Get current working drectory:
         backend_root_dir = Path(__file__).resolve().parent
@@ -107,14 +112,20 @@ class Controller:
             return "Exception while storing the simsettings.yml file: {e}"
 
         ### Store location / simulation data in filesystem:
-        await self.convert_simulations_to_csv(simulation_id)
+        try:
+            await self.convert_simulations_to_csv(simulation_id)
+        except Exception as e:
+            return f"No simulation with ID {simulation_id} stored in DB"
 
         # Path to simulation directory (.csv - FLEE files of simulation):
         simulation_dir = backend_root_dir / "flee_stored_files" / "conflict_input" / simulation_id
 
+        # Create simulations-directory:
+        if not simulation_dir.exists():
+            simulation_dir.mkdir(parents=True)
+
         ### Execute simulation with location data in location_dir and simsettings in simsettings_path:
         sim = self.adapter.run_simulation_config(simulation_dir, simsettings_filename)
-        self.store_simulation(sim)
 
         # Store simulation results together with simsettings_id and location string:
         self.store_simulation_config(sim, simulation_id, simsettings_id)
@@ -287,47 +298,53 @@ class Controller:
         """
 
         # Fetch simulation data from DB by simulation_id:
-        simulations_collection = self.db.get_collection("simulations")
-        simulation = simulations_collection.find_one({"_id": ObjectID(simulation_id)})
+        try:
+            simulations_collection = self.db.get_collection("simulations")
+            simulation = simulations_collection.find_one({"_id": ObjectID(simulation_id)})
 
-        # Create all .csv files for simulation:
-        if simulation is not None:
+            # Create all .csv files for simulation:
+            if simulation is not None:
 
-            # Create directory for simulation:
-            backend_root_dir = Path(__file__).resolve().parent
-            simulation_dir = backend_root_dir / "flee_stored_files" / "conflict_input" / simulation_id
-            os.makedirs(simulation_dir, exist_ok=True)
+                # Create directory for simulation:
+                backend_root_dir = Path(__file__).resolve().parent
+                simulation_dir = backend_root_dir / "flee_stored_files" / "conflict_input" / simulation_id
+                os.makedirs(simulation_dir, exist_ok=True)
 
-            # Cretae csv files using helper function export-csv (filename, data, fieldnames):
-            # Closures.csv file:
-            self.export_closures_csv(os.path.join(simulation_dir, "closures.csv"), simulation["closures"])
+                # Cretae csv files using helper function export-csv (filename, data, fieldnames):
+                # Closures.csv file:
+                self.export_closures_csv(os.path.join(simulation_dir, "closures.csv"), simulation["closures"])
 
-            # conflicts.csv file:
-            self.export_csv(os.path.join(simulation_dir, "conflicts.csv"), simulation["conflicts"],
-                            simulation["conflicts"][0].keys())  # In DB hinten null-objekt: :null -> Daher hier ein Komma hinten angehängt
-            self.remove_trailing_commas(os.path.join(simulation_dir, "conflicts.csv"))
+                # conflicts.csv file:
+                self.export_csv(os.path.join(simulation_dir, "conflicts.csv"), simulation["conflicts"],
+                                simulation["conflicts"][
+                                    0].keys())  # In DB hinten null-objekt: :null -> Daher hier ein Komma hinten angehängt
+                self.remove_trailing_commas(os.path.join(simulation_dir, "conflicts.csv"))
 
-            # locations.csv file:
-            self.export_locations_csv(os.path.join(simulation_dir, "locations.csv"), simulation["locations"],
-                            ["name", "region", "country", "latitude", "longitude", "location_type", "conflict_date",
-                             "population"])
+                # locations.csv file:
+                self.export_locations_csv(os.path.join(simulation_dir, "locations.csv"), simulation["locations"],
+                                          ["name", "region", "country", "latitude", "longitude", "location_type",
+                                           "conflict_date",
+                                           "population"])
 
-            # registration_corrections.csv file:
-            self.export_registration_corrections_csv(os.path.join(simulation_dir, "registration_corrections.csv"),
-                            simulation["registration_corrections"])
+                # registration_corrections.csv file:
+                self.export_registration_corrections_csv(os.path.join(simulation_dir, "registration_corrections.csv"),
+                                                         simulation["registration_corrections"])
 
-            # routes.csv file:
-            self.export_routes_csv(os.path.join(simulation_dir, "routes.csv"), simulation["routes"],
-                            ["from", "to", "distance",
-                             "forced_redirection"])  # null werte ignoriert -> Freie kommas hinten
+                # routes.csv file:
+                self.export_routes_csv(os.path.join(simulation_dir, "routes.csv"), simulation["routes"],
+                                       ["from", "to", "distance",
+                                        "forced_redirection"])  # null werte ignoriert -> Freie kommas hinten
 
-            # sim_period.csv file (values are single data points, not directories themselves -> unnested function):
-            self.export_csv_sim_period(os.path.join(simulation_dir, "sim_period.csv"), simulation["sim_period"])
+                # sim_period.csv file (values are single data points, not directories themselves -> unnested function):
+                self.export_csv_sim_period(os.path.join(simulation_dir, "sim_period.csv"), simulation["sim_period"])
 
-            return "All files written"
+                return "All files written"
 
-        else:
-            return "No simulations in Database"
+            else:
+                raise SimulationNotFoundError(f"Simulation with ID {simulation_id} not found")
+
+        except Exception as e:
+            raise e
 
 
     # Helper Function to create csv-file from filename, data and fieldnames:
@@ -581,3 +598,8 @@ class Controller:
         except Exception as e:
             return "File6 nicht vorhanden"
         return f1, f2, f3, f4, f5, f6
+
+
+# Define a custom exception for simulation not found
+class SimulationNotFoundError(Exception):
+    pass
