@@ -310,36 +310,34 @@ class Controller:
                 simulation_dir = backend_root_dir / "flee_stored_files" / "conflict_input" / simulation_id
                 os.makedirs(simulation_dir, exist_ok=True)
 
-                print("1")
-
                 # Cretae csv files using helper function export-csv (filename, data, fieldnames):
                 # Closures.csv file:
                 self.export_closures_csv(os.path.join(simulation_dir, "closures.csv"), simulation["closures"])
-                print("2")
+                
                 # conflicts.csv file:
                 self.export_csv(os.path.join(simulation_dir, "conflicts.csv"), simulation["conflicts"],
                                 simulation["conflicts"][
                                     0].keys())  # In DB hinten null-objekt: :null -> Daher hier ein Komma hinten angehängt
                 self.remove_trailing_commas(os.path.join(simulation_dir, "conflicts.csv"))
-                print("3")
+                
                 # locations.csv file:
                 self.export_locations_csv(os.path.join(simulation_dir, "locations.csv"), simulation["locations"],
                                           ["name", "region", "country", "latitude", "longitude", "location_type",
                                            "conflict_date",
                                            "population"])
-                print("4")
+                
                 # registration_corrections.csv file:
                 self.export_registration_corrections_csv(os.path.join(simulation_dir, "registration_corrections.csv"),
                                                          simulation["registration_corrections"])
-                print("5")
+                
                 # routes.csv file:
                 self.export_routes_csv(os.path.join(simulation_dir, "routes.csv"), simulation["routes"],
                                        ["from", "to", "distance",
                                         "forced_redirection"])  # null werte ignoriert -> Freie kommas hinten
-                print("6")
+                
                 # sim_period.csv file (values are single data points, not directories themselves -> unnested function):
                 self.export_csv_sim_period(os.path.join(simulation_dir, "sim_period.csv"), simulation["sim_period"])
-                print("7")
+                
                 return "All files written"
 
             else:
