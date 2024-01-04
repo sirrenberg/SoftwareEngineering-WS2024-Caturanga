@@ -1,5 +1,15 @@
 :root {
-  --main-green: #3bb732;
+  --tea-green: #d8ffd6;
+  --dark-green: #1d493d;
+  --light-green: #46af93;
+  --misty-rose: #efd3d7;
+  --charcoal: #2c4251;
+  --light-charcoal: #476c85;
+  --air-superiority-blue: #77a6b6;
+  --peach: #f3b391;
+  --gray: #7b7b7b;
+  --light-gray: #f5f5f5;
+  --coquelicot: #f15025;
   --white: #ffffff;
   --black: #000000;
 }
@@ -9,8 +19,14 @@
 }
 
 body {
-  font-family: "Roboto", sans-serif;
+  font-family: "Questrial", sans-serif;
   color: var(--black);
+  overflow-x: hidden;
+}
+
+a {
+  text-decoration: none;
+  color: var(--white);
 }
 
 .App {
@@ -20,28 +36,66 @@ body {
 }
 
 .content-page {
+  min-height: 100vh;
+  width: 100vw;
+
   display: flex;
   flex-direction: column;
-  align-items: center;
-  background-color: var(--white);
-  padding-top: 12vh;
-  min-height: 100vh;
+
+  padding: 2rem 4rem;
 }
 
-.nav-link {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  text-decoration: none;
-}
-
-a {
-  text-decoration: none;
+.simple-button {
+  font-family: "Cabin", sans-serif;
+  font-weight: 600;
+  font-size: 1.5rem;
+  border: none;
+  padding: 1rem 2rem;
+  margin: 2rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+  cursor: pointer;
   transition: all 0.3s ease-in-out;
+  background-color: var(--dark-green);
+  color: var(--white);
 }
 
-@media screen and (min-width: 992px) {
-  .content-page {
-    min-height: 100vh;
+.simple-button:hover {
+  transform: scale(1.1);
+  background-color: var(--light-green);
+}
+
+.simple-button:active {
+  transform: scale(0.9);
+}
+
+.page-title {
+  font-size: 3rem;
+  font-weight: 700;
+  margin-bottom: 2rem;
+  font-family: "Cabin", sans-serif;
+}
+
+.page-subtitle {
+  font-size: 2rem;
+  font-weight: 600;
+  margin-bottom: 2rem;
+  font-family: "Cabin", sans-serif;
+  color: var(--gray);
+}
+
+@media (max-width: 1280px) {
+  .simple-button {
+    font-size: 0.8rem;
+    padding: 0.5rem 1rem;
+    margin: 1rem;
+  }
+
+  .page-title {
+    font-size: 1.5rem;
+  }
+
+  .page-subtitle {
+    font-size: 1.2rem;
   }
 }
