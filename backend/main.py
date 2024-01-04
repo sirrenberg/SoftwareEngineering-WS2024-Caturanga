@@ -61,7 +61,8 @@ async def run_simulation_config(
     '''
 
 # Run a simulation with the simsettings_id and the location name:
-@app.get("/run_simulation/config/")  # E.g. /run/simulation/config/?location=Ethipia&simsettings_id=abcde
+# E.g. /run_simulation/config/?simulation_id=658dec24819bd1bc1ff738cd&simsettings_id=6570f624987cdd647c68bc7d
+@app.get("/run_simulation/config/")
 async def run_simulation_config(
         simulation_id: str = Query(
             description="Id der config simulation",
