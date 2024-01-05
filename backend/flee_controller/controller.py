@@ -11,10 +11,12 @@ import csv
 
 class Controller:
     """
-    The Controller class handles the interaction with the database and the execution of simulations.
+    The Controller class handles the interaction with the database and the
+    execution of simulations.
     """
 
-    # Setup of MongoDB DB Connection: ----------------------------------------------------------------------------------
+# Setup of MongoDB DB Connection: ---------------------------------------------
+
     def __init__(self):
         """
         Initializes the Controller object.
@@ -25,85 +27,178 @@ class Controller:
         self.client = MongoClient(self.MONGODB_URI)
         self.db = self.client.get_database("Caturanga")
 
-# Run simulations: -------------------------------------------------------------------------------------------------
+# Run simulations: ------------------------------------------------------------
 
-    # Run default simulation (burundi, default simsettings) and store result:
-    def run_simulation(self):
+    def run_simulation(self, object_id: str):
+        """
+        Runs a simulation and stores the result in the database.
+
+        Parameter:
+        - simulation_id (str): The object ID of the dummy simulation.
+        """
         sim = self.adapter.run_simulation()
-        self.store_simulation(sim)
-        return sim
+        self.store_simulation(sim, object_id)
 
     # Run default simulation (burundi) with custom simsettings and store result:
-    async def run_simulation_simsettings(self, simsettings_id: str):
-
+    async def run_simulation_simsettings(self, simsettings_id: str, object_id: str):
         """
-        Runs a simulation with custom simsettings, whcih are stored in the DB with simsettings_id.
-        Running a custom simulation
-        Storing simulation results in DB in connection with Simsettings_id and default location 'burundi'
+        Runs a simulation with custom simsettings stored in the database
+        using the provided simsettings_id.
+        Stores the simulation results in the database associated with the
+        simsettings_id and the default location 'burundi'.
 
-        :param simsettings_id: Simulation Settings ID in DB
-        :return: Simulation results
+        Patameter:
+        - simsettings_id (str): The ID of the simulation settings in the 
+          database.
+        - object_id (str): The object ID of the dummy simulation.
+
+        Returns:
+        - The simulation results.
         """
 
-        ### Store simsettings in filesystem:
-        # Get Simsettings from DB:
-        try:
-            simsettings = await self.get_simsetting(simsettings_id)
-        except Exception as e:
-            return f"No simsettings with ID {simsettings_id} stored in DB"
-
-        # Get current working drectory:
         backend_root_dir = Path(__file__).resolve().parent
 
-        # Total path to simsettings-file:
-        simsettings_dir = backend_root_dir / "flee_stored_files" / "simsettings"
-        filename = simsettings_id + ".yml"
-        simsettings_filename = simsettings_dir / filename
+        simsettings_filename = await self.store_simsettings_to_filesystem(
+            simsettings_id,
+            backend_root_dir)
 
-        # Create simsettings-file:
-        if not simsettings_dir.exists():
-            simsettings_dir.mkdir(parents=True)
-
-        # Create simsettings-file:
-        try:
-            with open(simsettings_filename, 'w') as yml_file:
-                yaml.dump(simsettings, yml_file, default_flow_style=False, sort_keys=False)
-        except Exception as e:
-            return "Exception while storing the simsettings.yml file: {e}"
-
-        ### Execute simulation with location data in location_dir and simsettings in simsettings_path:
         sim = self.adapter.run_simulation_ss(simsettings_filename)
 
-        # Store simulation results together with simsettings_id and location string:
-        self.store_simulation_config(sim, 'burundi', simsettings_id)
-
-        return sim
+        self.store_simulation(
+            sim,
+            object_id=object_id,
+            simsettings_id=simsettings_id)
 
     # Run simulation with provided simulation_id and simsettings_id and store results in DB:
-    async def run_simulation_config(self, simulation_id: str, simsettings_id: str):
+    async def run_simulation_config(
+            self,
+            simulation_id: str,
+            simsettings_id: str,
+            object_id: str):
 
         """
-        Runs a simulation with custom simsettings, whcih are stored in the DB with simsettings_id.
-        Running a custom simulation
-        Storing simulation results in DB in connection with Simsettings_id and custom location name
+        Runs a simulation with custom simsettings and input stored in the database
+        using the provided simsettings_id and simulation_id.
+        Stores the simulation results in the database associated with the
+        simsettings_id and the simulation_id.
 
         :param simulation_id: String of location name e.g. 'burundi'
         :param simsettings_id: Simulation Settings ID in DB
         :return: Returns simulation results
         """
 
-        ### Store simsettings in filesystem:
+        backend_root_dir = Path(__file__).resolve().parent
+
+        simsettings_filename = await self.store_simsettings_to_filesystem(
+            simsettings_id,
+            backend_root_dir)
+
+        simulation_dir = await self.store_simulation_to_filesystem(
+            simulation_id,
+            backend_root_dir)
+
+        sim = self.adapter.run_simulation_config(
+            simulation_dir,
+            simsettings_filename)
+
+        self.store_simulation(
+            sim,
+            object_id=object_id,
+            simulation_id=simulation_id,
+            simsettings_id=simsettings_id)
+
+# Store results in database: ----------------------------------------------
+
+    def connect_db(self):
+        """
+        Connects to the database.
+
+        Returns:
+            tuple: A tuple containing the MongoClient object and
+                   the database object.
+        """
+        load_dotenv()
+        MONGODB_URI = os.environ.get('MONGO_URI')
+        client = MongoClient(MONGODB_URI)
+        db = client.Caturanga
+        return client, db
+
+    def store_simulation(
+            self,
+            result,
+            object_id: str,
+            simulation_id: str = "658dec24819bd1bc1ff738cd",
+            simsettings_id: str = "6570f624987cdd647c68bc7d"):
+        """
+        Stores a simulation result in the database.
+
+        Parameters:
+        - result (dict): The result of the simulation.
+        - object_id (str): The ID of the dummy simulation result.
+        - simulation_id (str): The ID of the simulation input.
+          Defaults to "658dec24819bd1bc1ff738cd" (Burundi).
+        - simsettings_id (str): The ID of the simulation settings.
+          Defaults to "6570f624987cdd647c68bc7d" (Test simsettings).
+        """
+        client, db = self.connect_db()
+        simulations_collection = db.simulations_results
+        new_simulation = {}
+        new_simulation = {
+            "simulation_id": simulation_id,
+            "simsettings_id": simsettings_id,
+            "data": result
+        }
+        simulations_collection.replace_one(
+            {"_id": ObjectID(object_id)},
+            new_simulation)
+        client.close()
+
+    async def store_dummy_simulation(
+                self,
+                simulation_id: str = "658dec24819bd1bc1ff738cd",
+                simsettings_id: str = "6570f624987cdd647c68bc7d"):
+        """
+        Stores a dummy simulation in the database so that the user can see
+        that the simulation is started.
+
+        Parameters:
+        - simulation_id (str): The ID of the simulation input.
+          Defaults to "658dec24819bd1bc1ff738cd" (Burundi).
+        - simsettings_id (str): The ID of the simulation settings.
+          Defaults to "6570f624987cdd647c68bc7d" (Test simsettings).
+
+        Returns:
+        - str: The ID of the inserted dummy simulation.
+        """
+        client, db = self.connect_db()
+        collection = db.simulations_results
+        dummy_simulation = {}
+        dummy_simulation = {
+            "simulation_id": simulation_id,
+            "simsettings_id": simsettings_id,
+            "data": {"status": "running"}
+        }
+        result = collection.insert_one(dummy_simulation)
+        client.close()
+
+        return result.inserted_id
+
+# Store results in file system: -------------------------------------------
+
+    async def store_simsettings_to_filesystem(
+            self,
+            simsettings_id: str,
+            backend_root_dir: Path):
+
         # Get Simsettings from DB:
         try:
             simsettings = await self.get_simsetting(simsettings_id)
         except Exception as e:
-            return f"No simsettings with ID {simsettings_id} stored in DB"
-
-        # Get current working drectory:
-        backend_root_dir = Path(__file__).resolve().parent
+            return f"No simsettings with ID {simsettings_id} stored in DB: {e}"
 
         # Total path to simsettings-file:
-        simsettings_dir = backend_root_dir / "flee_stored_files" / "simsettings"
+        simsettings_dir = \
+            backend_root_dir / "flee_stored_files" / "simsettings"
         filename = simsettings_id + ".yml"
         simsettings_filename = simsettings_dir / filename
 
@@ -114,67 +209,36 @@ class Controller:
         # Create simsettings-file:
         try:
             with open(simsettings_filename, 'w') as yml_file:
-                yaml.dump(simsettings, yml_file, default_flow_style=False, sort_keys=False)
+                yaml.dump(simsettings, yml_file,
+                          default_flow_style=False,
+                          sort_keys=False)
         except Exception as e:
-            return "Exception while storing the simsettings.yml file: {e}"
+            return f"Exception while storing the simsettings.yml file: {e}"
 
-        ### Store location / simulation data in filesystem:
+        return simsettings_filename
+
+    async def store_simulation_to_filesystem(
+            self,
+            simulation_id: str,
+            backend_root_dir: Path):
+
         try:
             await self.convert_simulations_to_csv(simulation_id)
         except Exception as e:
-            return f"No simulation with ID {simulation_id} stored in DB"
+            return f"No simulation with ID {simulation_id} stored in DB: {e}"
 
         # Path to simulation directory (.csv - FLEE files of simulation):
-        simulation_dir = backend_root_dir / "flee_stored_files" / "conflict_input" / simulation_id
+        simulation_dir = \
+            backend_root_dir / "flee_stored_files" / "conflict_input" / \
+            simulation_id
 
         # Create simulations-directory:
         if not simulation_dir.exists():
             simulation_dir.mkdir(parents=True)
 
-        ### Execute simulation with location data in location_dir and simsettings in simsettings_path:
-        sim = self.adapter.run_simulation_config(simulation_dir, simsettings_filename)
+        return simulation_dir
 
-        # Store simulation results together with simsettings_id and location string:
-        self.store_simulation_config(sim, simulation_id, simsettings_id)
-
-        return sim
-
-
-# Return simulation values from DB: --------------------------------------------------------------------------------
-
-    # Return all simulsation Results:
-    def store_simulation(self, result, object_id: str):
-        """
-        Stores a simulation result in the database.
-
-        Args:
-            result: The result of the simulation.
-            object_id (str): The ID of the dummy simulation result.
-        """
-        client, db = self.connect_db()
-        simulations_collection = db.simulations_results
-        new_simulation = {}
-        new_simulation["data"] = result
-        simulations_collection.replace_one({"_id": ObjectID(object_id)}, new_simulation)
-        client.close()
-
-
-    async def store_dummy_simulation(self):
-        """
-        Stores a dummy simulation in the database so that the user can see that the simulation is started.
-
-        Returns:
-            str: The ID of the inserted dummy simulation, so that object can be overwritten.
-        """
-        client, db = self.connect_db()
-        collection = db.simulations_results
-        dummy_simulation = {}
-        dummy_simulation["data"] = {}
-        result = collection.insert_one(dummy_simulation)
-        client.close()
-
-        return result.inserted_id
-
+# Simulations and Simulation Results: -----------------------------------------
 
     async def get_all_simulation_results(self):
         """
@@ -256,7 +320,7 @@ class Controller:
             return None
 
 
-# Manage simsettings in DB: ----------------------------------------------------------------------------------------
+# Manage simsettings in DB: ---------------------------------------------------
 
     # Store dict of simsettings in DB:
     async def post_simsettings(self, simsetting):
@@ -314,41 +378,7 @@ class Controller:
         return
 
 
-    def connect_db(self):
-        """
-        Connects to the database.
-
-        Returns:
-            tuple: A tuple containing the MongoClient object and the database object.
-        """
-        load_dotenv()
-        MONGODB_URI = os.environ.get('MONGO_URI')
-        client = MongoClient(MONGODB_URI)
-        db = client.Caturanga
-        return client, db
-
-
-    # Store custom simulation with simulation_id and simsettings_id:
-    def store_simulation_config(self, result, simulation_id, simsettings_id):
-
-        load_dotenv()
-        MONGODB_URI = os.environ.get('MONGO_URI')
-        client = MongoClient(MONGODB_URI)
-        db = client.Caturanga
-        simulations_collection = db.simulations_results
-
-        new_simulation = {}
-        new_simulation = {
-            "simulation_id": simulation_id,
-            "simsettings_id": simsettings_id,  # Add the relevant simsettings_ID to the dictionary
-            "data": result
-        }
-
-        simulations_collection.insert_one(new_simulation)
-        client.close()
-
-
-# Helper functions - Storing .csv-files for given data and path: -------------------------------------------------------
+# Helper functions - Storing .csv-files for given data and path: --------------
 
     # Store simulation data from DB in csv files for FLEE execution:
     async def convert_simulations_to_csv(self, simulation_id: str):

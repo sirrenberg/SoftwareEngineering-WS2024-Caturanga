@@ -1,15 +1,13 @@
 from fastapi import FastAPI, Path, BackgroundTasks, Query
 from flee_controller.controller import Controller
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
 from typing import Any, Dict, AnyStr, List, Union
 
 app = FastAPI()
 controller = Controller()
 
-# allow CORS (Cross Origin Resource Sharing) - allows us to access the API from a different origin
-# e.g. if we have a frontend on localhost:3000 and the API on localhost:8000, we need to allow the frontend to access the API
 
+# TODO: adjust this for production as allowing all origins is not secure
 origins = ["*"]
 app.add_middleware(
     CORSMiddleware,
@@ -20,146 +18,182 @@ app.add_middleware(
 )
 
 
-### General: -----------------------------------------------------------------------------------------------------------
+# General: --------------------------------------------------------------------
+
 
 @app.get("/")
 def read_root():
+    """
+    Root of the Caturanga API.
+
+    :return: A dictionary containing the welcome message.
+    """
     return {"data": "Welcome to the Caturanga API!!"}
 
-### Run Simulations: ---------------------------------------------------------------------------------------------------
 
-# this runs the Burundi simulation and returns the result
+# Simulation Execution: -------------------------------------------------------
+
+
 @app.get("/run_simulation")
 async def run_simulation(background_tasks: BackgroundTasks):
     """
-    Runs the simulation using the controller module.
+    Runs the default Burundi simulation using the controller module.
+
+    Parameters:
+    - background_tasks (BackgroundTasks): The background tasks object used to
+      run the simulation asynchronously.
 
     Returns:
-        The object id of the dummy simulation result.
+    - dict: A dictionary containing the object ID of the dummy simulation.
 
     Background Tasks:
-        The simulation is run in the background using FastAPI's BackgroundTasks.
-        This allows the user to continue using the application without waiting for the simulation to complete.
+        The simulation is run in the background using FastAPI's
+        BackgroundTasks.
+        This allows the user to continue using the application without waiting
+        for the simulation to complete.
 
     References:
-        - FastAPI Background Tasks: https://fastapi.tiangolo.com/tutorial/background-tasks/
+        - FastAPI Background Tasks: 
+            https://fastapi.tiangolo.com/tutorial/background-tasks/
         - Celery: https://docs.celeryproject.org/en/stable/
-            Celery is an alternative to FastAPI's BackgroundTasks that provides more complex setup but can be used
-            for heavy background computation.
+            Celery is an alternative to FastAPI's BackgroundTasks that
+            provides more complex setup but can be used for
+            heavy background computation.
 
     """
     object_id = await controller.store_dummy_simulation()
 
-    background_tasks.add_task(controller.run_simulation, object_id)
+    background_tasks.add_task(
+        controller.run_simulation,
+        object_id)
 
     return {"dummy simulation": str(object_id)}
 
 
-# Run a simulation with the simsettins for a specific simulation:
-@app.get("/run_simulation_simsettings/{simsetting_id}")
+@app.get("/run_simulation_simsettings/{simsettings_id}")
 async def run_simulation_simsettings(
-        simsetting_id: str = Path(
-            description="The ID of the simulation you want to run"
-        ),
+    background_tasks: BackgroundTasks,
+    simsettings_id: str = Path(),
 ):
-    return await controller.run_simulation_simsettings(simsetting_id)
+    """
+    Run the default Burundi simulation based on the provided simsetting_id.
 
-'''
-# Run a simulation with the simsettings_id and the location name:
-@app.get("/run_simulation/config/")  # E.g. /run/simulation/config/?location=Ethipia&simsettings_id=abcde
-async def run_simulation_config(
-        simulation_id: str = '658dec24819bd1bc1ff738cd',
-        simsettings_id: str = '6570f624987cdd647c68bc7d'  # Default ID der Simulation Settings
-):
-    return await controller.run_simulation_config(simulation_id, simsettings_id)
-    '''
+    Parameters:
+    - background_tasks (BackgroundTasks): The background tasks object used to
+      run the simulation asynchronously.
+    - simsetting_id (str): The ID of the simulation settings.
 
-# Run a simulation with the simsettings_id and the location name:
-# E.g. /run_simulation/config/?simulation_id=658dec24819bd1bc1ff738cd&simsettings_id=6570f624987cdd647c68bc7d
+    Returns:
+    - dict: A dictionary containing the object ID of the dummy simulation.
+    """
+    object_id = await controller.store_dummy_simulation(
+        simsettings_id=simsettings_id)
+
+    background_tasks.add_task(
+        controller.run_simulation_simsettings,
+        simsettings_id,
+        object_id)
+
+    return {"dummy simulation": str(object_id)}
+
+
 @app.get("/run_simulation/config/")
 async def run_simulation_config(
-        simulation_id: str = Query(
-            description="Id der config simulation",
-            example="658dec24819bd1bc1ff738cd"
-        ),
-        simsettings_id: str = Query(
-            description="Id der Id der simsetttings",
-            example="6570f624987cdd647c68bc7d"
-        )
+        background_tasks: BackgroundTasks,
+        simulation_id: str = Query(),
+        simsettings_id: str = Query()
 ):
-    return await controller.run_simulation_config(simulation_id, simsettings_id)
+    """
+    Run simulation with specified simulation input and settings.
+
+    Parameters:
+    - background_tasks (BackgroundTasks): The background tasks object used to
+      run the simulation asynchronously.
+    - simulation_id (str): The ID of the simulation input.
+    - simsettings_id (str): The ID of the simulation settings.
+
+    Returns:
+        dict: A dictionary containing the object ID of the dummy simulation.
+
+    Example:
+        To query this endpoint, use the following URL format:
+        /run_simulation/config/?simulation_id=<simulation_id>&simsettings_id=<simsettings_id>
+    """
+    object_id = await controller.store_dummy_simulation(
+        simulation_id=simulation_id,
+        simsettings_id=simsettings_id
+    )
+
+    background_tasks.add_task(
+        controller.run_simulation_config,
+        simulation_id,
+        simsettings_id,
+        object_id)
+
+    return {"dummy simulation": str(object_id)}
 
 
-### Simulation: --------------------------------------------------------------------------------------------------------
+# Simulations: ---------------------------------------------------------------
 
-## Return all simulations:
+
 @app.get("/simulations")
 async def get_all_simulations():
     """
     Return the data of all simulations.
+
+    Returns:
+    - list: The data of the all simulations.
     """
     return await controller.get_all_simulations()
 
 
-## Return a single simulation by id:
 @app.get("/simulations/{simulation_id}")
 async def get_simulation(
-        simulation_id: str = Path(
-            description="The ID of the simulation whose data you want to view."
-        ),
+        simulation_id: str = Path(),
 ):
     """
     Return the data of a simulation based on its ID.
 
     Parameters:
-        simulation_id (str): The ID of the simulation.
+    - simulation_id (str): The ID of the simulation.
 
     Returns:
-        dict: The data of the simulation.
+    - dict: The data of the simulation.
     """
     return await controller.get_simulation(simulation_id)
 
 
-### Simulation results: ------------------------------------------------------------------------------------------------
+# Simulation results: -------------------------------------------------------
 
-## Return all simulation results:
+
 @app.get("/simulation_results")
 async def get_all_simulation_results():
     """
     Retrieves all simulation results.
 
     Returns:
-        A list of simulation results.
+    - list: A list of all simulation results.
     """
     return await controller.get_all_simulation_results()
 
 
-## Return simulation results of a specific simulation:
 @app.get("/simulation_results/{simulation_result_id}")
 async def get_simulation_result(
-        simulation_result_id: str = Path(
-            description="The ID of the simulation whose data you want to view."
-        ),
+        simulation_result_id: str = Path(),
 ):
     """
     Retrieve the data of a simulation result based on its ID.
 
-    Args:
-        simulation_result_id (str): The ID of the simulation result.
+    Parameters:
+    - simulation_result_id (str): The ID of the simulation result.
 
     Returns:
-        The data of the simulation result.
+    - dict: The data of the simulation result.
     """
     return await controller.get_simulation_result(simulation_result_id)
 
 
-### Simulation inputs: -------------------------------------------------------------------------------------------------
-
-class SimulationSetting(BaseModel):
-    log_levels: str
-    spawn_rules: str
-    move_rules: str
-    optimizations: str
+# Simulation Settings: --------------------------------------------------------
 
 
 JSONObject = Dict[AnyStr, Any]
@@ -167,49 +201,68 @@ JSONArray = List[Any]
 JSONStructure = Union[JSONArray, JSONObject]
 
 
-## Return all simsettings:
 @app.get("/simsettings")
 async def get_all_simsettings():
     """
-    Return the data of all simsettings.
+    Return all simsettings.
+
+    Returns:
+    - list: A list of all simulation settings.
     """
     return await controller.get_all_simsettings()
 
 
-## Return simsettings for a specific simulation:
 @app.get("/simsettings/{simsetting_id}")
-async def get_simulation(
-        simsetting_id: str = Path(
-            description="The ID of the simsetting whose data you want to view."
-        ),
+async def get_simsetting(
+        simsetting_id: str = Path(),
 ):
+    """
+    Retrieve the data of a simulation setting based on its ID.
+
+    Parameters:
+    - simsetting_id (str): The ID of the simulation setting.
+
+    Returns:
+    - dict: The data of the simulation setting.
+    """
     return await controller.get_simsetting(simsetting_id)
 
 
-## Post new simsettings:
 @app.post("/simsettings")
-async def post_simsettings(simsetting: JSONStructure = None):
+async def post_simsettings(
+        simsetting: JSONStructure = None):
     """
-    Example:
-        # curl -X POST "http://127.0.0.1:8080/simsettings" -H  "accept: application/json" -H  "Content-Type: application/json" -d "{\"test_key\":\"test_val\"}"
+    Posts the simulation settings to the controller.
+
+    Parameters:
+    - simsetting (JSONStructure, optional): The simulation settings.
+
+    Returns:
+    - dict: A dictionary containing the posted simulation settings.
     """
     await controller.post_simsettings(simsetting)
     return {"data": simsetting}
 
 
-## Delete simsettings for a specific simulation:
 @app.delete("/simsettings/{simsetting_id}")
 async def delete_simsetting(
-        simsetting_id: str = Path(
-            description="The ID of the simsetting you want to delete."
-        ),
+        simsetting_id: str = Path(),
 ):
+    """
+    Deletes a simulation setting with the given ID.
+
+    Parameters:
+    - simsetting_id (str): The ID of the simulation setting to delete.
+
+    Returns:
+    - The result of the deletion operation.
+    """
     return await controller.delete_simsetting(simsetting_id)
 
 
-# Helper Functions -----------------------------------------------------------------------------------------------------
+# Helper Functions ------------------------------------------------------------
 
-# Retrieve simsettings from the DB and store them in a .yml file in the filesystem:
+
 @app.get("/teststore/{simsetting_id}")
 async def teststore(
     simsetting_id: str = Path(
@@ -221,7 +274,7 @@ async def teststore(
     """
     return await controller.teststore_ss(simsetting_id)
 
-# Read a stored simsettings.yml file from the filesystem:
+
 @app.get("/testread_ss/{simsetting_id}")
 def testread(
         simsetting_id: str = Path(
@@ -233,7 +286,7 @@ def testread(
     """
     return controller.testread_ss(simsetting_id)
 
-# Store all data (in the DB) in .csv files in the filesystem, for a given simulation_id:
+
 @app.get("/test_csv/{simulation_id}")
 async def test_csv(
         simulation_id: str = '658dec24819bd1bc1ff738cd'
@@ -244,10 +297,9 @@ async def test_csv(
     return await controller.convert_simulations_to_csv(simulation_id)
 
 
-# Read all stored .csv in the filesystem for given simulation_id:
 @app.get("/testread_csv/{simulation_id}")
-def testread(
-        simulation_id = Path(
+def testread_csv(
+        simulation_id: str = Path(
             description="ID of simulation of .csv file, which should be returned"
         )
 ):
