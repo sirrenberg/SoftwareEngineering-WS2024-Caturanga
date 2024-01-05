@@ -20,6 +20,10 @@ class Controller:
         Initializes the Controller object.
         """
         self.adapter = Adapter()
+        load_dotenv()
+        self.MONGODB_URI = os.environ.get('MONGO_URI')
+        self.client = MongoClient(self.MONGODB_URI)
+        self.db = self.client.get_database("Caturanga")
 
 # Run simulations: -------------------------------------------------------------------------------------------------
 
