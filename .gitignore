@@ -29,6 +29,6 @@ dist-ssr
 # database
 *.ini
 
-# Untrack and ignore pycache
+# Untrack and ignore pycache files:
 *.pyc
 __pycache__/

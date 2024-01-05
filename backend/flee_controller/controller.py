@@ -8,15 +8,18 @@ import yaml
 import os
 import csv
 
+
 class Controller:
+    """
+    The Controller class handles the interaction with the database and the execution of simulations.
+    """
 
     # Setup of MongoDB DB Connection: ----------------------------------------------------------------------------------
     def __init__(self):
+        """
+        Initializes the Controller object.
+        """
         self.adapter = Adapter()
-        load_dotenv()
-        self.MONGODB_URI = os.environ.get('MONGO_URI')
-        self.client = MongoClient(self.MONGODB_URI)
-        self.db = self.client.get_database("Caturanga")
 
 # Run simulations: -------------------------------------------------------------------------------------------------
 
@@ -136,6 +139,39 @@ class Controller:
 # Return simulation values from DB: --------------------------------------------------------------------------------
 
     # Return all simulsation Results:
+    def store_simulation(self, result, object_id: str):
+        """
+        Stores a simulation result in the database.
+
+        Args:
+            result: The result of the simulation.
+            object_id (str): The ID of the dummy simulation result.
+        """
+        client, db = self.connect_db()
+        simulations_collection = db.simulations_results
+        new_simulation = {}
+        new_simulation["data"] = result
+        simulations_collection.replace_one({"_id": ObjectID(object_id)}, new_simulation)
+        client.close()
+
+
+    async def store_dummy_simulation(self):
+        """
+        Stores a dummy simulation in the database so that the user can see that the simulation is started.
+
+        Returns:
+            str: The ID of the inserted dummy simulation, so that object can be overwritten.
+        """
+        client, db = self.connect_db()
+        collection = db.simulations_results
+        dummy_simulation = {}
+        dummy_simulation["data"] = {}
+        result = collection.insert_one(dummy_simulation)
+        client.close()
+
+        return result.inserted_id
+
+
     async def get_all_simulation_results(self):
         """
         Retrieves all simulation results from the database.
@@ -143,88 +179,114 @@ class Controller:
         Returns:
             list: A list of simulation results, where each result is a dictionary.
         """
-        simulations_results_collection = self.db.get_collection("simulations_results")
+        client, db = self.connect_db()
+        simulations_results_collection = db.get_collection("simulations_results")
         simulations_results = simulations_results_collection.find({})
         rl = []
         for simulation in simulations_results:
             simulation["_id"] = str(simulation["_id"])
             rl.append(simulation)
+
+        client.close()
         return rl
 
     # Return specific simulation by simulation_results_id:
     async def get_simulation_result(self, simulation_result_id: str):
         """
-        Retrieves a simulation results from the database based on its ID.
+        Retrieves a simulation result from the database based on its ID.
+
+        Args:
+            simulation_result_id (str): The ID of the simulation result.
 
         Returns:
-            list: A list of simulation results, where each result is a dictionary.
+            dict: The simulation result.
         """
-        simulations_results_collection = self.db.get_collection("simulations_results")
+        client, db = self.connect_db()
+        simulations_results_collection = db.get_collection("simulations_results")
         simulation_results = simulations_results_collection.find_one({"_id": ObjectID(simulation_result_id)})
         if simulation_results is not None:
             simulation_results["_id"] = str(simulation_results["_id"])
+            client.close()
             return simulation_results
+        else:
+            client.close()
+            return None
 
-    # Get all simulations (not simulation results):
     async def get_all_simulations(self):
         """
-        Return the data of all simulations.
-        """
-        """
-        results = db.get_collection("simulations")
-        results = results.find({
+        Retrieves all simulations from the database.
 
-        })
+        Returns:
+            list: A list of simulations, where each simulation is a dictionary.
         """
-        simulations_collection = self.db.get_collection("simulations")
+        client, db = self.connect_db()
+        simulations_collection = db.get_collection("simulations")
         simulations = simulations_collection.find({})
         rl = []
         for simulation in simulations:
             simulation["_id"] = str(simulation["_id"])
             rl.append(simulation)
+        client.close()
         return rl
 
     # Get specific simulation by simulation_id:
     async def get_simulation(self, simulation_id: str):
         """
-        Return the data of a simulation based on its ID.
+        Retrieves a simulation from the database based on its ID.
 
-        Example:
-            get_simulation("65691061651825804b76fae0")
+        Args:
+            simulation_id (str): The ID of the simulation.
+
+        Returns:
+            dict: The simulation.
         """
-        simulations_collection = self.db.get_collection("simulations")
+        client, db = self.connect_db()
+        simulations_collection = db.get_collection("simulations")
         simulation = simulations_collection.find_one({"_id": ObjectID(simulation_id)})
         if simulation is not None:
             simulation["_id"] = str(simulation["_id"])
+            client.close()
             return simulation
+        else:
+            client.close()
+            return None
 
 
 # Manage simsettings in DB: ----------------------------------------------------------------------------------------
 
     # Store dict of simsettings in DB:
     async def post_simsettings(self, simsetting):
-        simsettings_collection = self.db.simsettings
+        client, db = self.connect_db()
+        simsettings_collection = db.simsettings
         simsettings_collection.insert_one(dict(simsetting))
+        client.close()
         return 1
 
     # Return all stored simsettings of DB:
     async def get_all_simsettings(self):
-        simsettings = self.db.get_collection("simsettings").find({})
+        client, db = self.connect_db()
+        simsettings = db.get_collection("simsettings").find({})
         rl = []
         for simsetting in simsettings:
             simsetting["_id"] = str(simsetting["_id"])
             rl.append(simsetting)
+        client.close()
         return rl
 
     # Get specific simsettings by simsetting_id:
     async def get_simsetting(self, simsetting_id: str):
-        simsetting = self.db.get_collection("simsettings").find_one(
+        client, db = self.connect_db()
+        simsetting = db.get_collection("simsettings").find_one(
             {"_id": ObjectID(simsetting_id)}
         )
         print(simsetting)
         if simsetting is not None:
             simsetting["_id"] = str(simsetting["_id"])
+            client.close()
             return simsetting
+        else:
+            client.close()
+            return None
 
     # Get specific simsettings by simsetting_id and return as dict:
     async def get_simsetting_dict(self, simsetting_id: str):
@@ -240,27 +302,27 @@ class Controller:
 
     # Delete specfici simsettings by simsetting_id:
     async def delete_simsetting(self, simsetting_id: str):
-        return self.db.get_collection("simsettings").delete_one(
+        client, db = self.connect_db()
+        db.get_collection("simsettings").delete_one(
             {"_id": ObjectID(simsetting_id)}
         )
+        client.close()
+        return
 
 
-# Store simulation results: ----------------------------------------------------------------------------------------
+    def connect_db(self):
+        """
+        Connects to the database.
 
-    # Store default simulation without custom location and simsettings:
-    def store_simulation(self, result):
-
+        Returns:
+            tuple: A tuple containing the MongoClient object and the database object.
+        """
         load_dotenv()
         MONGODB_URI = os.environ.get('MONGO_URI')
         client = MongoClient(MONGODB_URI)
         db = client.Caturanga
-        simulations_collection = db.simulations_results
+        return client, db
 
-        new_simulation = {}
-        new_simulation["data"] = result
-
-        simulations_collection.insert_one(new_simulation)
-        client.close()
 
     # Store custom simulation with simulation_id and simsettings_id:
     def store_simulation_config(self, result, simulation_id, simsettings_id):
@@ -605,3 +667,4 @@ class Controller:
 # Define a custom exception for simulation not found
 class SimulationNotFoundError(Exception):
     pass
+

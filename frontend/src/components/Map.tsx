@@ -7,7 +7,7 @@ import {
   Polyline,
 } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
-import { LocationType, SimLocation, Simulation } from "../types";
+import { LocationType, SimLocation, Input, Route } from "../types";
 import { LatLngExpression } from "leaflet";
 import { useMap } from "react-leaflet/hooks";
 import { useEffect } from "react";
@@ -18,16 +18,31 @@ function Map({
   center,
   MapClickHandler,
   NodeClickHandler,
+  NodeDoubleClickHandler,
+  RouteDoubleClickHandler,
+  shouldRecenter,
 }: {
-  input: Simulation;
-  center: LatLngExpression;
+  input?: Input;
+  center?: LatLngExpression;
   MapClickHandler?: () => null;
   NodeClickHandler?: (location: SimLocation) => void;
+  NodeDoubleClickHandler?: (location: SimLocation) => void;
+  RouteDoubleClickHandler?: (route: Route) => void;
+  shouldRecenter?: boolean;
 }) {
   const zoomLevel = 5;
 
   function Recenter() {
+    if (!shouldRecenter) {
+      return null;
+    }
+
     const map = useMap();
+
+    if (!center) {
+      return null;
+    }
+
     useEffect(() => {
       map.flyTo(center, zoomLevel, { duration: 1 });
     }, [center]);
@@ -59,7 +74,7 @@ function Map({
   return (
     <div className="map-background">
       <MapContainer
-        center={[0, 0]}
+        center={center}
         zoom={zoomLevel}
         // scrollWheelZoom={false}
         doubleClickZoom={false}
@@ -88,7 +103,7 @@ function Map({
         />
 
         {/* Add locations */}
-        {input.locations.map((location) => {
+        {input?.locations.map((location) => {
           return (
             <Circle
               key={uuidv4()}
@@ -99,6 +114,11 @@ function Map({
                 click: () => {
                   if (NodeClickHandler) {
                     NodeClickHandler(location);
+                  }
+                },
+                dblclick: () => {
+                  if (NodeDoubleClickHandler) {
+                    NodeDoubleClickHandler(location);
                   }
                 },
               }}
@@ -114,7 +134,7 @@ function Map({
         })}
 
         {/* Add routes */}
-        {input.routes.map((route) => {
+        {input?.routes.map((route) => {
           // search for from and to locations
           const fromLocation = input.locations.find(
             (location) => location.name === route.from
@@ -137,6 +157,13 @@ function Map({
                 [fromLocation.latitude, fromLocation.longitude],
                 [toLocation.latitude, toLocation.longitude],
               ]}
+              eventHandlers={{
+                dblclick: () => {
+                  if (RouteDoubleClickHandler) {
+                    RouteDoubleClickHandler(route);
+                  }
+                },
+              }}
             >
               <Popup>
                 {fromLocation.name} to {toLocation.name}: {route.distance} km

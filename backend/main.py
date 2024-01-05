@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Path, Query, Request
+from fastapi import FastAPI, Path, BackgroundTasks, Query
 from flee_controller.controller import Controller
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -26,19 +26,33 @@ app.add_middleware(
 def read_root():
     return {"data": "Welcome to the Caturanga API!!"}
 
-
 ### Run Simulations: ---------------------------------------------------------------------------------------------------
 
-# Run the Burundi simulation and returns the result
-@app.get("/run_simulation/")
-def run_simulation():
+# this runs the Burundi simulation and returns the result
+@app.get("/run_simulation")
+async def run_simulation(background_tasks: BackgroundTasks):
     """
     Runs the simulation using the controller module.
 
     Returns:
-        The result of the simulation.
+        The object id of the dummy simulation result.
+
+    Background Tasks:
+        The simulation is run in the background using FastAPI's BackgroundTasks.
+        This allows the user to continue using the application without waiting for the simulation to complete.
+
+    References:
+        - FastAPI Background Tasks: https://fastapi.tiangolo.com/tutorial/background-tasks/
+        - Celery: https://docs.celeryproject.org/en/stable/
+            Celery is an alternative to FastAPI's BackgroundTasks that provides more complex setup but can be used
+            for heavy background computation.
+
     """
-    return controller.run_simulation()
+    object_id = await controller.store_dummy_simulation()
+
+    background_tasks.add_task(controller.run_simulation, object_id)
+
+    return {"dummy simulation": str(object_id)}
 
 
 # Run a simulation with the simsettins for a specific simulation:

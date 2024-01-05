@@ -1,20 +1,12 @@
-enum Country {
-  burundi = "Burundi",
-  car = "Central African Republic",
-  ethiopia = "Ethiopia",
-  mali = "Mali",
-  ssudan = "South Sudan",
-}
-
 enum LocationType {
-  conflict_zone = "Conflict Zone",
-  town = "Town",
-  forwarding_hub = "Forwarding Hub",
-  camp = "Camp",
+  conflict_zone = "conflict_zone",
+  town = "town",
+  forwarding_hub = "forwarding_hub",
+  camp = "camp",
 }
 
 enum MapOperatingMode {
-  vizualizing = "Vizualizing",
+  vizualizing = "Visualizing",
   adding_location = "Adding Location",
   adding_route = "Adding Route",
 }
@@ -38,11 +30,54 @@ interface Route {
   forced_redirection?: number;
 }
 
-interface Simulation {
-  name: Country;
+interface Input {
+  _id: string;
+  region: string;
   locations: SimLocation[];
   routes: Route[];
+  name: string;
+  // TODO: Remove Array (only one sim_period)
+  sim_period: {
+    date: string;
+    length: number;
+  };
 }
 
-export type { SimLocation, Route, Simulation };
-export { Country, LocationType, MapOperatingMode };
+interface SimSettings {
+  _id: string;
+  name: string;
+  log_levels: {
+    agent: number;
+    link: number;
+    camp: number;
+    conflict: number;
+    init: number;
+    idp_totals: number;
+    granularity: string;
+  };
+  spawn_rules: {
+    take_from_population: boolean;
+    insert_day0: boolean;
+  };
+  move_rules: {
+    max_move_speed: number;
+    max_walk_speed: number;
+    foreign_weight: number;
+    conflict_weight: number;
+    camp_weight: number;
+    conflict_movechance: number;
+    camp_movechance: number;
+    default_movechance: number;
+    awareness_level: number;
+    capacity_scaling: number;
+    avoid_short_stints: boolean;
+    start_on_foot: boolean;
+    weight_power: number;
+  };
+  optimisations: {
+    hasten: number;
+  };
+}
+
+export type { SimLocation, Route, Input, SimSettings };
+export { LocationType, MapOperatingMode };
