@@ -3,6 +3,16 @@ from bson.objectid import ObjectId as ObjectID
 from dotenv import load_dotenv
 from flee_adapter.adapter import Adapter
 import os
+import logging
+import boto3
+from fastapi import FastAPI, Path, Request
+import logging
+import boto3
+from botocore.exceptions import ClientError
+import json
+
+
+logging.basicConfig(level=logging.DEBUG)
 
 
 class Controller:
@@ -15,6 +25,9 @@ class Controller:
         Initializes the Controller object.
         """
         self.adapter = Adapter()
+        secret = self.get_secret()
+        self.username = secret["username"] # store username and password in environment variables, so that they don't have to be fetched from the AWS Secrets Manager every time, which is expensive
+        self.password = secret["password"]
 
     def run_simulation(self, simulation_id: str):
         """
@@ -178,6 +191,58 @@ class Controller:
         client.close()
         return 
 
+    
+    def get_secret(self):
+        """
+        Retrieves the secret value that contains the username and password for the documentDB database from the AWS Secrets Manager.
+        """
+        logging.basicConfig(level=logging.DEBUG)
+        secret_name = "caturanga-db-user-and-pw"
+        region_name = "eu-west-1"
+
+        # Create a Secrets Manager client
+        logging.debug("Creating a boto3 session...")
+        session = boto3.session.Session()
+        logging.debug("Session created. Session is of type: " + str(type(session)))
+        logging.debug("Creating a boto3 client...")
+        client = session.client(service_name="secretsmanager", region_name=region_name)
+        logging.debug("Client created. Client is of type: " + str(type(client)))
+
+        try:
+            logging.debug("Trying to get secret value...")
+            get_secret_value_response = client.get_secret_value(SecretId=secret_name)
+            logging.debug(
+                "Secret value retrieved. Secret value is of type: "
+                + str(type(get_secret_value_response))
+            )
+        except ClientError as e:
+            # For a list of exceptions thrown, see
+            # https://docs.aws.amazon.com/secretsmanager/latest/apireference/API_GetSecretValue.html
+            return e
+
+        logging.debug("Trying to parse secret value...")
+        secret = get_secret_value_response["SecretString"]
+        logging.debug("Secret value parsed. Secret value is of type: " + str(type(secret)))
+
+        json_secret = json.loads(secret)
+        print("Type of json_secret:" + str(type(json_secret)))
+
+        logging.debug("Trying to parse secret value as JSON...")
+        username = json_secret["username"]
+        print("Username is " + str(username))
+        logging.debug(
+            "Secret value parsed as JSON. Username is of type: " + str(type(username))
+        )
+
+        return json.loads(secret)
+
+    def migrate_from_atlas(self):
+        """
+        
+        """
+        pass
+
+
     def connect_db(self):
         """
         Connects to the database.
@@ -186,7 +251,39 @@ class Controller:
             tuple: A tuple containing the MongoClient object and the database object.
         """
         load_dotenv()
-        MONGODB_URI = os.environ.get('MONGO_URI')
+        MONGODB_URI = f"mongodb://{self.username}:{self.password}@caturanga-2023-12-08-16-18-00.cluster-cqhcnfxitkih.eu-west-1.docdb.amazonaws.com:27017/?tls=true&tlsCAFile=global-bundle.pem&replicaSet=rs0&readPreference=secondaryPreferred&retryWrites=false"
         client = MongoClient(MONGODB_URI)
         db = client.Caturanga
         return client, db
+    
+    def connect_atlas_db(self):
+        """
+        Connects to the database.
+
+        Returns:
+            tuple: A tuple containing the MongoClient object and the database object.
+        """
+        load_dotenv()
+        MONGODB_URI = os.environ.get('MONGO_URI')
+        atlas_client = MongoClient(MONGODB_URI)
+        atlas_db = atlas_client.Caturanga
+        return atlas_client, atlas_db
+    
+    def migrate_from_atlas(self):
+        """
+        Insert all data from the Atlas database into the Amazon DocumentDB database.
+        """
+        atlas_client, atlas_db = self.connect_atlas_db()
+        atlas_collection_names = atlas_db.list_collection_names()
+        for collection_name in atlas_collection_names:
+            atlas_collection = atlas_db.get_collection(collection_name)
+            atlas_documents = atlas_collection.find({})
+            for document in atlas_documents:
+                aws_ddb_client, aws_ddb_db = self.connect_db()
+                aws_ddb_db.get_collection(collection_name).insert_one(document)
+                aws_ddb_client.close()
+
+        atlas_client.close()
+        return "Migration successful."
+
+    

@@ -20,7 +20,7 @@ RUN npm run build
 ENV NODE_ENV=production
 
 ## EXPOSE [Port you mentioned in the vite.config file]
-EXPOSE 5173
+EXPOSE 80
 
 # Start the server
 CMD ["npm", "run", "dev"]

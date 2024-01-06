@@ -147,6 +147,14 @@ async def post_simsettings(simsetting: JSONStructure = None):
     await controller.post_simsettings(simsetting)
     return {"data": simsetting}
 
+@app.get("/migrate-from-atlas")
+def migrate_from_atlas():
+    """
+    Insert all data from the Atlas database into the Amazon DocumentDB database.
+    """
+    return controller.migrate_from_atlas()
+
+
 
 @app.delete("/simsettings/{simsetting_id}")
 async def delete_simsetting(
