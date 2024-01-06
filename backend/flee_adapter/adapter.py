@@ -46,7 +46,8 @@ class Adapter:
 
     def run_simulation_config(self,
                               simulation_dir: str,
-                              simsettings_file: str):
+                              simsettings_file: str,
+                              validation_dir: str):
         """
         Runs a simulation using custom simulation and simsettings.
 
@@ -58,7 +59,7 @@ class Adapter:
         -dict: The result of the simulation.
         """
         sim = Simulation(simulation_dir,
-                         "flee/conflict_validation/burundi2015",
+                         validation_dir,
                          0,
                          simsettings_file)
         result = sim.run()

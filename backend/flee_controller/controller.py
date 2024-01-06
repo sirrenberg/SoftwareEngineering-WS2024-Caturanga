@@ -97,9 +97,13 @@ class Controller:
             simulation_id,
             backend_root_dir)
 
+        validation_dir = await self.store_validation_to_filesystem(
+            backend_root_dir)
+
         sim = self.adapter.run_simulation_config(
             simulation_dir,
-            simsettings_filename)
+            simsettings_filename,
+            validation_dir)
 
         self.store_simulation(
             sim,
@@ -237,6 +241,26 @@ class Controller:
             simulation_dir.mkdir(parents=True)
 
         return simulation_dir
+
+    async def store_validation_to_filesystem(
+            self,
+            backend_root_dir: Path):
+
+        validation_dir = \
+            backend_root_dir / "flee_stored_files" / "conflict_validation"
+        data_layout = validation_dir / "data_layout.csv"
+
+        if not validation_dir.exists():
+            validation_dir.mkdir(parents=True)
+
+        # create an empty csv file
+        try:
+            open(data_layout, 'w').close()
+        except Exception as e:
+            return f"Exception while creating data_layout.csv: {e}"
+
+        return validation_dir
+
 
 # Simulations and Simulation Results: -----------------------------------------
 
