@@ -446,10 +446,6 @@ class Controller:
                                            "conflict_date",
                                            "population"])
                 
-                # registration_corrections.csv file:
-                self.export_registration_corrections_csv(os.path.join(simulation_dir, "registration_corrections.csv"),
-                                                         simulation["registration_corrections"])
-                
                 # routes.csv file:
                 self.export_routes_csv(os.path.join(simulation_dir, "routes.csv"), simulation["routes"],
                                        ["from", "to", "distance",
@@ -550,30 +546,6 @@ class Controller:
                          row.values()])
 
                 return "File created successfully"
-
-        except Exception as e:
-            return e
-
-    # Helper Function to create csv-file from filename, data and fieldnames:
-    def export_registration_corrections_csv(self, file_name, data):
-
-        """
-        :param file_name: New path of file incl. filename
-        :param data: Row data
-        :return: Returns nothin, only creates and stores files
-        """
-
-        try:
-            with open(file_name, mode='w', newline='') as csv_file:
-                writer = csv.writer(csv_file)
-
-                # Write data
-                for row in data:
-                    name = row['name']
-                    date_str = row['date'].strftime('%Y-%m-%d')
-                    writer.writerow([name, date_str])
-
-                return "File created succesfully"
 
         except Exception as e:
             return e
