@@ -6,7 +6,6 @@ import os
 import logging
 import boto3
 from fastapi import FastAPI, Path, Request
-import logging
 import boto3
 from botocore.exceptions import ClientError
 import json
@@ -25,7 +24,7 @@ class Controller:
         Initializes the Controller object.
         """
         self.adapter = Adapter()
-        secret = self.get_secret()
+        secret = self.get_secret("caturanga-db-user-and-pw")
         self.username = secret["username"] # store username and password in environment variables, so that they don't have to be fetched from the AWS Secrets Manager every time, which is expensive
         self.password = secret["password"]
 
@@ -190,14 +189,12 @@ class Controller:
         )
         client.close()
         return 
-
     
-    def get_secret(self):
+    def get_secret(self, secret_name):
         """
         Retrieves the secret value that contains the username and password for the documentDB database from the AWS Secrets Manager.
         """
         logging.basicConfig(level=logging.DEBUG)
-        secret_name = "caturanga-db-user-and-pw"
         region_name = "eu-west-1"
 
         # Create a Secrets Manager client
@@ -236,13 +233,6 @@ class Controller:
 
         return json.loads(secret)
 
-    def migrate_from_atlas(self):
-        """
-        
-        """
-        pass
-
-
     def connect_db(self):
         """
         Connects to the database.
@@ -255,35 +245,4 @@ class Controller:
         client = MongoClient(MONGODB_URI)
         db = client.Caturanga
         return client, db
-    
-    def connect_atlas_db(self):
-        """
-        Connects to the database.
-
-        Returns:
-            tuple: A tuple containing the MongoClient object and the database object.
-        """
-        load_dotenv()
-        MONGODB_URI = os.environ.get('MONGO_URI')
-        atlas_client = MongoClient(MONGODB_URI)
-        atlas_db = atlas_client.Caturanga
-        return atlas_client, atlas_db
-    
-    def migrate_from_atlas(self):
-        """
-        Insert all data from the Atlas database into the Amazon DocumentDB database.
-        """
-        atlas_client, atlas_db = self.connect_atlas_db()
-        atlas_collection_names = atlas_db.list_collection_names()
-        for collection_name in atlas_collection_names:
-            atlas_collection = atlas_db.get_collection(collection_name)
-            atlas_documents = atlas_collection.find({})
-            for document in atlas_documents:
-                aws_ddb_client, aws_ddb_db = self.connect_db()
-                aws_ddb_db.get_collection(collection_name).insert_one(document)
-                aws_ddb_client.close()
-
-        atlas_client.close()
-        return "Migration successful."
-
     
