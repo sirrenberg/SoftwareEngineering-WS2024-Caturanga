@@ -1,5 +1,5 @@
 export function useAPI() {
-  const API_URL = "http://52.209.42.166";
+  const API_URL = "http://34.254.183.97";
 
   function sendRequest(route: string, method: string, body?: any) {
     return fetch(API_URL + route, {
