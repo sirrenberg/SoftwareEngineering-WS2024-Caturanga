@@ -53,7 +53,7 @@ async def run_simulation(background_tasks: BackgroundTasks):
         for the simulation to complete.
 
     References:
-        - FastAPI Background Tasks: 
+        - FastAPI Background Tasks:
             https://fastapi.tiangolo.com/tutorial/background-tasks/
         - Celery: https://docs.celeryproject.org/en/stable/
             Celery is an alternative to FastAPI's BackgroundTasks that
@@ -61,13 +61,13 @@ async def run_simulation(background_tasks: BackgroundTasks):
             heavy background computation.
 
     """
-    object_id = await controller.store_dummy_simulation()
+    data = await controller.initialize_simulation()
 
     background_tasks.add_task(
         controller.run_simulation,
-        object_id)
+        data["objectid"])
 
-    return {"dummy simulation": str(object_id)}
+    return {"dummy simulation": str(data["objectid"])}
 
 
 @app.get("/run_simulation_simsettings/{simsettings_id}")
@@ -86,15 +86,17 @@ async def run_simulation_simsettings(
     Returns:
     - dict: A dictionary containing the object ID of the dummy simulation.
     """
-    object_id = await controller.store_dummy_simulation(
-        simsettings_id=simsettings_id)
+    data = await controller.initialize_simulation(
+        simsettings_id=simsettings_id
+    )
 
     background_tasks.add_task(
         controller.run_simulation_simsettings,
         simsettings_id,
-        object_id)
+        data["objectid"],
+        data["simsettings_filename"])
 
-    return {"dummy simulation": str(object_id)}
+    return {"dummy simulation": str(data["objectid"])}
 
 
 @app.get("/run_simulation/config/")
@@ -119,7 +121,7 @@ async def run_simulation_config(
         To query this endpoint, use the following URL format:
         /run_simulation/config/?simulation_id=<simulation_id>&simsettings_id=<simsettings_id>
     """
-    object_id = await controller.store_dummy_simulation(
+    data = await controller.initialize_simulation(
         simulation_id=simulation_id,
         simsettings_id=simsettings_id
     )
@@ -128,9 +130,12 @@ async def run_simulation_config(
         controller.run_simulation_config,
         simulation_id,
         simsettings_id,
-        object_id)
+        data["objectid"],
+        data["simsettings_filename"],
+        data["simulation_dir"],
+        data["validation_dir"])
 
-    return {"dummy simulation": str(object_id)}
+    return {"dummy simulation": str(data["objectid"])}
 
 
 # Simulations: ---------------------------------------------------------------

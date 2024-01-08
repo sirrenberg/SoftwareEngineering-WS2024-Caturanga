@@ -22,12 +22,50 @@ class Controller:
         Initializes the Controller object.
         """
         self.adapter = Adapter()
+        self.backend_root_dir = Path(__file__).resolve().parent
         load_dotenv()
         self.MONGODB_URI = os.environ.get('MONGO_URI')
         self.client = MongoClient(self.MONGODB_URI)
         self.db = self.client.get_database("Caturanga")
 
 # Run simulations: ------------------------------------------------------------
+
+    async def initialize_simulation(
+            self,
+            simulation_id: str = "658dec24819bd1bc1ff738cd",
+            simsettings_id: str = "6570f624987cdd647c68bc7d"):
+        """
+        Initializes a simulation by storing the input directory, simsettings,
+        validation directory to the filesystem, and returns the object ID,
+        simsettings filename, simulation directory, and validation directory.
+
+        Args:
+            simulation_id (str): The ID of the simulation. 
+            Defaults to "658dec24819bd1bc1ff738cd".(Burundi)
+            simsettings_id (str): The ID of the simulation settings.
+            Defaults to "6570f624987cdd647c68bc7d".(default)
+
+        Returns:
+            dict: A dictionary containing the object ID, simsettings filename,
+            simulation directory, and validation directory.
+        """
+
+        objectid = await self.store_dummy_simulation(
+            simulation_id,
+            simsettings_id)
+
+        simsettings_filename = await self.store_simsettings_to_filesystem(
+            simsettings_id)
+
+        simulation_dir = await self.store_simulation_to_filesystem(
+            simulation_id)
+
+        validation_dir = await self.store_validation_to_filesystem()
+
+        return {"objectid": objectid,
+                "simsettings_filename": simsettings_filename,
+                "simulation_dir": simulation_dir,
+                "validation_dir": validation_dir}
 
     def run_simulation(self, object_id: str):
         """
@@ -40,7 +78,11 @@ class Controller:
         self.store_simulation(sim, object_id)
 
     # Run default simulation (burundi) with custom simsettings and store result:
-    async def run_simulation_simsettings(self, simsettings_id: str, object_id: str):
+    def run_simulation_simsettings(
+            self,
+            simsettings_id: str,
+            object_id: str,
+            simsettings_filename: str):
         """
         Runs a simulation with custom simsettings stored in the database
         using the provided simsettings_id.
@@ -56,12 +98,6 @@ class Controller:
         - The simulation results.
         """
 
-        backend_root_dir = Path(__file__).resolve().parent
-
-        simsettings_filename = await self.store_simsettings_to_filesystem(
-            simsettings_id,
-            backend_root_dir)
-
         sim = self.adapter.run_simulation_ss(simsettings_filename)
 
         self.store_simulation(
@@ -70,11 +106,14 @@ class Controller:
             simsettings_id=simsettings_id)
 
     # Run simulation with provided simulation_id and simsettings_id and store results in DB:
-    async def run_simulation_config(
+    def run_simulation_config(
             self,
             simulation_id: str,
             simsettings_id: str,
-            object_id: str):
+            object_id: str,
+            simsettings_filename: str,
+            simulation_dir: str,
+            validation_dir: str):
 
         """
         Runs a simulation with custom simsettings and input stored in the database
@@ -86,19 +125,6 @@ class Controller:
         :param simsettings_id: Simulation Settings ID in DB
         :return: Returns simulation results
         """
-
-        backend_root_dir = Path(__file__).resolve().parent
-
-        simsettings_filename = await self.store_simsettings_to_filesystem(
-            simsettings_id,
-            backend_root_dir)
-
-        simulation_dir = await self.store_simulation_to_filesystem(
-            simulation_id,
-            backend_root_dir)
-
-        validation_dir = await self.store_validation_to_filesystem(
-            backend_root_dir)
 
         sim = self.adapter.run_simulation_config(
             simulation_dir,
@@ -191,8 +217,7 @@ class Controller:
 
     async def store_simsettings_to_filesystem(
             self,
-            simsettings_id: str,
-            backend_root_dir: Path):
+            simsettings_id: str):
 
         # Get Simsettings from DB:
         try:
@@ -202,7 +227,7 @@ class Controller:
 
         # Total path to simsettings-file:
         simsettings_dir = \
-            backend_root_dir / "flee_stored_files" / "simsettings"
+            self.backend_root_dir / "flee_stored_files" / "simsettings"
         filename = simsettings_id + ".yml"
         simsettings_filename = simsettings_dir / filename
 
@@ -223,8 +248,7 @@ class Controller:
 
     async def store_simulation_to_filesystem(
             self,
-            simulation_id: str,
-            backend_root_dir: Path):
+            simulation_id: str):
 
         try:
             await self.convert_simulations_to_csv(simulation_id)
@@ -233,7 +257,7 @@ class Controller:
 
         # Path to simulation directory (.csv - FLEE files of simulation):
         simulation_dir = \
-            backend_root_dir / "flee_stored_files" / "conflict_input" / \
+            self.backend_root_dir / "flee_stored_files" / "conflict_input" / \
             simulation_id
 
         # Create simulations-directory:
@@ -242,12 +266,10 @@ class Controller:
 
         return simulation_dir
 
-    async def store_validation_to_filesystem(
-            self,
-            backend_root_dir: Path):
+    async def store_validation_to_filesystem(self):
 
         validation_dir = \
-            backend_root_dir / "flee_stored_files" / "conflict_validation"
+            self.backend_root_dir / "flee_stored_files" / "conflict_validation"
         data_layout = validation_dir / "data_layout.csv"
 
         if not validation_dir.exists():
