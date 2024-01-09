@@ -67,44 +67,6 @@ class Controller:
                 "simulation_dir": simulation_dir,
                 "validation_dir": validation_dir}
 
-    def run_simulation(self, object_id: str):
-        """
-        Runs a simulation and stores the result in the database.
-
-        Parameter:
-        - simulation_id (str): The object ID of the dummy simulation.
-        """
-        sim = self.adapter.run_simulation()
-        self.store_simulation(sim, object_id)
-
-    # Run default simulation (burundi) with custom simsettings and store result:
-    def run_simulation_simsettings(
-            self,
-            simsettings_id: str,
-            object_id: str,
-            simsettings_filename: str):
-        """
-        Runs a simulation with custom simsettings stored in the database
-        using the provided simsettings_id.
-        Stores the simulation results in the database associated with the
-        simsettings_id and the default location 'burundi'.
-
-        Patameter:
-        - simsettings_id (str): The ID of the simulation settings in the 
-          database.
-        - object_id (str): The object ID of the dummy simulation.
-
-        Returns:
-        - The simulation results.
-        """
-
-        sim = self.adapter.run_simulation_ss(simsettings_filename)
-
-        self.store_simulation(
-            sim,
-            object_id=object_id,
-            simsettings_id=simsettings_id)
-
     # Run simulation with provided simulation_id and simsettings_id and store results in DB:
     def run_simulation_config(
             self,
