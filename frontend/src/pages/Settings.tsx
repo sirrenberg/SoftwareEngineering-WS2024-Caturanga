@@ -35,7 +35,13 @@ function Settings() {
         <h2 className="items-list-title">Saved Settings</h2>
 
         <div className="items-list" id="settings-items-list">
-          {settings.map((setting, index) => {
+
+          {settings.length === 0 && 
+          <h3>Loading...</h3>
+          }
+
+          {settings &&
+          settings.map((setting, index) => {
             return (
               <button
                 key={setting._id}

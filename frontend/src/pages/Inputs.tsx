@@ -42,7 +42,13 @@ function Inputs() {
         <h2 className="items-list-title">Saved Inputs</h2>
 
         <div className="items-list">
-          {inputs.map((input, index) => {
+
+          {inputs.length === 0 && 
+          <h3>Loading...</h3>
+          }
+
+          {inputs &&
+          inputs.map((input, index) => {
             return (
               <button
                 key={input._id}
