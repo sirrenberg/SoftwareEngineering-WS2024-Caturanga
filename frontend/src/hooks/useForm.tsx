@@ -41,40 +41,6 @@ export function useForm(initialFValues: any) {
       return;
     }
 
-    // Log levels are nested in the sim_settings object
-    if (
-      [
-        "agent",
-        "link",
-        "camp",
-        "conflict",
-        "init",
-        "idp_totals",
-        "granularity",
-      ].includes(name)
-    ) {
-      setValues({
-        ...values,
-        log_levels: {
-          ...values.log_levels,
-          [name]: value,
-        },
-      });
-      return;
-    }
-
-    // Spawn rules are nested in the sim_settings object
-    if (["take_from_population", "insert_day0"].includes(name)) {
-      setValues({
-        ...values,
-        spawn_rules: {
-          ...values.spawn_rules,
-          [name]: value,
-        },
-      });
-      return;
-    }
-
     // Move rules are nested in the sim_settings object
     if (
       [
@@ -83,6 +49,8 @@ export function useForm(initialFValues: any) {
         "foreign_weight",
         "conflict_weight",
         "camp_weight",
+        "use_pop_for_loc_weight",
+        "pop_power_for_loc_weight",
         "conflict_movechance",
         "camp_movechance",
         "default_movechance",

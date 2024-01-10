@@ -12,25 +12,14 @@ function AddSetting() {
   const initialValues: SimSettings = {
     _id: "",
     name: "",
-    log_levels: {
-      agent: 0,
-      link: 0,
-      camp: 0,
-      conflict: 0,
-      init: 0,
-      idp_totals: 0,
-      granularity: "",
-    },
-    spawn_rules: {
-      take_from_population: false,
-      insert_day0: false,
-    },
     move_rules: {
       max_move_speed: 0,
       max_walk_speed: 0,
       foreign_weight: 0,
       conflict_weight: 0,
       camp_weight: 0,
+      use_pop_for_loc_weight: false,
+      pop_power_for_loc_weight: 0,
       conflict_movechance: 0,
       camp_movechance: 0,
       default_movechance: 0,
@@ -77,140 +66,9 @@ function AddSetting() {
         </div>
       </div>
 
-      <div className="log-levels-container settings-input-section">
-        <h2 className="page-subtitle">Log Levels</h2>
-        <div className="fields-container">
-          <div className="input-field-container">
-            <label htmlFor="">
-              Agent: <br />
-              <input
-                className="input-field"
-                type="number"
-                placeholder="0"
-                name="agent"
-                value={values.log_levels.agent}
-                onChange={handleInputChange}
-              />
-            </label>
-          </div>
-          <div className="input-field-container">
-            <label htmlFor="">
-              Link: <br />
-              <input
-                className="input-field"
-                type="number"
-                placeholder="0"
-                name="link"
-                value={values.log_levels.link}
-                onChange={handleInputChange}
-              />
-            </label>
-          </div>
-          <div className="input-field-container">
-            <label htmlFor="">
-              Camp: <br />
-              <input
-                className="input-field"
-                type="number"
-                placeholder="0"
-                name="camp"
-                value={values.log_levels.camp}
-                onChange={handleInputChange}
-              />
-            </label>
-          </div>
-          <div className="input-field-container">
-            <label htmlFor="">
-              Conflict: <br />
-              <input
-                className="input-field"
-                type="number"
-                placeholder="0"
-                name="conflict"
-                value={values.log_levels.conflict}
-                onChange={handleInputChange}
-              />
-            </label>
-          </div>
-        </div>
-
-        <div className="fields-container">
-          <div className="input-field-container">
-            <label htmlFor="">
-              Init: <br />
-              <input
-                className="input-field"
-                type="number"
-                placeholder="0"
-                name="init"
-                value={values.log_levels.init}
-                onChange={handleInputChange}
-              />
-            </label>
-          </div>
-          <div className="input-field-container">
-            <label htmlFor="">
-              IDP Totals: <br />
-              <input
-                className="input-field"
-                type="number"
-                placeholder="0"
-                name="idp_totals"
-                value={values.log_levels.idp_totals}
-                onChange={handleInputChange}
-              />
-            </label>
-          </div>
-          <div className="input-field-container">
-            <label htmlFor="">
-              Granularity: <br />
-              <input
-                className="input-field"
-                type="text"
-                placeholder="0"
-                name="granularity"
-                value={values.log_levels.granularity}
-                onChange={handleInputChange}
-              />
-            </label>
-          </div>
-        </div>
-      </div>
-
-      <div className="spawn-rules-container settings-input-section">
-        <h2 className="page-subtitle">Spawn Rules</h2>
-        <div className="fields-container">
-          <div className="input-field-container">
-            <label htmlFor="" className="checkbox-label">
-              Take From Population: <br />
-              <input
-                className="input-field"
-                type="checkbox"
-                placeholder="0"
-                name="take_from_population"
-                checked={values.spawn_rules.take_from_population}
-                onChange={handleInputChange}
-              />
-            </label>
-          </div>
-          <div className="input-field-container">
-            <label htmlFor="" className="checkbox-label">
-              Insert Day0: <br />
-              <input
-                className="input-field"
-                type="checkbox"
-                placeholder="0"
-                name="insert_day0"
-                checked={values.spawn_rules.insert_day0}
-                onChange={handleInputChange}
-              />
-            </label>
-          </div>
-        </div>
-      </div>
-
       <div className="move-rules-container settings-input-section">
         <h2 className="page-subtitle">Movement Rules</h2>
+        <h3 className="page-subsubtitle">Movement Speed</h3>
         <div className="fields-container">
           <div className="input-field-container">
             <label htmlFor="">
@@ -240,6 +98,7 @@ function AddSetting() {
           </div>
         </div>
 
+        <h3 className="page-subsubtitle">Location Weight</h3>
         <div className="fields-container">
           <div className="input-field-container">
             <label htmlFor="">
@@ -284,6 +143,36 @@ function AddSetting() {
 
         <div className="fields-container">
           <div className="input-field-container">
+            <label htmlFor="" className="checkbox-label">
+              Use Population For Location Weight: <br />
+              <input
+                className="input-field"
+                type="checkbox"
+                placeholder="0"
+                name="use_pop_for_loc_weight"
+                checked={values.move_rules.use_pop_for_loc_weight}
+                onChange={handleInputChange}
+              />
+            </label>
+          </div>
+          <div className="input-field-container">
+            <label htmlFor="">
+              Population Power For Location Weight: <br />
+              <input
+                className="input-field"
+                type="number"
+                placeholder="0"
+                name="pop_power_for_loc_weight"
+                value={values.move_rules.pop_power_for_loc_weight}
+                onChange={handleInputChange}
+              />
+            </label>
+          </div>
+        </div>
+
+        <h3 className="page-subsubtitle">Movement Chance</h3>
+        <div className="fields-container">
+          <div className="input-field-container">
             <label htmlFor="">
               Conflict Movechance: <br />
               <input
@@ -325,6 +214,7 @@ function AddSetting() {
           </div>
         </div>
 
+        <h3 className="page-subsubtitle">Advanced</h3>
         <div className="fields-container">
           <div className="input-field-container">
             <label htmlFor="">

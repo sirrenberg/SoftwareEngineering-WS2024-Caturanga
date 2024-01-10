@@ -96,149 +96,9 @@ function Settings() {
               </div>
             </div>
 
-            <div className="log-levels-container settings-input-section">
-              <h2 className="page-subtitle">Log Levels</h2>
-              <div className="fields-container">
-                <div className="input-field-container">
-                  <label htmlFor="">
-                    Agent: <br />
-                    <input
-                      className="input-field"
-                      type="number"
-                      placeholder="0"
-                      name="agent"
-                      value={settings[selectedSettingIndex].log_levels.agent}
-                      disabled={true}
-                    />
-                  </label>
-                </div>
-                <div className="input-field-container">
-                  <label htmlFor="">
-                    Link: <br />
-                    <input
-                      className="input-field"
-                      type="number"
-                      placeholder="0"
-                      name="link"
-                      value={settings[selectedSettingIndex].log_levels.link}
-                      disabled={true}
-                    />
-                  </label>
-                </div>
-                <div className="input-field-container">
-                  <label htmlFor="">
-                    Camp: <br />
-                    <input
-                      className="input-field"
-                      type="number"
-                      placeholder="0"
-                      name="camp"
-                      value={settings[selectedSettingIndex].log_levels.camp}
-                      disabled={true}
-                    />
-                  </label>
-                </div>
-                <div className="input-field-container">
-                  <label htmlFor="">
-                    Conflict: <br />
-                    <input
-                      className="input-field"
-                      type="number"
-                      placeholder="0"
-                      name="conflict"
-                      value={settings[selectedSettingIndex].log_levels.conflict}
-                      disabled={true}
-                    />
-                  </label>
-                </div>
-              </div>
-
-              <div className="fields-container">
-                <div className="input-field-container">
-                  <label htmlFor="">
-                    Init: <br />
-                    <input
-                      className="input-field"
-                      type="number"
-                      placeholder="0"
-                      name="init"
-                      value={settings[selectedSettingIndex].log_levels.init}
-                      disabled={true}
-                    />
-                  </label>
-                </div>
-                <div className="input-field-container">
-                  <label htmlFor="">
-                    IDP Totals: <br />
-                    <input
-                      className="input-field"
-                      type="number"
-                      placeholder="0"
-                      name="idp_totals"
-                      value={
-                        settings[selectedSettingIndex].log_levels.idp_totals
-                      }
-                      disabled={true}
-                    />
-                  </label>
-                </div>
-                <div className="input-field-container">
-                  <label htmlFor="">
-                    Granularity: <br />
-                    <input
-                      className="input-field"
-                      type="text"
-                      placeholder="0"
-                      name="granularity"
-                      value={
-                        settings[selectedSettingIndex].log_levels.granularity
-                      }
-                      disabled={true}
-                    />
-                  </label>
-                </div>
-              </div>
-            </div>
-
-            <div className="spawn-rules-container settings-input-section">
-              <h2 className="page-subtitle">Spawn Rules</h2>
-              <div className="fields-container">
-                <div className="input-field-container">
-                  <label htmlFor="" className="checkbox-label">
-                    Take From Population: <br />
-                    <input
-                      className="input-field"
-                      type="checkbox"
-                      placeholder="0"
-                      name="take_from_population"
-                      checked={
-                        settings[selectedSettingIndex].spawn_rules
-                          .take_from_population
-                      }
-                      disabled={true}
-                    />
-                  </label>
-                </div>
-                <div className="input-field-container">
-                  <label htmlFor="" className="checkbox-label">
-                    Insert Day0: <br />
-                    <input
-                      className="input-field"
-                      type="checkbox"
-                      placeholder="0"
-                      name="take_from_population"
-                      checked={
-                        settings[selectedSettingIndex].spawn_rules.insert_day0
-                      }
-                      disabled={true}
-                    />
-                  </label>
-                </div>
-              </div>
-            </div>
-
             <div className="move-rules-container settings-input-section">
               <h2 className="page-subtitle">Movement Rules</h2>
+              <h3 className="page-subsubtitle">Movement Speed</h3>
               <div className="fields-container">
                 <div className="input-field-container">
                   <label htmlFor="">
@@ -271,7 +131,8 @@ function Settings() {
                   </label>
                 </div>
               </div>
-
+              
+              <h3 className="page-subsubtitle">Location Weight</h3>
               <div className="fields-container">
                 <div className="input-field-container">
                   <label htmlFor="">
@@ -323,6 +184,40 @@ function Settings() {
 
               <div className="fields-container">
                 <div className="input-field-container">
+                  <label htmlFor="" className="checkbox-label">
+                    Use Population For Location Weight: <br />
+                    <input
+                      className="input-field"
+                      type="checkbox"
+                      placeholder="0"
+                      name="use_pop_for_loc_weight"
+                      checked={
+                        settings[selectedSettingIndex].move_rules.use_pop_for_loc_weight
+                      }
+                      disabled={true}
+                    />
+                  </label>
+                </div>
+                <div className="input-field-container">
+                  <label htmlFor="">
+                    Population Power For Location Weight: <br />
+                    <input
+                      className="input-field"
+                      type="number"
+                      placeholder="0.1"
+                      name="camp_weight"
+                      value={
+                        settings[selectedSettingIndex].move_rules.pop_power_for_loc_weight
+                      }
+                      disabled={true}
+                    />
+                  </label>
+                </div>
+              </div>
+              
+              <h3 className="page-subsubtitle">Movement Chance</h3>
+              <div className="fields-container">
+                <div className="input-field-container">
                   <label htmlFor="">
                     Conflict Movechance: <br />
                     <input
@@ -372,7 +267,8 @@ function Settings() {
                   </label>
                 </div>
               </div>
-
+              
+              <h3 className="page-subsubtitle">Advanced</h3>
               <div className="fields-container">
                 <div className="input-field-container">
                   <label htmlFor="">
