@@ -3,10 +3,10 @@ from pymongo import MongoClient
 from bson.objectid import ObjectId as ObjectID
 from dotenv import load_dotenv
 from flee_adapter.adapter import Adapter
+from flee_controller.csvtransformer import CsvTransformer
 from pathlib import Path
 import yaml
 import os
-import csv
 
 
 class Controller:
@@ -21,11 +21,12 @@ class Controller:
         """
         Initializes the Controller object.
         """
-        self.adapter = Adapter()
         load_dotenv()
         self.MONGODB_URI = os.environ.get('MONGO_URI')
         self.client = MongoClient(self.MONGODB_URI)
         self.db = self.client.get_database("Caturanga")
+        self.adapter = Adapter()
+        self.csvTransformer = CsvTransformer()
 
 # Run simulations: ------------------------------------------------------------
 
@@ -223,7 +224,8 @@ class Controller:
             backend_root_dir: Path):
 
         try:
-            await self.convert_simulations_to_csv(simulation_id)
+            #await self.convert_simulations_to_csv(simulation_id)
+            await self.convert_simulation_to_csv(simulation_id)
         except Exception as e:
             return f"No simulation with ID {simulation_id} stored in DB: {e}"
 
@@ -381,7 +383,7 @@ class Controller:
 # Helper functions - Storing .csv-files for given data and path: --------------
 
     # Store simulation data from DB in csv files for FLEE execution:
-    async def convert_simulations_to_csv(self, simulation_id: str):
+    async def convert_simulation_to_csv(self, simulation_id: str):
 
         """
         Convert location data into .csv files (for FLEE simulation execution) - Returns location of simulation-data dir:
@@ -408,230 +410,38 @@ class Controller:
 
                 # Cretae csv files using helper function export-csv (filename, data, fieldnames):
                 # Closures.csv file:
-                self.export_closures_csv(os.path.join(simulation_dir, "closures.csv"), simulation["closures"])
-                
+                self.csvTransformer.export_closures_csv(os.path.join(simulation_dir, "closures.csv"), simulation["closures"])
+
                 # conflicts.csv file:
-                self.export_csv(os.path.join(simulation_dir, "conflicts.csv"), simulation["conflicts"],
+                self.csvTransformer.export_conflicts_csv(os.path.join(simulation_dir, "conflicts.csv"), simulation["conflicts"],
                                 simulation["conflicts"][
-                                    0].keys())  # In DB hinten null-objekt: :null -> Daher hier ein Komma hinten angehängt
-                self.remove_trailing_commas(os.path.join(simulation_dir, "conflicts.csv"))
-                
+                                    0].keys())
+
                 # locations.csv file:
-                self.export_locations_csv(os.path.join(simulation_dir, "locations.csv"), simulation["locations"],
+                self.csvTransformer.export_locations_csv(os.path.join(simulation_dir, "locations.csv"), simulation["locations"],
                                           ["name", "region", "country", "latitude", "longitude", "location_type",
                                            "conflict_date",
                                            "population"])
-                
+
                 # registration_corrections.csv file:
-                self.export_registration_corrections_csv(os.path.join(simulation_dir, "registration_corrections.csv"),
+                self.csvTransformer.export_registration_corrections_csv(os.path.join(simulation_dir, "registration_corrections.csv"),
                                                          simulation["registration_corrections"])
-                
+
                 # routes.csv file:
-                self.export_routes_csv(os.path.join(simulation_dir, "routes.csv"), simulation["routes"],
+                self.csvTransformer.export_routes_csv(os.path.join(simulation_dir, "routes.csv"), simulation["routes"],
                                        ["from", "to", "distance",
-                                        "forced_redirection"])  # null werte ignoriert -> Freie kommas hinten
-                
+                                        "forced_redirection"])
+
                 # sim_period.csv file (values are single data points, not directories themselves -> unnested function):
-                self.export_csv_sim_period(os.path.join(simulation_dir, "sim_period.csv"), simulation["sim_period"])
-                
-                return "All files written"
+                self.csvTransformer.export_sim_period_csv(os.path.join(simulation_dir, "sim_period.csv"), simulation["sim_period"])
+
+                return "All files written with csvTransformer"
 
             else:
                 raise SimulationNotFoundError(f"Simulation with ID {simulation_id} not found")
 
         except Exception as e:
             raise e
-
-
-    # Helper Function to create csv-file from filename, data and fieldnames:
-    def export_closures_csv(self, file_name, data):
-
-        """
-        :param file_name: New path of file incl. filename
-        :param data: Row data
-        :return: Returns nothin, only creates and stores files
-        """
-
-        try:
-            with open(file_name, mode='w', newline='') as csv_file:
-                fieldnames = ['#closure_type', 'name1', 'name2', 'closure_start', 'closure_end']
-                writer = csv.writer(csv_file)
-
-                # Write header:
-                writer.writerow(fieldnames)
-
-                # Write data & Skip rows with empty keys
-                for row in data:
-                    writer.writerow([
-                        int(value) if value and isinstance(value, (int, float)) else value
-                        for value in row.values()
-                    ])
-
-                return "File created succesfully"
-
-        except Exception as e:
-            return e
-
-    # Helper Function to create csv-file from filename, data and fieldnames:
-    def export_csv(self, file_name, data, fieldnames):
-
-        """
-        :param file_name: New path of file incl. filename
-        :param data: Row data
-        :param fieldnames: Name of columns in .csv files
-        :return: Returns nothin, only creates and stores files
-        """
-
-        try:
-            with open(file_name, mode='w', newline='') as csv_file:
-                writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
-
-                # Write header:
-                writer.writeheader()
-
-                # Write data & Skip rows with empty keys
-                for row in data:
-                    if any(value == '' for value in row.values()):
-                        continue
-                    writer.writerow(row)
-
-                return "File created succesfully"
-
-        except Exception as e:
-            return e
-
-    # Helper Function to create csv-file from filename, data and fieldnames:
-    def export_locations_csv(self, file_name, data, fieldnames):
-
-        """
-        :param file_name: New path of file incl. filename
-        :param data: Row data
-        :param fieldnames: Name of columns in .csv files
-        :return: Returns nothin, only creates and stores files
-        """
-
-        try:
-            with open(file_name, mode='w', newline='', encoding='utf-8') as csv_file:
-                writer = csv.writer(csv_file, quoting=csv.QUOTE_NONNUMERIC)
-
-                # Write header:
-                writer.writerow(['#' + field if field == 'name' else field for field in fieldnames])
-
-                # Write data & Skip rows with empty keys
-                for row in data:
-                    if any(value == '' for value in row.values()):
-                        continue
-                    writer.writerow(
-                        [str(value) if value and not isinstance(value, (int, float)) else value for value in
-                         row.values()])
-
-                return "File created successfully"
-
-        except Exception as e:
-            return e
-
-    # Helper Function to create csv-file from filename, data and fieldnames:
-    def export_registration_corrections_csv(self, file_name, data):
-
-        """
-        :param file_name: New path of file incl. filename
-        :param data: Row data
-        :return: Returns nothin, only creates and stores files
-        """
-
-        try:
-            with open(file_name, mode='w', newline='') as csv_file:
-                writer = csv.writer(csv_file)
-
-                # Write data
-                for row in data:
-                    name = row['name']
-                    date_str = row['date'].strftime('%Y-%m-%d')
-                    writer.writerow([name, date_str])
-
-                return "File created succesfully"
-
-        except Exception as e:
-            return e
-
-    # Helper Function to create csv-file from filename, data and fieldnames:
-    def export_routes_csv(self, file_name, data, fieldnames):
-
-        """
-        :param file_name: New path of file incl. filename
-        :param data: Row data
-        :param fieldnames: Name of columns in .csv files
-        :return: Returns nothin, only creates and stores files
-        """
-
-        try:
-            with open(file_name, mode='w', newline='') as csv_file:
-                fieldnames = ['#name1', 'name2', 'distance', 'forced_redirection']
-                writer = csv.writer(csv_file)
-
-                # Write header:
-                writer.writerow(fieldnames)
-
-                # Write data & Skip rows with empty keys
-                for row in data:
-                    writer.writerow([
-                        int(value) if value and isinstance(value, (int, float)) and value != '0.0'
-                        else value if not (value == 0.0 or value == '0.0')
-                        else None
-                        for value in row.values()
-                    ])
-
-        except Exception as e:
-            return e
-
-    # Helper function for single value pairs, where values don´t represent own dictionaries themselves (sim_period)
-    def export_csv_sim_period(self, file_name, data):
-
-        """
-        :param file_name: New path of file incl. filename
-        :param data: Row data
-        :param fieldnames: Name of columns in .csv files
-        :return: Returns nothin, only creates and stores files
-        """
-
-        print(data)
-
-        try:
-            with open(file_name, mode='w', newline='') as csv_file:
-                writer = csv.writer(csv_file)
-
-                # Write data:
-                for key, value in data.items():
-                    if isinstance(value, datetime):
-                        formatted_date = value.strftime('%Y-%m-%d')
-                        writer.writerow(["StartDate", formatted_date])
-                    else:
-                        writer.writerow([key, value])
-
-                return "File created successfully"
-
-        except Exception as e:
-            return str(e)
-
-    # Function to remove trailing commas from .csv file (conflicts.csv):
-    def remove_trailing_commas(self, file_name):
-
-        input_file_path = file_name
-        output_file_path = file_name
-
-        # Read data from the input file
-        with open(input_file_path, 'r') as input_file:
-            reader = csv.reader(input_file)
-            rows = list(reader)
-
-        # Remove trailing commas:
-        processed_rows = [row[:-1] if row[-1] == '' else row for row in rows]
-
-        # Write the processed data back to the same file
-        with open(output_file_path, 'w', newline='') as file:
-            # Write the processed rows back to the CSV file
-            writer = csv.writer(file)
-            writer.writerows(processed_rows)
 
 
 # Helper functions - reading files: ------------------------------------------------------------------------------------
@@ -681,11 +491,6 @@ class Controller:
         except Exception as e:
             return "File3 nicht vorhanden"
         try:
-            with open(sim_filename4, 'r') as f:
-                f4 = f.read()
-        except Exception as e:
-            return "File4 nicht vorhanden"
-        try:
             with open(sim_filename5, 'r') as f:
                 f5 = f.read()
         except Exception as e:
@@ -695,10 +500,9 @@ class Controller:
                 f6 = f.read()
         except Exception as e:
             return "File6 nicht vorhanden"
-        return f1, f2, f3, f4, f5, f6
+        return f1, f2, f3, f5, f6
 
 
-# Define a custom exception for simulation not found
+# Custom exception for simulation not found: ---------------------------------------------------------------------------
 class SimulationNotFoundError(Exception):
     pass
-

@@ -294,7 +294,7 @@ async def test_csv(
     """
     Convert all data in DB, stored for given simulation, to .csv files and store them in filesystem
     """
-    return await controller.convert_simulations_to_csv(simulation_id)
+    return await controller.convert_simulations_to_csv_2(simulation_id)
 
 
 @app.get("/testread_csv/{simulation_id}")
