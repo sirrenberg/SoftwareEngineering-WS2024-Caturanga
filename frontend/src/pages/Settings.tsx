@@ -2,16 +2,15 @@ import "../styles/Menu.css";
 import { useEffect, useState, useContext } from "react";
 import { StartSimContext } from "../contexts/StartSimContext";
 import { SimSettings } from "../types";
-import { Link } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 import { useAPI } from "../hooks/useAPI";
-import { NavLink } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPenToSquare, faTrash } from "@fortawesome/free-solid-svg-icons";
-import { moveSpeedText, walkSpeedText, conflictWeightText,
+import { movementRulesText, moveSpeedText, walkSpeedText, conflictWeightText,
         campWeightText, foreignWeightText, usePopForLocWeightText,
         popPowerForLocWeightText, conflictMovechanceText, campMovechanceText,
         defaultMovechanceText, awarenessLevelText, startOnFootText, hastenText,
-        capacityScalingText, weightPowerText, avoidShortStintsText } from "../helper/constants";
+        capacityScalingText, weightPowerText, avoidShortStintsText, optimisationsText } from "../helper/constants";
 import SimsettingInputField from "../components/SimsettingInputField";
 
 function Settings() {
@@ -104,6 +103,7 @@ function Settings() {
 
             <div className="move-rules-container settings-input-section">
               <h2 className="page-subtitle">Movement Rules</h2>
+              <p className="section-subtext">{movementRulesText}</p>
               <h3 className="page-subsubtitle">Movement Speed</h3>
               <div className="fields-container">
                 <div className="input-field-container">
@@ -160,7 +160,7 @@ function Settings() {
               <div className="fields-container">
                 <div className="input-field-container">
                     <SimsettingInputField 
-                      label="Use Population For Location Weight"
+                      label="Utilize the Population For Location Weight"
                       infoText={usePopForLocWeightText}
                       checkBox={true}
                       name="use_pop_for_loc_weight"
@@ -234,6 +234,7 @@ function Settings() {
 
             <div className="optimisations-container settings-input-section">
               <h2 className="page-subtitle">Optimisations</h2>
+              <p className="section-subtext">{optimisationsText}</p>
               <div className="fields-container">
               <div className="input-field-container">
                     <SimsettingInputField 

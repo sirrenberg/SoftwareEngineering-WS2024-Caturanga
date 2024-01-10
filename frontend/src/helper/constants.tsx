@@ -12,10 +12,6 @@ export const walkSpeedText =
     `
 ;
 
-
-// Location weights
-// defaults? 
-
 export const conflictWeightText =
     `
     This refers to the attraction multiplier for conflict locations (conflict zones).
@@ -28,7 +24,6 @@ export const campWeightText =
     `
 ;
 
-// what does foreign location mean? and what does stacked mean
 export const foreignWeightText =
     `
     This refers to the attraction multiplier for foreign locations, which is added to the camp multiplier.
@@ -107,5 +102,18 @@ export const hastenText =
     speeding up execution. When using a value for hasten larger than 1.0, 
     the simulation becomes gradually less accurate and 
     will exhibit more variability in its results between individual runs.
+    `
+;
+
+export const movementRulesText =
+    `
+    The following section contains the parameters that influence IDPs' movement during the simulation.
+    Each parameter is explained in detail by clicking on the information icon next to it.
+    `
+;
+
+export const optimisationsText =
+    `
+    The following section contains the parameter that can improve the simulation's runtime.
     `
 ;

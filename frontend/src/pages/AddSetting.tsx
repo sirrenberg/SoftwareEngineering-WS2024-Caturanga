@@ -4,11 +4,11 @@ import { SimSettings } from "../types";
 import { useForm } from "../hooks/useForm";
 import { useEffect } from "react";
 import SimsettingInputField from "../components/SimsettingInputField";
-import { moveSpeedText, walkSpeedText, conflictWeightText,
+import { movementRulesText, moveSpeedText, walkSpeedText, conflictWeightText,
   campWeightText, foreignWeightText, usePopForLocWeightText,
   popPowerForLocWeightText, conflictMovechanceText, campMovechanceText,
   defaultMovechanceText, awarenessLevelText, startOnFootText, hastenText,
-  capacityScalingText, weightPowerText, avoidShortStintsText } from "../helper/constants";
+  capacityScalingText, weightPowerText, avoidShortStintsText, optimisationsText } from "../helper/constants";
 
 function AddSetting() {
   const { id } = useParams<{ id: string }>();
@@ -74,6 +74,7 @@ function AddSetting() {
 
       <div className="move-rules-container settings-input-section">
               <h2 className="page-subtitle">Movement Rules</h2>
+              <p className="section-subtext">{movementRulesText}</p>
               <h3 className="page-subsubtitle">Movement Speed</h3>
               <div className="fields-container">
                 <div className="input-field-container">
@@ -216,6 +217,7 @@ function AddSetting() {
 
             <div className="optimisations-container settings-input-section">
               <h2 className="page-subtitle">Optimisations</h2>
+              <p className="section-subtext">{optimisationsText}</p>
               <div className="fields-container">
               <div className="input-field-container">
                     <SimsettingInputField 
