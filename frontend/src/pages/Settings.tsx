@@ -7,6 +7,12 @@ import { useAPI } from "../hooks/useAPI";
 import { NavLink } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPenToSquare, faTrash } from "@fortawesome/free-solid-svg-icons";
+import { moveSpeedText, walkSpeedText, conflictWeightText,
+        campWeightText, foreignWeightText, usePopForLocWeightText,
+        popPowerForLocWeightText, conflictMovechanceText, campMovechanceText,
+        defaultMovechanceText, awarenessLevelText, startOnFootText, hastenText,
+        capacityScalingText, weightPowerText, avoidShortStintsText } from "../helper/constants";
+import SimsettingInputField from "../components/SimsettingInputField";
 
 function Settings() {
   const { sendRequest } = useAPI();
@@ -101,256 +107,127 @@ function Settings() {
               <h3 className="page-subsubtitle">Movement Speed</h3>
               <div className="fields-container">
                 <div className="input-field-container">
-                  <label htmlFor="">
-                    Max Move Speed: <br />
-                    <input
-                      className="input-field"
-                      type="number"
-                      placeholder="0"
-                      name="max_move_speed"
-                      value={
-                        settings[selectedSettingIndex].move_rules.max_move_speed
-                      }
-                      disabled={true}
-                    />
-                  </label>
+                  <SimsettingInputField 
+                    label="Max Move Speed"
+                    infoText={moveSpeedText}
+                    checkBox={false}
+                    name="max_move_speed"
+                    value={settings[selectedSettingIndex].move_rules.max_move_speed}
+                    disabled={true}/>
                 </div>
                 <div className="input-field-container">
-                  <label htmlFor="">
-                    Max Walk Speed: <br />
-                    <input
-                      className="input-field"
-                      type="number"
-                      placeholder="0"
-                      name="max_walk_speed"
-                      value={
-                        settings[selectedSettingIndex].move_rules.max_walk_speed
-                      }
-                      disabled={true}
-                    />
-                  </label>
+                  <SimsettingInputField 
+                    label="Max Walk Speed"
+                    infoText={walkSpeedText}
+                    checkBox={false}
+                    name="max_walk_speed"
+                    value={settings[selectedSettingIndex].move_rules.max_move_speed}
+                    disabled={true}/>
                 </div>
               </div>
               
               <h3 className="page-subsubtitle">Location Weight</h3>
               <div className="fields-container">
-                <div className="input-field-container">
-                  <label htmlFor="">
-                    Foreign Weight: <br />
-                    <input
-                      className="input-field"
-                      type="number"
-                      placeholder="0"
-                      name="foreign_weight"
-                      value={
-                        settings[selectedSettingIndex].move_rules.foreign_weight
-                      }
-                      disabled={true}
-                    />
-                  </label>
-                </div>
-                <div className="input-field-container">
-                  <label htmlFor="">
-                    Conflict Weight: <br />
-                    <input
-                      className="input-field"
-                      type="number"
-                      placeholder="0"
+               <div className="input-field-container">
+                    <SimsettingInputField 
+                      label="Conflict Weight"
+                      infoText={conflictWeightText}
+                      checkBox={false}
                       name="conflict_weight"
-                      value={
-                        settings[selectedSettingIndex].move_rules
-                          .conflict_weight
-                      }
-                      disabled={true}
-                    />
-                  </label>
+                      value={settings[selectedSettingIndex].move_rules.conflict_weight}
+                      disabled={true}/>
                 </div>
                 <div className="input-field-container">
-                  <label htmlFor="">
-                    Camp Weight: <br />
-                    <input
-                      className="input-field"
-                      type="number"
-                      placeholder="0"
+                    <SimsettingInputField 
+                      label="Camp Weight"
+                      infoText={campWeightText}
+                      checkBox={false}
                       name="camp_weight"
-                      value={
-                        settings[selectedSettingIndex].move_rules.camp_weight
-                      }
-                      disabled={true}
-                    />
-                  </label>
+                      value={settings[selectedSettingIndex].move_rules.camp_weight}
+                      disabled={true}/>
+                </div>
+                <div className="input-field-container">
+                    <SimsettingInputField 
+                      label="Foreign Weight"
+                      infoText={foreignWeightText}
+                      checkBox={false}
+                      name="foreign_weight"
+                      value={settings[selectedSettingIndex].move_rules.foreign_weight}
+                      disabled={true}/>
                 </div>
               </div>
 
               <div className="fields-container">
                 <div className="input-field-container">
-                  <label htmlFor="" className="checkbox-label">
-                    Use Population For Location Weight: <br />
-                    <input
-                      className="input-field"
-                      type="checkbox"
-                      placeholder="0"
+                    <SimsettingInputField 
+                      label="Use Population For Location Weight"
+                      infoText={usePopForLocWeightText}
+                      checkBox={true}
                       name="use_pop_for_loc_weight"
-                      checked={
-                        settings[selectedSettingIndex].move_rules.use_pop_for_loc_weight
-                      }
-                      disabled={true}
-                    />
-                  </label>
+                      checked={settings[selectedSettingIndex].move_rules.use_pop_for_loc_weight}
+                      disabled={true}/>
                 </div>
                 <div className="input-field-container">
-                  <label htmlFor="">
-                    Population Power For Location Weight: <br />
-                    <input
-                      className="input-field"
-                      type="number"
-                      placeholder="0.1"
-                      name="camp_weight"
-                      value={
-                        settings[selectedSettingIndex].move_rules.pop_power_for_loc_weight
-                      }
-                      disabled={true}
-                    />
-                  </label>
+                    <SimsettingInputField 
+                      label="Population Power For Location Weight"
+                      infoText={popPowerForLocWeightText}
+                      checkBox={false}
+                      name="pop_power_for_loc_weight"
+                      value={settings[selectedSettingIndex].move_rules.pop_power_for_loc_weight}
+                      disabled={true}/>
                 </div>
               </div>
               
               <h3 className="page-subsubtitle">Movement Chance</h3>
               <div className="fields-container">
                 <div className="input-field-container">
-                  <label htmlFor="">
-                    Conflict Movechance: <br />
-                    <input
-                      className="input-field"
-                      type="number"
-                      placeholder="0"
+                    <SimsettingInputField 
+                      label="Conflict Movechance"
+                      infoText={conflictMovechanceText}
+                      checkBox={false}
                       name="conflict_movechance"
-                      value={
-                        settings[selectedSettingIndex].move_rules
-                          .conflict_movechance
-                      }
-                      disabled={true}
-                    />
-                  </label>
+                      value={settings[selectedSettingIndex].move_rules.conflict_movechance}
+                      disabled={true}/>
                 </div>
-
                 <div className="input-field-container">
-                  <label htmlFor="">
-                    Camp Movechance: <br />
-                    <input
-                      className="input-field"
-                      type="number"
-                      placeholder="0"
+                    <SimsettingInputField 
+                      label="Camp Movechance"
+                      infoText={campMovechanceText}
+                      checkBox={false}
                       name="camp_movechance"
-                      value={
-                        settings[selectedSettingIndex].move_rules
-                          .camp_movechance
-                      }
-                      disabled={true}
-                    />
-                  </label>
+                      value={settings[selectedSettingIndex].move_rules.camp_movechance}
+                      disabled={true}/>
                 </div>
                 <div className="input-field-container">
-                  <label htmlFor="">
-                    Default Movechance: <br />
-                    <input
-                      className="input-field"
-                      type="number"
-                      placeholder="0"
+                    <SimsettingInputField 
+                      label="Default Movechance"
+                      infoText={defaultMovechanceText}
+                      checkBox={false}
                       name="default_movechance"
-                      value={
-                        settings[selectedSettingIndex].move_rules
-                          .default_movechance
-                      }
-                      disabled={true}
-                    />
-                  </label>
+                      value={settings[selectedSettingIndex].move_rules.default_movechance}
+                      disabled={true}/>
                 </div>
               </div>
               
               <h3 className="page-subsubtitle">Advanced</h3>
               <div className="fields-container">
-                <div className="input-field-container">
-                  <label htmlFor="">
-                    Awareness Level: <br />
-                    <input
-                      className="input-field"
-                      type="number"
-                      placeholder="0"
+               <div className="input-field-container">
+                    <SimsettingInputField 
+                      label="Awareness Level"
+                      infoText={awarenessLevelText}
+                      checkBox={false}
                       name="awareness_level"
-                      value={
-                        settings[selectedSettingIndex].move_rules
-                          .awareness_level
-                      }
-                      disabled={true}
-                    />
-                  </label>
+                      value={settings[selectedSettingIndex].move_rules.awareness_level}
+                      disabled={true}/>
                 </div>
                 <div className="input-field-container">
-                  <label htmlFor="">
-                    Capacity Scaling: <br />
-                    <input
-                      className="input-field"
-                      type="number"
-                      placeholder="0"
-                      name="capacity_scaling"
-                      value={
-                        settings[selectedSettingIndex].move_rules
-                          .capacity_scaling
-                      }
-                      disabled={true}
-                    />
-                  </label>
-                </div>
-
-                <div className="input-field-container">
-                  <label htmlFor="">
-                    Weight Power: <br />
-                    <input
-                      className="input-field"
-                      type="number"
-                      placeholder="0"
-                      name="weight_power"
-                      value={
-                        settings[selectedSettingIndex].move_rules.weight_power
-                      }
-                      disabled={true}
-                    />
-                  </label>
-                </div>
-              </div>
-
-              <div className="fields-container">
-                <div className="input-field-container">
-                  <label htmlFor="" className="checkbox-label">
-                    Avoid Short Stints: <br />
-                    <input
-                      className="input-field"
-                      type="checkbox"
-                      placeholder="0"
-                      name="avoid_short_stints"
-                      checked={
-                        settings[selectedSettingIndex].move_rules
-                          .avoid_short_stints
-                      }
-                      disabled={true}
-                    />
-                  </label>
-                </div>
-                <div className="input-field-container">
-                  <label htmlFor="" className="checkbox-label">
-                    Start On Foot: <br />
-                    <input
-                      className="input-field"
-                      type="checkbox"
-                      placeholder="0"
+                    <SimsettingInputField 
+                      label="Start On Foot"
+                      infoText={startOnFootText}
+                      checkBox={true}
                       name="start_on_foot"
-                      checked={
-                        settings[selectedSettingIndex].move_rules.start_on_foot
-                      }
-                      disabled={true}
-                    />
-                  </label>
+                      checked={settings[selectedSettingIndex].move_rules.start_on_foot}
+                      disabled={true}/>
                 </div>
               </div>
             </div>
@@ -358,20 +235,14 @@ function Settings() {
             <div className="optimisations-container settings-input-section">
               <h2 className="page-subtitle">Optimisations</h2>
               <div className="fields-container">
-                <div className="input-field-container">
-                  <label htmlFor="">
-                    Hasten: <br />
-                    <input
-                      className="input-field"
-                      type="number"
-                      placeholder="0"
+              <div className="input-field-container">
+                    <SimsettingInputField 
+                      label="Hasten"
+                      infoText={hastenText}
+                      checkBox={false}
                       name="hasten"
-                      value={
-                        settings[selectedSettingIndex].optimisations.hasten
-                      }
-                      disabled={true}
-                    />
-                  </label>
+                      value={settings[selectedSettingIndex].optimisations.hasten}
+                      disabled={true}/>
                 </div>
               </div>
             </div>
