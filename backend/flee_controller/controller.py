@@ -1,4 +1,3 @@
-from datetime import datetime
 from pymongo import MongoClient
 from bson.objectid import ObjectId as ObjectID
 from dotenv import load_dotenv
@@ -442,66 +441,6 @@ class Controller:
 
         except Exception as e:
             raise e
-
-
-# Helper functions - reading files: ------------------------------------------------------------------------------------
-
-    # Read .yml file for given simsettings:
-    def testread_ss(self, simsettings_id: str):
-        """
-        Read a dummy simulation result from the database.
-        """
-
-        filename = simsettings_id + ".yml"
-        backend_root_dir = Path(__file__).resolve().parent
-        simsettings_dir = backend_root_dir / "flee_stored_files" / "simsettings"
-        simsettings_filename = simsettings_dir / filename
-
-        try:
-            with open(simsettings_filename, 'r') as f:
-                return f.read()
-        except Exception as e:
-                return "File nicht vorhanden"
-
-    # Read all .csv files for given simulation:
-    def testread_csv(self, simulation_id):
-
-        backend_root_dir = Path(__file__).resolve().parent
-        sim_dir = backend_root_dir / "flee_stored_files" / "conflict_input" / simulation_id
-        sim_filename1 = sim_dir / "closures.csv"
-        sim_filename2 = sim_dir / "conflicts.csv"
-        sim_filename3 = sim_dir / "locations.csv"
-        sim_filename4 = sim_dir / "registration_corrections.csv"
-        sim_filename5 = sim_dir / "routes.csv"
-        sim_filename6 = sim_dir / "sim_period.csv"
-
-        try:
-            with open(sim_filename1, 'r') as f:
-                f1 = f.read()
-        except Exception as e:
-            return "File1 nicht vorhanden"
-        try:
-            with open(sim_filename2, 'r') as f:
-                f2 = f.read()
-        except Exception as e:
-            return "File2 nicht vorhanden"
-        try:
-            with open(sim_filename3, 'r') as f:
-                f3 = f.read()
-        except Exception as e:
-            return "File3 nicht vorhanden"
-        try:
-            with open(sim_filename5, 'r') as f:
-                f5 = f.read()
-        except Exception as e:
-            return "File5 nicht vorhanden"
-        try:
-            with open(sim_filename6, 'r') as f:
-                f6 = f.read()
-        except Exception as e:
-            return "File6 nicht vorhanden"
-        return f1, f2, f3, f5, f6
-
 
 # Custom exception for simulation not found: ---------------------------------------------------------------------------
 class SimulationNotFoundError(Exception):
