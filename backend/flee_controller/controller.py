@@ -1,10 +1,10 @@
 from pymongo import MongoClient
-from bson.objectid import ObjectId as ObjectID
 from dotenv import load_dotenv
 from flee_adapter.adapter import Adapter
 from flee_controller.csvtransformer import CsvTransformer
-from pathlib import Path
 import yaml
+from bson.objectid import ObjectId as ObjectID
+from pathlib import Path
 import os
 
 
@@ -27,7 +27,7 @@ class Controller:
         self.MONGODB_URI = os.environ.get('MONGO_URI')
         self.client = MongoClient(self.MONGODB_URI)
         self.db = self.client.get_database("Caturanga")
-        self.csvTransformer = CsvTransformer()
+        self.csvTransformer = CsvTransformer(self.db)
 
 # Run simulations: ------------------------------------------------------------
 
@@ -214,7 +214,7 @@ class Controller:
             simulation_id: str):
 
         try:
-            await self.convert_simulation_to_csv(simulation_id)
+            await self.csvTransformer.convert_simulation_to_csv(simulation_id)
         except Exception as e:
             return f"No simulation with ID {simulation_id} stored in DB: {e}"
 
@@ -385,68 +385,3 @@ class Controller:
         )
         client.close()
         return
-
-
-# Helper functions - Storing .csv-files for given data and path: --------------
-
-    # Store simulation data from DB in csv files for FLEE execution:
-    async def convert_simulation_to_csv(self, simulation_id: str):
-
-        """
-        Convert location data into .csv files (for FLEE simulation execution) - Returns location of simulation-data dir:
-        Read all data from simulation-collection in DB
-        Convert Data into .csv files, which are required by FLEE (closures, conflicts, locations,
-        registration_corrections, routes, sim_period)
-
-        :param simulation_id:
-        :return:
-        """
-
-        # Fetch simulation data from DB by simulation_id:
-        try:
-            simulations_collection = self.db.get_collection("simulations")
-            simulation = simulations_collection.find_one({"_id": ObjectID(simulation_id)})
-
-            # Create all .csv files for simulation:
-            if simulation is not None:
-
-                # Create directory for simulation:
-                backend_root_dir = Path(__file__).resolve().parent
-                simulation_dir = backend_root_dir / "flee_stored_files" / "conflict_input" / simulation_id
-                os.makedirs(simulation_dir, exist_ok=True)
-
-                # Cretae csv files using helper function export-csv (filename, data, fieldnames):
-                # Closures.csv file:
-                self.csvTransformer.export_closures_csv(os.path.join(simulation_dir, "closures.csv"), simulation["closures"])
-
-                # conflicts.csv file:
-                self.csvTransformer.export_conflicts_csv(os.path.join(simulation_dir, "conflicts.csv"), simulation["conflicts"],
-                                simulation["conflicts"][
-                                    0].keys())
-
-                # locations.csv file:
-                self.csvTransformer.export_locations_csv(os.path.join(simulation_dir, "locations.csv"), simulation["locations"],
-                                          ["name", "region", "country", "latitude", "longitude", "location_type",
-                                           "conflict_date",
-                                           "population"])
-
-                # routes.csv file:
-                self.csvTransformer.export_routes_csv(os.path.join(simulation_dir, "routes.csv"), simulation["routes"],
-                                       ["from", "to", "distance",
-                                        "forced_redirection"])
-
-                # sim_period.csv file (values are single data points, not directories themselves -> unnested function):
-                self.csvTransformer.export_sim_period_csv(os.path.join(simulation_dir, "sim_period.csv"), simulation["sim_period"])
-
-                return "All files written with csvTransformer"
-
-            else:
-                raise SimulationNotFoundError(f"Simulation with ID {simulation_id} not found")
-
-        except Exception as e:
-            raise e
-
-
-# Define a custom exception for simulation not found
-class SimulationNotFoundError(Exception):
-    pass
