@@ -188,5 +188,3 @@ class CsvTransformer:
 
         except Exception as e:
             return str(e)
-
-
