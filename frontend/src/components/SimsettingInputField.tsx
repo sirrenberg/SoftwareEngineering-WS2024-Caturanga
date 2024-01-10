@@ -20,6 +20,7 @@ function SimsettingInputField(props: props) {
             <Tooltip title={props.infoText} placement="top">
                 <FontAwesomeIcon style={{paddingLeft: '10px'}} icon={faCircleInfo} className="item-icon"/>
             </Tooltip>
+            <br />
             <input
                 className="input-field"
                 type={props.checkBox ? "checkbox" : "number"}
