@@ -1,7 +1,7 @@
 # Team Caturanga: Simulation of IDP movement
 
 ## Description
-Student project as part of a lecture.
+Student project as part of a Software Engineering lecture at University of Augsburg.
 Collaboration of University Augsburg, Netlight, and the World Food Programme.
 
 ## Installation
@@ -13,6 +13,7 @@ Collaboration of University Augsburg, Netlight, and the World Food Programme.
 - Docker
 
 ## Usage
+To run the tool locally, execute
 ```
 docker compose up
 ```
