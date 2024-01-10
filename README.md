@@ -11,7 +11,6 @@ Collaboration of University Augsburg, Netlight, and the World Food Programme.
 
 ### Requirements
 - Docker
-- node (v20.9.0)
 
 ## Usage
 ```
@@ -22,8 +21,12 @@ docker compose up
 During frontend development only run backend with docker and then execute the following commands:
 ```
 cd frontend
+npm install
 npm run dev
 ```
+
+### Additional Requirements
+- node (v20.9.0)
 
 ## Authors
 - Jonas Maurer
