@@ -34,69 +34,6 @@ def read_root():
 # Simulation Execution: -------------------------------------------------------
 
 
-@app.get("/run_simulation")
-async def run_simulation(background_tasks: BackgroundTasks):
-    """
-    Runs the default Burundi simulation using the controller module.
-
-    Parameters:
-    - background_tasks (BackgroundTasks): The background tasks object used to
-      run the simulation asynchronously.
-
-    Returns:
-    - dict: A dictionary containing the object ID of the dummy simulation.
-
-    Background Tasks:
-        The simulation is run in the background using FastAPI's
-        BackgroundTasks.
-        This allows the user to continue using the application without waiting
-        for the simulation to complete.
-
-    References:
-        - FastAPI Background Tasks: 
-            https://fastapi.tiangolo.com/tutorial/background-tasks/
-        - Celery: https://docs.celeryproject.org/en/stable/
-            Celery is an alternative to FastAPI's BackgroundTasks that
-            provides more complex setup but can be used for
-            heavy background computation.
-
-    """
-    object_id = await controller.store_dummy_simulation()
-
-    background_tasks.add_task(
-        controller.run_simulation,
-        object_id)
-
-    return {"dummy simulation": str(object_id)}
-
-
-@app.get("/run_simulation_simsettings/{simsettings_id}")
-async def run_simulation_simsettings(
-    background_tasks: BackgroundTasks,
-    simsettings_id: str = Path(),
-):
-    """
-    Run the default Burundi simulation based on the provided simsetting_id.
-
-    Parameters:
-    - background_tasks (BackgroundTasks): The background tasks object used to
-      run the simulation asynchronously.
-    - simsetting_id (str): The ID of the simulation settings.
-
-    Returns:
-    - dict: A dictionary containing the object ID of the dummy simulation.
-    """
-    object_id = await controller.store_dummy_simulation(
-        simsettings_id=simsettings_id)
-
-    background_tasks.add_task(
-        controller.run_simulation_simsettings,
-        simsettings_id,
-        object_id)
-
-    return {"dummy simulation": str(object_id)}
-
-
 @app.get("/run_simulation/config/")
 async def run_simulation_config(
         background_tasks: BackgroundTasks,
@@ -119,7 +56,7 @@ async def run_simulation_config(
         To query this endpoint, use the following URL format:
         /run_simulation/config/?simulation_id=<simulation_id>&simsettings_id=<simsettings_id>
     """
-    object_id = await controller.store_dummy_simulation(
+    data = await controller.initialize_simulation(
         simulation_id=simulation_id,
         simsettings_id=simsettings_id
     )
@@ -128,9 +65,12 @@ async def run_simulation_config(
         controller.run_simulation_config,
         simulation_id,
         simsettings_id,
-        object_id)
+        data["objectid"],
+        data["simsettings_filename"],
+        data["simulation_dir"],
+        data["validation_dir"])
 
-    return {"dummy simulation": str(object_id)}
+    return {"dummy simulation": str(data["objectid"])}
 
 
 # Simulations: ---------------------------------------------------------------
