@@ -1,6 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 import csv
+from datetime import datetime
 
 
 def extract_population_info_from_web(country, folder_name, threshold):
@@ -10,13 +11,21 @@ def extract_population_info_from_web(country, folder_name, threshold):
             country (str): Name of the country
             folder_name (str): Name of the folder where the file will be saved
             threshold (int): The minimum population threshold
+        Returns
+            url (str): URL of the data source
+            retrieval_date (str): Date of retrieval
+            latest_date (str): Latest date of the data source
     """
+    # date of retrieval, which is the date when the script is executed. Format: YYYY-MM-DD HH:MM:SS
+    retrieval_date = datetime.today().strftime('%Y-%m-%d %H:%M:%S')
+
     city_data = {}
 
     # URL to scrape for ethiopia
     # The population of all Ethiopian cities and towns with more than 20,000 inhabitants according to census results and latest official projections.
     country = country.lower()
     url = f"https://www.citypopulation.de/en/{country}/cities/"
+    latest_date = ""
 
     response = requests.get(url)
 
@@ -30,8 +39,14 @@ def extract_population_info_from_web(country, folder_name, threshold):
 
             if city_table:
                 # Extract information from the table
-                # Find all 'td' tags
-
+                header_row = city_table.find('tr', {'id': 'tsh'})
+                if header_row:
+                    # Find the header cell containing the latest date
+                    latest_date_cell = header_row.find('th', {'class': 'rpop prio1'})
+                    if latest_date_cell:
+                        # the format is YYYY-MM-DD
+                        latest_date = latest_date_cell['data-coldate']
+                # find all rows in the table
                 for row in city_table.find_all('tr'):
                     columns = row.find_all(['td', 'th'])
 
@@ -51,9 +66,6 @@ def extract_population_info_from_web(country, folder_name, threshold):
                             city_data[city_name] = {
                                 'Latest Population': population_latest
                             }
-
-                        # print(f"City: {city_name}, Adm: {adm}, Latest Population: {population_latest}")
-
             else:
                 print("Table with id='ts' not found.")
         else:
@@ -68,6 +80,8 @@ def extract_population_info_from_web(country, folder_name, threshold):
         writer.writerow(['name', 'population'])
         for key, value in city_data.items():
             writer.writerow([key, value['Latest Population']])
+    
+    return url, retrieval_date, latest_date
 
 
 

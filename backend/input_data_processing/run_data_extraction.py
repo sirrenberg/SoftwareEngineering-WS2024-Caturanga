@@ -3,6 +3,7 @@ from dotenv import load_dotenv
 import requests
 import pandas as pd
 from io import StringIO
+from datetime import datetime
 from extract_population import extract_population_info_from_web
 from extract_locations_csv import extract_locations_csv
 from extract_conflict_info import extract_conflict_info
@@ -24,8 +25,7 @@ LOCATION_TYPE = 'location'
 ADDED_CONFLICT_DAYS = 7
 
 
-
-def acled_data_to_csv(country, folder_name, start_year, end_year):
+def acled_data_to_csv(country, folder_name, start_date, end_date):
     '''
     Extracts the ACLED data for the given country and time period and saves it to a CSV file.
 
@@ -34,7 +34,28 @@ def acled_data_to_csv(country, folder_name, start_year, end_year):
             folder_name (str): Folder name for the CSV file
             start_year (int): Start year of the time period
             end_year (int): End year of the time period	
+        Returns:
+            acled_url (str): URL of the ACLED data source
+            retrieval_date (str): Date of retrieval
+            reformatted_start_date (str): Start date of the time period in the format YYYY-MM-DD
+            reformatted_end_date (str): End date of the time period in the format YYYY-MM-DD
+            oldest_event_date (str): Oldest event date of the ACLED data in the format YYYY-MM-DD
+            latest_event_date (str): Latest event date of the ACLED data in the format YYYY-MM-DD
     '''
+
+    # date of retrieval, which is the date when the script is executed. Format: YYYY-MM-DD HH:MM:SS
+    retrieval_date = datetime.today().strftime('%Y-%m-%d %H:%M:%S')
+    
+    # reformat the given date from DD-MM-YYYY to YYYY-MM-DD in order to have the same format as in the ACLED-API
+    split_start_date = start_date.split("-")
+    split_end_date = end_date.split("-")
+    reformatted_start_date = str(split_start_date[2]) + "-" + str(split_start_date[1]) + "-" + str(split_start_date[0])
+    reformatted_end_date = str(split_end_date[2]) + "-" + str(split_end_date[1]) + "-" + str(split_end_date[0])
+
+    # extract start_year and end_year
+    start_year = int(split_start_date[2])
+    end_year = int(split_end_date[2])
+
 
     # get the API key and email from the environment variables
     load_dotenv()
@@ -66,10 +87,29 @@ def acled_data_to_csv(country, folder_name, start_year, end_year):
 
     # Convert the response text to a CSV
     data = pd.read_csv(StringIO(response.text))
-    # Save the data to a CSV file
 
-    # store in folder_name
+    # filter the data by date and reset index
+    data = data[(data['event_date'] >= reformatted_start_date) & (data['event_date'] <= reformatted_end_date)]
+    data = data.reset_index(drop=True)
+
+
+    # extract latest event date (this is not always the same as the end_date). We want to store the event date in the DB
+    # the extracted format of the date is 'YYYY-MM-DD' - we also want to store it in this format 
+    # from API doc: ACLED data is returned in date order DESC (starting with the latest). 
+    # get latest entry for event_date 
+    latest_event_date = data['event_date'][0]
+
+    # get oldest event_date
+    oldest_event_date = data['event_date'].iloc[-1]
+
+    # url we want to show in the frontend and store in DB
+    acled_url = 'https://acleddata.com/data-export-tool/'
+
+    # store in folder_name as CSV file
     data.to_csv(os.path.join(folder_name, 'acled.csv'), index=False)
+
+    # return the data source and date information
+    return acled_url, retrieval_date, reformatted_start_date, reformatted_end_date, oldest_event_date, latest_event_date
 
 
 
@@ -87,15 +127,18 @@ def run_extraction(country_name, start_date, end_date):
 
     # 1. create folder for country with start_year
     folder_name = country_name.lower() + str(start_year)
-
+    # if folder already exists, then extend folder name with today's date
+    if os.path.exists(folder_name):
+        folder_name = folder_name + "_" + datetime.today().strftime('%Y-%m-%d')
     os.mkdir(folder_name)
     
     # 2. get acled data and create acled.csv
-    acled_data_to_csv(country_name, folder_name, start_year, end_year)
+    acled_url, acled_retrieval_date, acled_reformatted_start_date, acled_reformatted_end_date, acled_oldest_event_date, acled_latest_event_date = acled_data_to_csv(country_name, folder_name, start_date, end_date)
+    print(f"acled_url: {acled_url}, retrieval_date: {acled_retrieval_date}, reformatted_start_date: {acled_reformatted_start_date}, reformatted_end_date: {acled_reformatted_end_date}, oldest_event_date: {acled_oldest_event_date}, latest_event_date: {acled_latest_event_date}")
+    
 
-    # 3. get population data and create population.csv
-    extract_population_info_from_web(country_name, folder_name, POPULATION_THRESHOLD)
-
+    # 3. get population data and create population.csv.  population date in format YYYY-MM-DD
+    population_url, population_retrieval_date, population_date = extract_population_info_from_web(country_name, folder_name, POPULATION_THRESHOLD) 
     # 4. extract location data and create locations.csv
     # TODO: check how the code (from FabFlee) handels the fact that locations can appear multiple times in the ACLED data
     extract_locations_csv(folder_name, start_date, LOCATION_TYPE, FATALITIES_THRESHOLD, CONFLICT_THRESHOLD)
@@ -118,7 +161,6 @@ def run_extraction(country_name, start_date, end_date):
     create_empty_closure_csv(folder_name)
     
     # 10. create empty registration_correction.csv
-    # TODO: This has to be done with respect to the validation data
     create_empty_registration_corrections_csv(folder_name)
     
     # 11. create sim_period.csv
@@ -127,8 +169,13 @@ def run_extraction(country_name, start_date, end_date):
     # 12. insert data into DB
     current_dir = os.getcwd()
     folder_path = os.path.join(current_dir, folder_name)
-    insert_data_into_DB([country_name], folder_path)
     
+    acled_source_list=[acled_url, acled_retrieval_date, acled_reformatted_start_date, acled_reformatted_end_date, acled_oldest_event_date, acled_latest_event_date]
+    population_source_list = [population_url, population_retrieval_date, population_date]
+
+    insert_data_into_DB([country_name], folder_path, acled_source_list, population_source_list)
+    
+
     # 13. create validation data
     # create folder in conflict_validation
     os.mkdir(os.path.join('conflict_validation', folder_name))
@@ -136,15 +183,13 @@ def run_extraction(country_name, start_date, end_date):
     # create refugee.csv
     create_refugee_csv(folder_name, start_date, end_date)
     
-
-
     
 
 # variables that can be changed
 # date format: dd-mm-yyyy
 country_name = 'Ethiopia'
 start_date = "01-01-2023"
-end_date =  "31-12-2023"
+end_date =  "10-01-2024"
 
 
 run_extraction(country_name, start_date, end_date)

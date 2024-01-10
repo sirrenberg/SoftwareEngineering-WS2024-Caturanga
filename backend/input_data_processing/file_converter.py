@@ -183,6 +183,7 @@ def transform_sim_period_data(sim_period_data):
     for row in sim_period_data:
         date = row['date']
         date = datetime.strptime(date, '%Y-%m-%d') # additionally takes the time
+        print(date)
         length = int(row['length'])
 
         transformed_data.append({
@@ -193,12 +194,14 @@ def transform_sim_period_data(sim_period_data):
 
 
 
-def insert_data_into_DB(country_list, folder_path, is_test_data=False):
+def insert_data_into_DB(country_list, folder_path, acled_source_list=[], population_source_list = [], is_test_data=False):
     '''
     Insert the data into the MongoDB.
         Parameters:
             country_list (list): List of country names
             folder_path (str): Path to the folder containing the CSV files
+            acled_source_list (list): List containing the ACLED data source and latest available date
+            population_source_list (list): List containing the population data source and latest available date
             is_test_data (bool): Whether the data is test data or not
     '''
     load_dotenv()
@@ -214,7 +217,6 @@ def insert_data_into_DB(country_list, folder_path, is_test_data=False):
             current_directory = os.path.dirname(os.path.realpath(__file__))
             # Navigate to the locations.csv file using relative paths
             data_dir = os.path.join(current_directory, folder_path, country)
-            print(data_dir)
         else: 
             data_dir = folder_path
 
@@ -233,7 +235,6 @@ def insert_data_into_DB(country_list, folder_path, is_test_data=False):
         reg_corr_data = csv_to_list_reg_corr(reg_corrections_csv_path)
         sim_period_data = csv_to_list_sim_period(sim_period_csv_path)
 
-
         # Transform CSV data to match MongoDB schema
         locations = transform_location_data(location_data)
         routes = transform_routes_data(routes_data)
@@ -242,6 +243,8 @@ def insert_data_into_DB(country_list, folder_path, is_test_data=False):
         reg_corr = transform_reg_corr_data(reg_corr_data)
         sim_period = transform_sim_period_data(sim_period_data)
 
+        print(acled_source_list)
+        print(population_source_list)
 
         # Create the JSON object to be inserted into the MongoDB
         mongo_document = {
@@ -251,7 +254,22 @@ def insert_data_into_DB(country_list, folder_path, is_test_data=False):
             'locations': locations,
             'registration_corrections': reg_corr,
             'routes': routes,
-            'sim_period': sim_period[0] if sim_period else None  # Use the first element or None if the list is empty
+            'sim_period': sim_period[0] if sim_period else None,  # Use the first element or None if the list is empty
+            'data_sources': {
+                'acled': {
+                    'url': acled_source_list[0],
+                    'retrieval_date': datetime.strptime(acled_source_list[1], '%Y-%m-%d %H:%M:%S'),
+                    'user_start_date': datetime.strptime(acled_source_list[2], '%Y-%m-%d'),
+                    'user_end_date': datetime.strptime(acled_source_list[3], '%Y-%m-%d'),
+                    'oldest_event_date': datetime.strptime(acled_source_list[4], '%Y-%m-%d'),
+                    'latest_event_date': datetime.strptime(acled_source_list[5], '%Y-%m-%d')
+                },
+                'population': {
+                    'url': population_source_list[0],
+                    'retrieval_date': datetime.strptime(population_source_list[1], '%Y-%m-%d %H:%M:%S'),
+                    'latest_population_date': datetime.strptime(population_source_list[2], '%Y-%m-%d')
+                }
+             }
         }
 
         # insert test data into the database
@@ -280,15 +298,19 @@ def delete_data_from_DB(id):
 
 
 # insert test data from frontend folder into the database
-'''
-countries = ['burundi', 'car', 'ethiopia', 'mali', 'ssudan']
+"""
+countries = ['burundi' , 'car', 'ethiopia', 'mali', 'ssudan']
 folder_path = "..\\flee\\conflict_input\\"
-insert_data_into_DB(countries, folder_path, is_test_data=True)
-'''
+# add acled and population information with test values
+acled_source_list = ["test_url", "2024-01-10 11:48:58", "2023-07-01", "2023-11-15", "2023-07-02", "2023-11-15"]
+population_source_list = ["test_url", "2024-01-10 11:48:58", "2021-05-17"]
+
+insert_data_into_DB(countries, folder_path, acled_source_list, population_source_list, is_test_data=True)
+"""
 
 # delete  data from the database
-'''
-delete_ids = ["65931f6880f964659eb571aa", "65931f6a80f964659eb571ab", "65931f6b80f964659eb571ac", "65931f6d80f964659eb571ad", "65931f6f80f964659eb571ae", "65931f7080f964659eb571af", "65931f7280f964659eb571b0", "65931f7380f964659eb571b1", "65931fb919013eb159fef04b", "65931fbc19013eb159fef04c", "65931fbd19013eb159fef04d", "65931fbf19013eb159fef04e", "65931fc019013eb159fef04f", "65931fc119013eb159fef050", "65931fc319013eb159fef051", "65931fc419013eb159fef052"]
+"""
+delete_ids = ["659e7398a4e932c57153caae"]
 for ids in delete_ids:
     delete_data_from_DB(ids)
-'''
+"""
