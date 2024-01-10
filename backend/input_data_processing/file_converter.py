@@ -310,7 +310,7 @@ insert_data_into_DB(countries, folder_path, acled_source_list, population_source
 
 # delete  data from the database
 """
-delete_ids = ["659e7398a4e932c57153caae"]
+delete_ids = ["659e7db42a5d002d4b481d21", "659e7977d14212c850a018e0", "658e103c51b9a2ed5ae66fcb", "658dec29819bd1bc1ff738d1", "658dec28819bd1bc1ff738d0", "658dec27819bd1bc1ff738cf", "658dec26819bd1bc1ff738ce", "658dec24819bd1bc1ff738cd"]
 for ids in delete_ids:
     delete_data_from_DB(ids)
 """
