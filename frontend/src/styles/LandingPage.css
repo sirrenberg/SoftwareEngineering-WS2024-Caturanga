@@ -95,6 +95,7 @@
   align-items: center;
   width: 50%;
   height: 100%;
+  gap: 7rem;
 }
 
 .img-container {
@@ -125,6 +126,15 @@
   background-color: var(--charcoal);
 }
 
+#lp-credits-page {
+  background-color: var(--light-gray);
+  align-items: center;
+}
+
+#lp-simulation-title {
+  color: black;
+}
+
 @media (max-width: 1280px) {
   .lp-title-content-section {
     height: 50vh;
@@ -146,6 +156,10 @@
   }
 
   .lp-title-map-container {
+    align-items: center;
+  }
+
+  .lp-title-credits-container {
     align-items: center;
   }
 

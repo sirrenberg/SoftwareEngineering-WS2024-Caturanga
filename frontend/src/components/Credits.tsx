@@ -1,179 +1,177 @@
-import "../styles/Map.css";
-import {
-  MapContainer,
-  TileLayer,
-  Popup,
-  Circle,
-  Polyline,
-} from "react-leaflet";
-import "leaflet/dist/leaflet.css";
-import { LocationType, SimLocation, Input, Route } from "../types";
-import { LatLngExpression } from "leaflet";
-import { useMap } from "react-leaflet/hooks";
-import { useEffect } from "react";
-import { v4 as uuidv4 } from "uuid";
+import React, {useEffect, useState} from 'react';
+import "../styles/Credits.css";
+import smallImage_netlight from '../../public/netlight-logo.png'; // Update the path to your actual image
+import smallImage_FLEE from '../../public/flee.png'; // Update the path to your actual image
+import smallImage_ACLED from '../../public/acled-logo.png'; // Update the path to your actual image
+import FLEE_Credits_text from '../../public/FLEE_Credits.txt';
+import ACLED_Credits_text from '../../public/ACLED_Credits.txt';
+import NL_Credits_text from '../../public/NL_Credits.txt';
 
-function Map({
-  input,
-  center,
-  MapClickHandler,
-  NodeClickHandler,
-  NodeDoubleClickHandler,
-  RouteDoubleClickHandler,
-  shouldRecenter,
-}: {
-  input?: Input;
-  center?: LatLngExpression;
-  MapClickHandler?: () => null;
-  NodeClickHandler?: (location: SimLocation) => void;
-  NodeDoubleClickHandler?: (location: SimLocation) => void;
-  RouteDoubleClickHandler?: (route: Route) => void;
-  shouldRecenter?: boolean;
-}) {
-  const zoomLevel = 5;
+// Flee references:
+const FLEE_LITERATURE = [
+  {
+    title: "Large-Scale Parallelization of Human Migration Simulation",
+    authors: "Groen, D., Papadopoulou, N., Anastasiadis, P., Lawenda, M., Szustak, L., Gogolenko, S., Arabnejad, H. and Jahani, A.",
+    journal: "IEEE Transactions on Computational Social Systems",
+    year: 2023,
+    link: "https://ieeexplore.ieee.org/document/10207715"
+  },
+  {
+    title: "Sensitivity-driven simulation development: a case study in forced migration",
+    authors: "Suleimenova, D., Arabnejad, H., Edeling, W.N. and Groen, D.",
+    journal: "Philosophical Transactions of the Royal Society A",
+    volume: 379,
+    number: 2197,
+    pages: "20200077",
+    year: 2021,
+    link: "https://bura.brunel.ac.uk/bitstream/2438/22565/1/FullText.pdf"
+  },
+  {
+    title: "A generalized simulation development approach for predicting refugee destinations",
+    authors: "Suleimenova, D., Bell, D. and Groen, D.",
+    journal: "Scientific reports",
+    volume: 7,
+    number: 1,
+    pages: "13377",
+    year: 2017,
+    link: "https://www.nature.com/articles/s41598-017-13828-9"
+  },
+  {
+    title: "Simulating refugee movements: Where would you go?",
+    authors: "Groen, D.",
+    journal: "Procedia Computer Science",
+    volume: 80,
+    pages: "2251-2255",
+    year: 2016,
+    link: "https://bura.brunel.ac.uk/bitstream/2438/12519/1/Fulltext.pdf"
+  },
+  {
+    title: "How Policy Decisions Affect Refugee Journeys in South Sudan: A Study Using Automated Ensemble Simulations",
+    authors: "Suleimenova, D. and Groen, D.",
+    journal: "Journal of Artificial Societies and Social Simulation",
+    volume: 23,
+    number: 1,
+    year: 2020,
+    link: "https://bura.brunel.ac.uk/bitstream/2438/19675/4/FullText.pdf"
+  }
+];
 
-  function Recenter() {
-    if (!shouldRecenter) {
-      return null;
-    }
+function Credits() {
 
-    const map = useMap();
+    // Variables to Store the Credits texts from textfiles in the ../../public - directory:
+    const[FLEEcreditsLines, setFLEECreditsLines] = useState<string[]>([]);
+    const[ACLEDcreditsLines, setACLEDCreditsLines] = useState<string[]>([]);
+    const[NLcreditsLines, setNLCreditsLines] = useState<string[]>([]);
 
-    if (!center) {
-      return null;
-    }
-
+    // Fetch all Credits - texts from the ../../public - directory:
     useEffect(() => {
-      map.flyTo(center, zoomLevel, { duration: 1 });
-    }, [center]);
+        const fetchCreditsTexts = async () => {
+            try {
 
-    return null;
-  }
+                {/*Fetch text in ../../public/FLEE_Credits.txt and convert it to individual lines*/}
+                const fleeresponse = await fetch(FLEE_Credits_text);
+                const fleetext = await fleeresponse.text();
+                const FLEElines = fleetext.split('\n');
+                setFLEECreditsLines(FLEElines);
 
-  function getNodeColor(location: SimLocation) {
-    // get the color of the node based on the location type
-    switch (location.location_type) {
-      case LocationType.conflict_zone:
-        return "red";
-      case LocationType.town:
-        return "blue";
-      case LocationType.forwarding_hub:
-        return "orange";
-      case LocationType.camp:
-        return "green";
-      default:
-        return "black";
-    }
-  }
+                {/*Fetch text in ../../public/ACLED_Credits.txt and convert it to individual lines*/}
+                const acledresponse = await fetch(ACLED_Credits_text);
+                const acledtext = await acledresponse.text();
+                const ACLEDlines = acledtext.split('\n');
+                setACLEDCreditsLines(ACLEDlines);
 
-  // if no click handlers are passed
-  if (!MapClickHandler) {
-    MapClickHandler = () => null;
-  }
+                {/*Fetch text in ../../public/NL_Credits.txt and convert it to individual lines*/}
+                const nlresponse = await fetch(NL_Credits_text);
+                const nltext = await nlresponse.text();
+                const NLlines = nltext.split('\n');
+                setNLCreditsLines(NLlines);
+            } catch (error) {
+                console.error('Error fetching credits texts:', error);
+            }
+        };
 
-  return (
-    <div className="map-background">
-      <MapContainer
-        center={center}
-        zoom={zoomLevel}
-        // scrollWheelZoom={false}
-        doubleClickZoom={false}
-      >
-        <MapClickHandler />
-        <Recenter />
-        {/* Add a tile layer */}
-        {/* OPEN STREEN MAPS TILES */}
-        {/* <TileLayer
-    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-  /> */}
-        {/* WATERCOLOR CUSTOM TILES */}
-        {/* <TileLayer
-    attribution='Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-    url="https://stamen-tiles-{s}.a.ssl.fastly.net/watercolor/{z}/{x}/{y}.jpg"
-  /> */}
-        {/* GOOGLE MAPS TILES */}
-        <TileLayer
-          attribution="Google Maps"
-          // url="http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}" // regular
-          // url="http://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}" // satellite
-          url="http://{s}.google.com/vt/lyrs=p&x={x}&y={y}&z={z}" // terrain
-          maxZoom={20}
-          subdomains={["mt0", "mt1", "mt2", "mt3"]}
-        />
+        fetchCreditsTexts();
+    }, []);
 
-        {/* Add locations */}
-        {input?.locations.map((location) => {
-          return (
-            <Circle
-              key={uuidv4()}
-              center={[location.latitude, location.longitude]}
-              radius={location.population ? location.population / 100 : 10000}
-              color={getNodeColor(location)}
-              eventHandlers={{
-                click: () => {
-                  if (NodeClickHandler) {
-                    NodeClickHandler(location);
-                  }
-                },
-                dblclick: () => {
-                  if (NodeDoubleClickHandler) {
-                    NodeDoubleClickHandler(location);
-                  }
-                },
-              }}
-            >
-              <Popup>
-                {location.name} ({location.location_type})
-                <ul>
-                  <li>pop.: {location.population}</li>
-                </ul>
-              </Popup>
-            </Circle>
-          );
-        })}
+    // Return Collection of Cards, displaying Credits and Logos:
+    return (
+        <div className="credits-background">
 
-        {/* Add routes */}
-        {input?.routes.map((route) => {
-          // search for from and to locations
-          const fromLocation = input.locations.find(
-            (location) => location.name === route.from
-          );
+            {/* First Row of Credits Fields*/}
+            <div className="row">
 
-          const toLocation = input.locations.find(
-            (location) => location.name === route.to
-          );
+                {/*FLEE Credits */}
+                <div className="full-width-card">
+                    <div className="card-content">
+                        <h1 className="card-heading">FLEE</h1>
+                        <a href="https://flee.readthedocs.io/en/master/" target="_blank">
+                            <img className="small-image" src={smallImage_FLEE} alt="Small Image 1"/>
+                        </a>
+                    </div>
+                    {/*Iterate over all lines and map them to card*/}
+                    <div className="card-text">
+                        {FLEEcreditsLines.map((line, index) => (
+                            <p key={index}>{line}</p>
+                        ))}
+                    </div>
+                    {/* Add FLEE literature as small cards by mapping over FLEE_LITERATURE*/}
+                    <div className="row" style={{marginTop: '20px'}}>
+                        {FLEE_LITERATURE.map((paper, index) => (
+                            <div key={index} className="half-width-card" style={{marginRight: '20px'}}>
+                                <a key={index} target="_blank" href={paper.link}>
+                                    <div className="card-content">
+                                        <h1 className="card-heading">{paper.title}</h1>
+                                    </div>
+                                    <div className="card-text">
+                                        <p style={{marginTop: '10px'}}>{paper.authors}</p>
+                                        <p style={{marginTop: '10px'}}>{paper.journal}</p>
+                                        <p>{paper.volume && `Volume: ${paper.volume}`}</p>
+                                        <p>{`Year: ${paper.year}`}</p>
+                                    </div>
+                                </a>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
 
-          // should not happen
-          if (!fromLocation || !toLocation) {
-            return null;
-          }
+            {/* Second Row of Credits Fields*/}
+            <div className="row">
 
-          return (
-            <Polyline
-              key={uuidv4()}
-              // weight={route.distance / 100}
-              positions={[
-                [fromLocation.latitude, fromLocation.longitude],
-                [toLocation.latitude, toLocation.longitude],
-              ]}
-              eventHandlers={{
-                dblclick: () => {
-                  if (RouteDoubleClickHandler) {
-                    RouteDoubleClickHandler(route);
-                  }
-                },
-              }}
-            >
-              <Popup>
-                {fromLocation.name} to {toLocation.name}: {route.distance} km
-              </Popup>
-            </Polyline>
-          );
-        })}
-      </MapContainer>
-    </div>
-  );
+                {/*ACLED Credits */}
+                <div className="half-width-card">
+                    <div className="card-content">
+                        <h1 className="card-heading">ACLED</h1>
+                        <a href="https://acleddata.com/" target="_blank">
+                            <img className="small-image" src={smallImage_ACLED} alt="Small Image 2"/>
+                        </a>
+                    </div>
+                    {/*Iterate over all lines and map them to card*/}
+                    <div className="card-text">
+                        {ACLEDcreditsLines.map((line, index) => (
+                            <p key={index}>{line}</p>
+                        ))}
+                    </div>
+                </div>
+
+                {/*Netlight Credits */}
+                <div className="half-width-card">
+                    <div className="card-content">
+                        <h1 className="card-heading">Netlight</h1>
+                        <a href="https://www.netlight.com/" target="_blank">
+                            <img className="small-image" src={smallImage_netlight} alt="Small Image 2"/>
+                        </a>
+                    </div>
+                    {/*Iterate over all lines and map them to card*/}
+                    <div className="card-text">
+                        {NLcreditsLines.map((line, index) => (
+                            <p key={index}>{line}</p>
+                        ))}
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
 }
 
-export default Map;
+export default Credits;
