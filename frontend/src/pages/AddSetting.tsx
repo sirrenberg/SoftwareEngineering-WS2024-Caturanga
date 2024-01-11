@@ -1,5 +1,5 @@
 import "../styles/AddInput.css";
-import { Link, useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { SimSettings } from "../types";
 import { useForm } from "../hooks/useForm";
 import { useEffect } from "react";
@@ -8,7 +8,7 @@ import { movementRulesText, moveSpeedText, walkSpeedText, conflictWeightText,
   campWeightText, foreignWeightText, usePopForLocWeightText,
   popPowerForLocWeightText, conflictMovechanceText, campMovechanceText,
   defaultMovechanceText, awarenessLevelText, startOnFootText, hastenText,
-  capacityScalingText, weightPowerText, avoidShortStintsText, optimisationsText } from "../helper/constants";
+  optimisationsText } from "../helper/constants";
 
 function AddSetting() {
   const { id } = useParams<{ id: string }>();

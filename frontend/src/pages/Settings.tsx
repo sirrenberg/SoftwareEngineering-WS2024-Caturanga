@@ -10,7 +10,7 @@ import { movementRulesText, moveSpeedText, walkSpeedText, conflictWeightText,
         campWeightText, foreignWeightText, usePopForLocWeightText,
         popPowerForLocWeightText, conflictMovechanceText, campMovechanceText,
         defaultMovechanceText, awarenessLevelText, startOnFootText, hastenText,
-        capacityScalingText, weightPowerText, avoidShortStintsText, optimisationsText } from "../helper/constants";
+        optimisationsText } from "../helper/constants";
 import SimsettingInputField from "../components/SimsettingInputField";
 
 function Settings() {
