@@ -259,10 +259,11 @@ def insert_data_into_DB(country_list, folder_path, acled_source_list=[], populat
                 'acled': {
                     'url': acled_source_list[0],
                     'retrieval_date': datetime.strptime(acled_source_list[1], '%Y-%m-%d %H:%M:%S'),
-                    'user_start_date': datetime.strptime(acled_source_list[2], '%Y-%m-%d'),
-                    'user_end_date': datetime.strptime(acled_source_list[3], '%Y-%m-%d'),
-                    'oldest_event_date': datetime.strptime(acled_source_list[4], '%Y-%m-%d'),
-                    'latest_event_date': datetime.strptime(acled_source_list[5], '%Y-%m-%d')
+                    'last_update': datetime.strptime(acled_source_list[2], '%Y-%m-%d %H:%M:%S'),
+                    'user_start_date': datetime.strptime(acled_source_list[3], '%Y-%m-%d'),
+                    'user_end_date': datetime.strptime(acled_source_list[4], '%Y-%m-%d'),
+                    'oldest_event_date': datetime.strptime(acled_source_list[5], '%Y-%m-%d'),
+                    'latest_event_date': datetime.strptime(acled_source_list[6], '%Y-%m-%d')
                 },
                 'population': {
                     'url': population_source_list[0],
@@ -310,7 +311,7 @@ insert_data_into_DB(countries, folder_path, acled_source_list, population_source
 
 # delete  data from the database
 """
-delete_ids = ["659e7db42a5d002d4b481d21", "659e7977d14212c850a018e0", "658e103c51b9a2ed5ae66fcb", "658dec29819bd1bc1ff738d1", "658dec28819bd1bc1ff738d0", "658dec27819bd1bc1ff738cf", "658dec26819bd1bc1ff738ce", "658dec24819bd1bc1ff738cd"]
+delete_ids = ["659e8bb8db3cae9c87a0a506"] # , "659e7977d14212c850a018e0", "658e103c51b9a2ed5ae66fcb", "658dec29819bd1bc1ff738d1", "658dec28819bd1bc1ff738d0", "658dec27819bd1bc1ff738cf", "658dec26819bd1bc1ff738ce", "658dec24819bd1bc1ff738cd"]
 for ids in delete_ids:
     delete_data_from_DB(ids)
 """
