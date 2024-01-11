@@ -121,7 +121,7 @@ function Settings() {
                     infoText={walkSpeedText}
                     checkBox={false}
                     name="max_walk_speed"
-                    value={settings[selectedSettingIndex].move_rules.max_move_speed}
+                    value={settings[selectedSettingIndex].move_rules.max_walk_speed}
                     disabled={true}/>
                 </div>
               </div>
