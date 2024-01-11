@@ -59,10 +59,26 @@ def create_refugee_csv(folder_name, start_date, end_date):
     {"round": 34, "total_IDPs": 2237195, "date": "2023-09-02"},
     ]
 
-    # convert start_date and end_date to "yyyy-mm-dd" format
-    start_date = date_format(start_date)
-    end_date = date_format(end_date)
+    # from round_data, get the date of the highest round number and lowest round number
+    highest_round = round_data[0]["round"]
+    lowest_round = round_data[0]["round"]
+    latest_date = round_data[0]["date"]
+    oldest_date = round_data[0]["date"]
+    for data in round_data:
+        if data["round"] > highest_round:
+            highest_round = data["round"]
+            latest_date = data["date"]
+        if data["round"] < lowest_round:
+            lowest_round = data["round"]
+            oldest_date = data["date"]
+    
+    
+    # date of retrieval, which is the date when the script is executed. Format: YYYY-MM-DD HH:MM:SS
+    retrieval_date = datetime.today().strftime('%Y-%m-%d %H:%M:%S')
 
+    # reformat the given dates from DD-MM-YYYY to YYYY-MM-DD in order to have the same format as in the ACLED-API
+    reformatted_start_date = date_format(start_date)
+    reformatted_end_date = date_format(end_date)
 
     # Get the current directory
     current_dir = os.getcwd()
@@ -76,11 +92,13 @@ def create_refugee_csv(folder_name, start_date, end_date):
             current_date = data["date"]
             # convert to datetime object
             current_date_object = datetime.strptime(current_date, '%Y-%m-%d')
-            start_date_object = datetime.strptime(start_date, '%Y-%m-%d')
-            end_date_object = datetime.strptime(end_date, '%Y-%m-%d')
+            start_date_object = datetime.strptime(reformatted_start_date, '%Y-%m-%d')
+            end_date_object = datetime.strptime(reformatted_end_date, '%Y-%m-%d')
             # compare dates
             if current_date_object >= start_date_object and current_date_object <= end_date_object:
                 writer.writerow([data["date"], data["total_IDPs"]])
-
     
     print("Successfully added total IDP numbers to refugees.csv")
+    
+    return retrieval_date, reformatted_start_date, reformatted_end_date, oldest_date, latest_date
+
