@@ -1,5 +1,5 @@
 import "../styles/AddInput.css";
-import { useParams } from "react-router-dom";
+import { Link, useParams, useNavigate } from "react-router-dom";
 import { SimSettings } from "../types";
 import { useForm } from "../hooks/useForm";
 import { useEffect } from "react";
@@ -12,6 +12,7 @@ import { movementRulesText, moveSpeedText, walkSpeedText, conflictWeightText,
 
 function AddSetting() {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
 
   const isNewSetting = id === "new";
 
@@ -237,7 +238,12 @@ function AddSetting() {
           id="submit-settings-button"
           className="simple-button"
           onClick={(e) => {
-            handleSubmit(e, "/simsettings", isNewSetting ? "POST" : "PUT");
+            /**
+             * Handles the form submission and navigates to the "/settings" page.
+             * @param {Event} e - The form submission event.
+             */
+            handleSubmit(e, "/simsettings", "POST");
+            navigate("/settings");
           }}
         >
           Save

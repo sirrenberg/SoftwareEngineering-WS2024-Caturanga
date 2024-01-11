@@ -123,6 +123,7 @@ class Controller:
         db = client.Caturanga
         return client, db
 
+    # TODO: use variables to store the default IDs
     def store_simulation(
             self,
             result,
@@ -319,16 +320,54 @@ class Controller:
             client.close()
             return None
 
-
 # Manage simsettings in DB: ---------------------------------------------------
 
-    # Store dict of simsettings in DB:
-    async def post_simsettings(self, simsetting):
+    async def post_simsettings(
+                self,
+                simsetting,
+                simsetting_id: str = "6599846eeb8f8c36cce8307a"):
+        """
+        Posts a new simulation setting to the database.
+        More precisely, this function retrieves the "basic" simsetting from the
+        database, uses it as a baseline, updates the part that has been
+        manipulated by the user and saves the newly created setting to the
+        database. This is because parts of the simsetting have implications on
+        logging or the required files and format and are therefore not shown to
+        the user.
+
+        Parameters:
+        - simsetting (dict): The new simulation setting to be posted.
+        - simsetting_id (str, optional): The ID of the "basic" simsetting
+          to be used as baseline. Defaults to "6599846eeb8f8c36cce8307a".
+
+        Returns:
+        - str: The ID of the inserted simulation setting.
+        """
+        basic_simsetting = await self.get_simsetting(simsetting_id)
+
         client, db = self.connect_db()
+
+        # remove id to create a NEW simsetting
+        try:
+            del basic_simsetting["_id"]
+            del simsetting["_id"]
+        except Exception as e:
+            return f"Exception while removing _id key from simsetting: {e}"
+
+        # Update parts of basic simsetting manipulated by the user
+        try:
+            for key in simsetting:
+                basic_simsetting[key] = simsetting[key]
+        except Exception as e:
+            return f"Exception while updating basic \
+                    simsetting with new simsetting: {e}"
+
         simsettings_collection = db.simsettings
-        simsettings_collection.insert_one(dict(simsetting))
+        result = simsettings_collection.insert_one(dict(basic_simsetting))
+
         client.close()
-        return 1
+
+        return str(result.inserted_id)
 
     # Return all stored simsettings of DB:
     async def get_all_simsettings(self):

@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Path, BackgroundTasks, Query
+from fastapi import FastAPI, HTTPException, Path, BackgroundTasks, Query
 from flee_controller.controller import Controller
 from fastapi.middleware.cors import CORSMiddleware
 from typing import Any, Dict, AnyStr, List, Union
@@ -232,16 +232,19 @@ async def get_simsetting(
 async def post_simsettings(
         simsetting: JSONStructure = None):
     """
-    Posts the simulation settings to the controller.
+    Posts the simulation settings to the database.
 
     Parameters:
     - simsetting (JSONStructure, optional): The simulation settings.
 
     Returns:
-    - dict: A dictionary containing the posted simulation settings.
+    - dict: A dictionary containing the posted simulation settings id.
     """
-    await controller.post_simsettings(simsetting)
-    return {"data": simsetting}
+    try:
+        simsetting_id = await controller.post_simsettings(simsetting)
+        return {"id": simsetting_id}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @app.delete("/simsettings/{simsetting_id}")
