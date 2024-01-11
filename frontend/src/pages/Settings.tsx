@@ -14,6 +14,8 @@ function Settings() {
   const [settings, setSettings] = useState<SimSettings[]>([]);
   const [selectedSettingIndex, setSelectedSettingIndex] = useState<number>(-1);
 
+  const protectedSimSettingIDs: string[] = ["6599846eeb8f8c36cce8307a"];
+
   const context = useContext(StartSimContext);
   if (!context) {
     throw new Error("StartSimContext is null");
@@ -66,35 +68,37 @@ function Settings() {
                       className="item-icon"
                     />
                   </NavLink>
-                  <button
-                    className="item-icon"
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      console.log("Deleting " + setting._id + " ...");
-                      // if the setting to be deleted is the one that is currently selected, deselect it
-                      if (selectedSettingIndex === index){
-                        console.log("Entered the branch where selectedSettingIndex === index", selectedSettingIndex, index);
-                        setSelectedSettingIndex(-1);
-                        console.log("selectedSettingIndex is now", selectedSettingIndex);
-                      }
-                      sendRequest("/simsettings/" + setting._id, "DELETE")
-                      .then(_ => {
-                        // if the setting to be deleted is before the currently selected one, decrement the selected index
-                        const indexOfDeleted = settings.findIndex(s => s._id === setting._id);
-                        if (indexOfDeleted < selectedSettingIndex){
-                          setSelectedSettingIndex(selectedSettingIndex - 1);
+                  {!protectedSimSettingIDs.includes(setting._id) && (
+                    <FontAwesomeIcon
+                      icon={faTrash}
+                      className="item-icon"
+                      //style={{ border: "none" , backgroundColor: "transparent" , padding : 0, color: "inherit"}}
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        console.log("Deleting " + setting._id + " ...");
+                        // if the setting to be deleted is the one that is currently selected, deselect it
+                        if (selectedSettingIndex === index){
+                          console.log("Entered the branch where selectedSettingIndex === index", selectedSettingIndex, index);
+                          setSelectedSettingIndex(-1);
+                          console.log("selectedSettingIndex is now", selectedSettingIndex);
                         }
-                        console.log("Deleted setting with id " + setting._id);
-                        setSettings(settings.filter(simsetting => simsetting._id !== setting._id));
-                      })
-                      .catch(err => {
-                        console.log("Deleting setting with id " + setting._id + " lead to an error.");
-                        console.log(err);
-                      });
-                    }}
-                  >
-                    <FontAwesomeIcon icon={faTrash} />
-                  </button>
+                        sendRequest("/simsettings/" + setting._id, "DELETE")
+                        .then(_ => {
+                          // if the setting to be deleted is before the currently selected one, decrement the selected index
+                          const indexOfDeleted = settings.findIndex(s => s._id === setting._id);
+                          if (indexOfDeleted < selectedSettingIndex){
+                            setSelectedSettingIndex(selectedSettingIndex - 1);
+                          }
+                          console.log("Deleted setting with id " + setting._id);
+                          setSettings(settings.filter(simsetting => simsetting._id !== setting._id));
+                        })
+                        .catch(err => {
+                          console.log("Deleting setting with id " + setting._id + " lead to an error.");
+                          console.log(err);
+                        });
+                      }}
+                    />
+                  )}
                 </span>
               </button>
             );
