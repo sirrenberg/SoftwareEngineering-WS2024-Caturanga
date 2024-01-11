@@ -49,15 +49,12 @@ export function useForm(initialFValues: any) {
         "foreign_weight",
         "conflict_weight",
         "camp_weight",
-        "use_pop_for_loc_weight",
         "pop_power_for_loc_weight",
         "conflict_movechance",
         "camp_movechance",
         "default_movechance",
         "awareness_level",
         "capacity_scaling",
-        "avoid_short_stints",
-        "start_on_foot",
         "weight_power",
       ].includes(name)
     ) {
@@ -65,7 +62,24 @@ export function useForm(initialFValues: any) {
         ...values,
         move_rules: {
           ...values.move_rules,
-          [name]: value,
+          [name]: Number(value),
+        },
+      });
+      return;
+    }
+
+    if (
+      [
+        "use_pop_for_loc_weight",
+        "avoid_short_stints",
+        "start_on_foot",
+      ].includes(name)
+    ) {
+      setValues({
+        ...values,
+        move_rules: {
+          ...values.move_rules,
+          [name]: Boolean(value),
         },
       });
       return;
@@ -77,7 +91,7 @@ export function useForm(initialFValues: any) {
         ...values,
         optimisations: {
           ...values.optimisations,
-          [name]: value,
+          [name]: Number(value),
         },
       });
       return;
