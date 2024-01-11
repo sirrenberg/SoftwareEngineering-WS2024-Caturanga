@@ -226,7 +226,7 @@ function AddSetting() {
                       infoText={hastenText}
                       checkBox={false}
                       name="hasten"
-                      value={values.move_rules.hasten}
+                      value={values.optimisations.hasten}
                       disabled={false}
                       onChange={handleInputChange}/>
                 </div>
