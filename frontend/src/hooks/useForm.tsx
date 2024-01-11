@@ -58,6 +58,10 @@ export function useForm(initialFValues: any) {
         "weight_power",
       ].includes(name)
     ) {
+      // sanitise input
+      if (value.length > 5  || Number(value) > 1000) {
+        value = "1000";
+      }
       setValues({
         ...values,
         move_rules: {
@@ -87,6 +91,10 @@ export function useForm(initialFValues: any) {
 
     // Optimisations are nested in the sim_settings object
     if (["hasten"].includes(name)) {
+      // sanitise input
+      if (Number(value) > 100) {
+        value = "100";
+      }
       setValues({
         ...values,
         optimisations: {

@@ -25,6 +25,8 @@ function SimsettingInputField(props: props) {
                 className="input-field"
                 type={props.checkBox ? "checkbox" : "number"}
                 placeholder="0"
+                min={0}
+                max={1000}
                 name={props.name}
                 value={props.checkBox ? undefined : props.value}
                 checked={props.checkBox ? props.checked : undefined}
