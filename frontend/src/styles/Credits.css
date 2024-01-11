@@ -35,13 +35,18 @@
 }
 
 .small-image {
-  width: 60px; /* Increase the width */
-  height: 60px; /* Increase the height */
+  width: 100px; /* Increase the width */
+  height: 100px; /* Increase the height */
   object-fit: contain; /* Maintain aspect ratio and fit the entire image */
   align-self: flex-start; /* Align the image to the top */
 }
 
 .card-heading {
+  color: var(--black);
+  font-size: 2em; /* Adjust the font size as needed */
+}
+
+.reference-heading {
   color: var(--black);
   font-size: 1.2em; /* Adjust the font size as needed */
 }

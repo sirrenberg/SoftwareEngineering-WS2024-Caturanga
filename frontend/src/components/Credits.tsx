@@ -120,7 +120,7 @@ function Credits() {
                             <div key={index} className="half-width-card" style={{marginRight: '20px'}}>
                                 <a key={index} target="_blank" href={paper.link}>
                                     <div className="card-content">
-                                        <h1 className="card-heading">{paper.title}</h1>
+                                        <h1 className="reference-heading">{paper.title}</h1>
                                     </div>
                                     <div className="card-text">
                                         <p style={{marginTop: '10px'}}>{paper.authors}</p>
