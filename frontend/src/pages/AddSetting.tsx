@@ -18,26 +18,26 @@ function AddSetting() {
 
   const initialValues: SimSettings = {
     _id: "",
-    name: "",
+    name: "untitled",
     move_rules: {
-      max_move_speed: 0,
-      max_walk_speed: 0,
-      foreign_weight: 0,
-      conflict_weight: 0,
-      camp_weight: 0,
+      max_move_speed: 360,
+      max_walk_speed: 35,
+      foreign_weight: 1,
+      conflict_weight: 0.25,
+      camp_weight: 1,
       use_pop_for_loc_weight: false,
-      pop_power_for_loc_weight: 0,
-      conflict_movechance: 0,
-      camp_movechance: 0,
-      default_movechance: 0,
-      awareness_level: 0,
-      capacity_scaling: 0,
+      pop_power_for_loc_weight: 0.1,
+      conflict_movechance: 1,
+      camp_movechance: 0.001,
+      default_movechance: 0.3,
+      awareness_level: 1,
+      capacity_scaling: 1,
       avoid_short_stints: false,
       start_on_foot: false,
-      weight_power: 0,
+      weight_power: 1,
     },
     optimisations: {
-      hasten: 0,
+      hasten: 1,
     },
   };
 
@@ -67,7 +67,7 @@ function AddSetting() {
               placeholder="Input Name"
               onChange={handleInputChange}
               name="name"
-              value={values.name}
+              value={values.name === initialValues.name ? "" : values.name}
             />
           </label>
         </div>
