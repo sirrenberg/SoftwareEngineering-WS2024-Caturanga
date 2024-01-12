@@ -533,7 +533,7 @@ function Settings() {
           >
             <button
               className="simple-button"
-              disabled={selectedSettingIndex === -1}
+              disabled={selectedSettingIndex === -1 || context.settings_id === "" || context.input_id === ""}
               onClick={() => {
                 console.log("Starting simulation with settings id " + context.settings_id + " and input id " + context.input_id)
                 sendRequest("/run_simulation/config/", 
@@ -543,7 +543,7 @@ function Settings() {
                             .then((data) => {
                               console.log(data);
               })
-              navigate("/simulations");
+              navigate("/results");
             }}
             >
               Start Simulation
