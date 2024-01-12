@@ -43,12 +43,12 @@
 .items-list {
   display: flex;
   flex-direction: column;
-  justify-content: flex-start; /* Change from 'center' to 'flex-start' due to scrolling issues at the top of the list*/
+  justify-content: flex-start;
   align-items: center;
   width: 90%;
-  height: 75%;           /* Changed to 100% in order to fix problem of cut of list items at the top of the list */
+  height: 75%;
   overflow-y: scroll;
-  box-sizing: border-box; /* Include this property to ensure consistent box sizing due to scrolling issues at the top of the list*/
+  box-sizing: border-box;
 }
 
 .items-list .simple-button {
