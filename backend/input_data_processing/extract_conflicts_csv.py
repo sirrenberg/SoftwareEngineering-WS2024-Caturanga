@@ -1,26 +1,9 @@
 # This script is based on https://github.com/djgroen/FabFlee/blob/master/scripts/04_extract_conflicts_csv.py 
 # but changed where necessary to work automatically with the data from the ACLED API and the population data
-
 import os
 import pandas as pd
 from datetime import datetime
-
-
-def between_date(d1, d2):
-    '''
-    Function to calculate the number of days between two dates in "dd-mm-yyyy" format
-        Parameters:
-            d1 (str): First date in "dd-mm-yyyy" format
-            d2 (str): Second date in "dd-mm-yyyy" format
-        Returns:
-            (int): Number of days between the two dates
-    '''
-    d1list = d1.split("-")
-    d2list = d2.split("-")
-    date1 = datetime(int(d1list[2]), int(d1list[1]), int(d1list[0]))
-    date2 = datetime(int(d2list[2]), int(d2list[1]), int(d2list[0]))
-
-    return abs((date1 - date2).days)
+from helper_functions import between_date
 
 
 def extract_conflicts_csv(folder_name, start_date, end_date):
