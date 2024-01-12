@@ -26,7 +26,12 @@ function Results() {
         <h2 className="items-list-title">Saved Simulation Results</h2>
 
         <div className="items-list" id="outputs-items-list">
-          {resultPreviews.map((resultPreview, index) => {
+
+          {resultPreviews.length === 0 &&
+          <h3>Loading...</h3>}
+
+          {resultPreviews &&
+          resultPreviews.map((resultPreview, index) => {
             return (
               <button
                 key={resultPreview._id}
