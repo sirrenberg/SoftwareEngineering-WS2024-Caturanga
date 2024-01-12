@@ -66,7 +66,8 @@ export const defaultMovechanceText =
 
 export const awarenessLevelText =
     `
-    This parameter is used to adjust the IDPs awareness of locations by incorporating a more wide or narrow awareness level.
+    This parameter is used to adjust the IDPs awareness of locations by incorporating a more wide or narrow awareness level. 
+    Settlements are divided into following three types: camps, towns, conflict zones.
     `
 ;
 
@@ -117,3 +118,10 @@ export const optimisationsText =
     The following section contains the parameter that can improve the simulation's runtime.
     `
 ;
+
+export const awarenessLevelOptions = 
+[{value: -1, label: "No awareness"},
+ {value: 0, label: "The length of the road to the closest settlement"}, 
+ {value: 1, label: "The type of the closest settlement"},
+ {value: 2, label: "The type of the settlement adjacent to neighbouring settlements"},
+ {value: 3, label: "The type of the settlements neighbouring those neighbours of neighbours"}]

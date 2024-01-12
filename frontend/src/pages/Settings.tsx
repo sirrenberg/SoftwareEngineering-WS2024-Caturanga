@@ -10,8 +10,8 @@ import { movementRulesText, moveSpeedText, walkSpeedText, conflictWeightText,
         campWeightText, foreignWeightText, usePopForLocWeightText,
         popPowerForLocWeightText, conflictMovechanceText, campMovechanceText,
         defaultMovechanceText, awarenessLevelText, startOnFootText, hastenText,
-        optimisationsText } from "../helper/constants";
-import SimsettingInputField from "../components/SimsettingInputField";
+        optimisationsText, awarenessLevelOptions } from "../helper/constants";
+import { CheckboxInputField, NumberInputField, SelectInputField } from "../components/SimsettingField";
 
 function Settings() {
   const { sendRequest } = useAPI();
@@ -107,19 +107,21 @@ function Settings() {
               <h3 className="page-subsubtitle">Movement Speed</h3>
               <div className="fields-container">
                 <div className="input-field-container">
-                  <SimsettingInputField 
+                  <NumberInputField 
                     label="Max Move Speed"
                     infoText={moveSpeedText}
-                    checkBox={false}
                     name="max_move_speed"
+                    min={0}
+                    max={1000}
                     value={settings[selectedSettingIndex].move_rules.max_move_speed}
                     disabled={true}/>
                 </div>
                 <div className="input-field-container">
-                  <SimsettingInputField 
+                  <NumberInputField 
                     label="Max Walk Speed"
                     infoText={walkSpeedText}
-                    checkBox={false}
+                    min={0}
+                    max={1000}
                     name="max_walk_speed"
                     value={settings[selectedSettingIndex].move_rules.max_walk_speed}
                     disabled={true}/>
@@ -129,28 +131,31 @@ function Settings() {
               <h3 className="page-subsubtitle">Location Weight</h3>
               <div className="fields-container">
                <div className="input-field-container">
-                    <SimsettingInputField 
+                    <NumberInputField 
                       label="Conflict Weight"
                       infoText={conflictWeightText}
-                      checkBox={false}
+                      min={0}
+                      max={100}
                       name="conflict_weight"
                       value={settings[selectedSettingIndex].move_rules.conflict_weight}
                       disabled={true}/>
                 </div>
                 <div className="input-field-container">
-                    <SimsettingInputField 
+                    <NumberInputField 
                       label="Camp Weight"
                       infoText={campWeightText}
-                      checkBox={false}
+                      min={0}
+                      max={100}
                       name="camp_weight"
                       value={settings[selectedSettingIndex].move_rules.camp_weight}
                       disabled={true}/>
                 </div>
                 <div className="input-field-container">
-                    <SimsettingInputField 
+                    <NumberInputField 
                       label="Foreign Weight"
                       infoText={foreignWeightText}
-                      checkBox={false}
+                      min={0}
+                      max={100}
                       name="foreign_weight"
                       value={settings[selectedSettingIndex].move_rules.foreign_weight}
                       disabled={true}/>
@@ -159,19 +164,19 @@ function Settings() {
 
               <div className="fields-container">
                 <div className="input-field-container">
-                    <SimsettingInputField 
+                    <CheckboxInputField 
                       label="Utilize the Population For Location Weight"
                       infoText={usePopForLocWeightText}
-                      checkBox={true}
                       name="use_pop_for_loc_weight"
                       checked={settings[selectedSettingIndex].move_rules.use_pop_for_loc_weight}
                       disabled={true}/>
                 </div>
                 <div className="input-field-container">
-                    <SimsettingInputField 
+                    <NumberInputField 
                       label="Population Power For Location Weight"
                       infoText={popPowerForLocWeightText}
-                      checkBox={false}
+                      min={0}
+                      max={100}
                       name="pop_power_for_loc_weight"
                       value={settings[selectedSettingIndex].move_rules.pop_power_for_loc_weight}
                       disabled={true}/>
@@ -181,28 +186,31 @@ function Settings() {
               <h3 className="page-subsubtitle">Movement Chance</h3>
               <div className="fields-container">
                 <div className="input-field-container">
-                    <SimsettingInputField 
+                    <NumberInputField 
                       label="Conflict Movechance"
                       infoText={conflictMovechanceText}
-                      checkBox={false}
+                      min={0}
+                      max={1}
                       name="conflict_movechance"
                       value={settings[selectedSettingIndex].move_rules.conflict_movechance}
                       disabled={true}/>
                 </div>
                 <div className="input-field-container">
-                    <SimsettingInputField 
+                    <NumberInputField 
                       label="Camp Movechance"
                       infoText={campMovechanceText}
-                      checkBox={false}
+                      min={0}
+                      max={1}
                       name="camp_movechance"
                       value={settings[selectedSettingIndex].move_rules.camp_movechance}
                       disabled={true}/>
                 </div>
                 <div className="input-field-container">
-                    <SimsettingInputField 
+                    <NumberInputField 
                       label="Default Movechance"
                       infoText={defaultMovechanceText}
-                      checkBox={false}
+                      min={0}
+                      max={1}
                       name="default_movechance"
                       value={settings[selectedSettingIndex].move_rules.default_movechance}
                       disabled={true}/>
@@ -212,19 +220,18 @@ function Settings() {
               <h3 className="page-subsubtitle">Advanced</h3>
               <div className="fields-container">
                <div className="input-field-container">
-                    <SimsettingInputField 
+                    <SelectInputField
                       label="Awareness Level"
                       infoText={awarenessLevelText}
-                      checkBox={false}
                       name="awareness_level"
                       value={settings[selectedSettingIndex].move_rules.awareness_level}
+                      options={awarenessLevelOptions}
                       disabled={true}/>
                 </div>
                 <div className="input-field-container">
-                    <SimsettingInputField 
+                    <CheckboxInputField 
                       label="Start On Foot"
                       infoText={startOnFootText}
-                      checkBox={true}
                       name="start_on_foot"
                       checked={settings[selectedSettingIndex].move_rules.start_on_foot}
                       disabled={true}/>
@@ -237,10 +244,11 @@ function Settings() {
               <p className="section-subtext">{optimisationsText}</p>
               <div className="fields-container">
               <div className="input-field-container">
-                    <SimsettingInputField 
+                    <NumberInputField 
                       label="Hasten"
                       infoText={hastenText}
-                      checkBox={false}
+                      min={0}
+                      max={1000}
                       name="hasten"
                       value={settings[selectedSettingIndex].optimisations.hasten}
                       disabled={true}/>

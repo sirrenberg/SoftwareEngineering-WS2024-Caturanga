@@ -12,12 +12,18 @@ export function useForm(initialFValues: any) {
     return value;
   }
 
-  const handleInputChange = (
+  const handleInputChange = (max?: number) => 
+  (
     e:
       | React.ChangeEvent<HTMLInputElement>
-      | React.ChangeEvent<HTMLSelectElement>
+      | React.ChangeEvent<HTMLSelectElement>,
   ) => {
     let { name, value, type } = e.target;
+
+    // sanitise input
+    if(name === "name" && value.length > 30) {
+      value = value.slice(0, 30);
+    }
 
     // handle type = checkbox
     if (type === "checkbox") {
@@ -58,10 +64,7 @@ export function useForm(initialFValues: any) {
         "weight_power",
       ].includes(name)
     ) {
-      // sanitise input
-      if (value.length > 5  || Number(value) > 1000) {
-        value = "1000";
-      }
+      value = sanitiseInput(value, max);
       setValues({
         ...values,
         move_rules: {
@@ -91,10 +94,7 @@ export function useForm(initialFValues: any) {
 
     // Optimisations are nested in the sim_settings object
     if (["hasten"].includes(name)) {
-      // sanitise input
-      if (Number(value) > 100) {
-        value = "100";
-      }
+      value = sanitiseInput(value, max);
       setValues({
         ...values,
         optimisations: {
@@ -111,6 +111,15 @@ export function useForm(initialFValues: any) {
       [name]: value,
     });
   };
+
+  function sanitiseInput(value: string, max?: number) {
+    if (max && Number(value) > max) {
+      value = max.toString();
+    } else if (value.length > 10) {
+      value = value.slice(0, 10);
+    }
+    return value;
+  }
 
   const resetForm = () => {
     setValues(initialFValues);
