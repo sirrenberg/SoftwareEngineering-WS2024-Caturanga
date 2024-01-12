@@ -23,4 +23,4 @@ ENV NODE_ENV=production
 EXPOSE 80
 
 # Start the server
-CMD ["npm", "run", "dev"]
+CMD ["npm", "run", "build"]
