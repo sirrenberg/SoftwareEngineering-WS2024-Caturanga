@@ -2,7 +2,7 @@ import "../styles/Menu.css";
 import { useEffect, useState, useContext } from "react";
 import { StartSimContext } from "../contexts/StartSimContext";
 import { SimSettings } from "../types";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAPI } from "../hooks/useAPI";
 import { NavLink } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -10,6 +10,7 @@ import { faPenToSquare, faTrash } from "@fortawesome/free-solid-svg-icons";
 
 function Settings() {
   const { sendRequest } = useAPI();
+  const navigate = useNavigate();
 
   const [settings, setSettings] = useState<SimSettings[]>([]);
   const [selectedSettingIndex, setSelectedSettingIndex] = useState<number>(-1);
@@ -533,8 +534,19 @@ function Settings() {
             <button
               className="simple-button"
               disabled={selectedSettingIndex === -1}
+              onClick={() => {
+                console.log("Starting simulation with settings id " + context.settings_id + " and input id " + context.input_id)
+                sendRequest("/run_simulation/config/", 
+                            "GET", 
+                            undefined,
+                            {simulation_id: context.input_id, simsettings_id: context.settings_id})
+                            .then((data) => {
+                              console.log(data);
+              })
+              navigate("/simulations");
+            }}
             >
-              Continue
+              Start Simulation
             </button>
           </Link>
         </div>
