@@ -123,7 +123,6 @@ class Controller:
         db = client.Caturanga
         return client, db
 
-    # TODO: use variables to store the default IDs
     def store_simulation(
             self,
             result,
@@ -332,8 +331,9 @@ class Controller:
         database, uses it as a baseline, updates the part that has been
         manipulated by the user and saves the newly created setting to the
         database. This is because parts of the simsetting have implications on
-        logging or the required files and format and are therefore not shown to
-        the user.
+        logging or the required files and format, thus are not relevant to the
+        user or might break the simulation (with the current setup),
+        and are therefore not shown to the user.
 
         Parameters:
         - simsetting (dict): The new simulation setting to be posted.
