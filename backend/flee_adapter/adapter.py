@@ -21,6 +21,11 @@ class Adapter:
         - simulation_dir (str): The path to the simulation directory.
         - simsettings_file (str): The path to the simsettings file.
 
+        Exceptions:
+        - All Exceptions and a SystemExit of flee are caught and returned
+          as a string, such that the user can see whether their simulation
+          failed.
+
         Returns:
         -dict: The result of the simulation.
         """
