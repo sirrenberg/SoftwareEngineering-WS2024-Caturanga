@@ -1,7 +1,7 @@
 import csv
 import os
 from datetime import datetime
-from extract_locations_csv import date_format
+from helper_functions import date_format
 
 
 
@@ -14,12 +14,6 @@ def create_validation_data(dtm_merged_df, round_data, folder_name,country_name, 
     create_refugee_csv(folder_name, round_data)
     location_files, camp_names = create_camp_csv(folder_name, country_name, dtm_merged_df, round_data)
     create_data_layout_csv(folder_name, location_files, camp_names)
-
-
-    # needed csv files:
-    # refugee.csv with total numbers of IDPs: data, number
-    # country_name-camp_name.csv:
-    # data_layout.csv with: camp name,  country_name-camp_name.csv
 
 
 def create_refugee_csv(folder_name, round_data):
@@ -36,6 +30,7 @@ def create_refugee_csv(folder_name, round_data):
     # write refugees.csv        
     with open(locations_file, 'w', newline='') as csv_file:
         writer = csv.writer(csv_file)
+        # header according to flee: https://github.com/djgroen/flee/blob/master/conflict_validation/ethiopia2020/refugees.csv
         writer.writerow(['Date', 'Refugee_numbers'])
         for data in round_data:
             latest_date = data["covered_to"]
@@ -114,25 +109,6 @@ def create_data_layout_csv(folder_name, location_files, camp_names):
 
 # OLD
 """
-def date_format(in_date):
-    '''
-    Function to format "dd-mm-yyyy" into "yyyy-mm-dd" format
-        Parameters:
-            in_date (str): Date in "dd-mm-yyyy" format
-        Returns:
-            (str): Date in "yyyy-mm-dd" format
-    '''
-    if "-" in in_date:
-        split_date = in_date.split("-")
-    else:
-        split_date = in_date.split(" ")
-
-    out_date = str(split_date[2]) + "-" + str(split_date[1]) + "-" + str(split_date[0])
-
-    return out_date
-
-
-
 def create_refugee_csv(folder_name, start_date, end_date):
     '''
     Add the total number of IDPs to refugees.csv.
