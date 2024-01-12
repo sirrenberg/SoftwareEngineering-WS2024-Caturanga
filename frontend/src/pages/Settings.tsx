@@ -528,7 +528,7 @@ function Settings() {
 
         <div className="buttons-container">
           <Link
-            to={selectedSettingIndex === -1 ? "/settings/" : "/simulations"}
+            to={selectedSettingIndex === -1 ? "/settings/" : "/results"}
           >
             <button
               className="simple-button"
