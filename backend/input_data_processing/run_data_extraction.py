@@ -146,12 +146,10 @@ def run_extraction(country_name, start_date, end_date):
 
     # 1. create folder for country with start_year and time (for uniqueness)
     folder_name = country_name.lower() + str(start_year) + "_" + datetime.today().strftime('%Y-%m-%d_%H-%M-%S')
-    
     os.mkdir(folder_name)
     
     # 2. get acled data and create acled.csv
     acled_url, acled_retrieval_date, acled_last_update, acled_reformatted_start_date, acled_reformatted_end_date, acled_oldest_event_date, acled_latest_event_date = acled_data_to_csv(country_name, folder_name, start_date, end_date)
-
 
     # 3. get population data and create population.csv.  population date in format YYYY-MM-DD
     population_url, population_retrieval_date, population_date = extract_population_info_from_web(country_name, folder_name, POPULATION_THRESHOLD) 
@@ -160,27 +158,14 @@ def run_extraction(country_name, start_date, end_date):
     # TODO: check how the code (from FabFlee) handels the fact that locations can appear multiple times in the ACLED data
     extract_locations_csv(folder_name, start_date, LOCATION_TYPE, FATALITIES_THRESHOLD, CONFLICT_THRESHOLD, NBR_SHOWN_ROWS)
     
-
-    # 5. add camps to locations.csv
-    # Caution: This has to be done manually. 
-    # Data for Ethiopia is available here: https://data.unhcr.org/en/documents/details/101743
-    
-    # create folder in conflict_validation
-    # TODO: error handling if folder already exists
+    # 5. add camps to locations.csv    
     camp_data_df, camp_rounds_dict = add_camp_locations(folder_name, NBR_SHOWN_ROWS, start_date, end_date)
 
-
-    """
     # 6. extract conflict data and create conflict_info.csv
     extract_conflict_info(country_name, folder_name, start_date, end_date, LOCATION_TYPE, ADDED_CONFLICT_DAYS)
 
     # 7. extract conflict information from conflict_info.csv, modify data and create conflict.csv
     extract_conflicts_csv(folder_name, start_date, end_date)
-
-    # 8. add camps to locations.csv
-    # Caution: This has to be done manually. 
-    # Data for Ethiopia is available here: https://data.unhcr.org/en/documents/details/101743
-    add_camp_locations(folder_name)
 
     # 9. extract routes from locations.csv and create routes.csv
     extract_routes_csv(folder_name)
@@ -193,28 +178,20 @@ def run_extraction(country_name, start_date, end_date):
     
     # 12. create sim_period.csv
     create_sim_period_csv(folder_name, start_date, end_date)
-    
-    # 13. insert data into DB
-    current_dir = os.getcwd()
-    folder_path = os.path.join(current_dir, folder_name)
-    
-    acled_source_list=[acled_url, acled_retrieval_date, acled_last_update, acled_reformatted_start_date, acled_reformatted_end_date, acled_oldest_event_date, acled_latest_event_date]
-    population_source_list = [population_url, population_retrieval_date, population_date]
 
-    insert_data_into_DB([country_name], folder_path, acled_source_list, population_source_list)
-    
-    """
-    # 14. create validation data
+    # 13. create validation data
     # create folder in conflict_validation
     # TODO: error handling if folder already exists
     os.mkdir(os.path.join('conflict_validation', folder_name))
     create_validation_data(camp_data_df, camp_rounds_dict, folder_name, country_name, start_date, end_date)
 
-    """
-    # create refugee.csv
-    val_retrieval_date, val_reformatted_start_date, val_reformatted_end_date, val_oldest_date, val_latest_date = create_refugee_csv(folder_name, start_date, end_date)
-    # this could also be stored in the database in the future, when the validation data is stored
-    """
+    # 14. insert data into DB
+    current_dir = os.getcwd()
+    acled_source_list=[acled_url, acled_retrieval_date, acled_last_update, acled_reformatted_start_date, acled_reformatted_end_date, acled_oldest_event_date, acled_latest_event_date]
+    population_source_list = [population_url, population_retrieval_date, population_date]
+
+    insert_data_into_DB([country_name], current_dir, folder_name, acled_source_list, population_source_list)
+    
 
 # variables that can be changed
 # date format: dd-mm-yyyy
