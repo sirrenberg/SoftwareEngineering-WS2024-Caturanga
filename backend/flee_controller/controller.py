@@ -15,7 +15,7 @@ class Controller:
     execution of simulations.
     """
 
-# Setup of MongoDB DB Connection: ---------------------------------------------
+    # Setup of MongoDB DB Connection: ---------------------------------------------
 
     def __init__(self):
         """
@@ -28,7 +28,7 @@ class Controller:
         self.client = MongoClient(self.MONGODB_URI)
         self.db = self.client.get_database("Caturanga")
 
-# Run simulations: ------------------------------------------------------------
+    # Run simulations: ------------------------------------------------------------
 
     async def initialize_simulation(
             self,
@@ -99,7 +99,7 @@ class Controller:
             simulation_id=simulation_id,
             simsettings_id=simsettings_id)
 
-# Store results in database: ----------------------------------------------
+    # Store results in database: ----------------------------------------------
 
     def connect_db(self):
         """
@@ -146,9 +146,9 @@ class Controller:
         client.close()
 
     async def store_dummy_simulation(
-                self,
-                simulation_id: str = "658dec24819bd1bc1ff738cd",
-                simsettings_id: str = "6570f624987cdd647c68bc7d"):
+            self,
+            simulation_id: str = "658dec24819bd1bc1ff738cd",
+            simsettings_id: str = "6570f624987cdd647c68bc7d"):
         """
         Stores a dummy simulation in the database so that the user can see
         that the simulation is started.
@@ -175,7 +175,7 @@ class Controller:
 
         return result.inserted_id
 
-# Store results in file system: -------------------------------------------
+    # Store results in file system: -------------------------------------------
 
     async def store_simsettings_to_filesystem(
             self,
@@ -245,8 +245,7 @@ class Controller:
 
         return validation_dir
 
-
-# Simulations and Simulation Results: -----------------------------------------
+    # Simulations and Simulation Results: -----------------------------------------
 
     async def get_all_simulation_results(self):
         """
@@ -288,6 +287,33 @@ class Controller:
             client.close()
             return None
 
+    # Deletes a specific set of simulation_results by simulation_results_id
+    async def delete_simulation_results(self, simulation_result_id: str):
+        """
+                Deletes siulation results from the database based on its ID.
+
+                Args:
+                    simulation_result_id (str): The ID of the simulation results.
+
+                """
+
+        client, db = self.connect_db()
+        simulations_results_collection = db.get_collection("simulations_results")
+
+        try:
+            result = simulations_results_collection.delete_one(
+                {"_id": ObjectID(simulation_result_id)}
+            )
+
+            if result.deleted_count == 1:
+                return "Deletion successful"
+            else:
+                return "No document found with the given ID"
+        except Exception as e:
+            return f"Error deleting document: {e}"
+        finally:
+            client.close()
+
     async def get_all_simulations(self):
         """
         Retrieves all simulations from the database.
@@ -327,8 +353,7 @@ class Controller:
             client.close()
             return None
 
-
-# Manage simsettings in DB: ---------------------------------------------------
+    # Manage simsettings in DB: ---------------------------------------------------
 
     # Store dict of simsettings in DB:
     async def post_simsettings(self, simsetting):
@@ -385,8 +410,7 @@ class Controller:
         client.close()
         return
 
-
-# Helper functions - Storing .csv-files for given data and path: --------------
+    # Helper functions - Storing .csv-files for given data and path: --------------
 
     # Store simulation data from DB in csv files for FLEE execution:
     async def convert_simulations_to_csv(self, simulation_id: str):
@@ -417,27 +441,27 @@ class Controller:
                 # Cretae csv files using helper function export-csv (filename, data, fieldnames):
                 # Closures.csv file:
                 self.export_closures_csv(os.path.join(simulation_dir, "closures.csv"), simulation["closures"])
-                
+
                 # conflicts.csv file:
                 self.export_csv(os.path.join(simulation_dir, "conflicts.csv"), simulation["conflicts"],
                                 simulation["conflicts"][
                                     0].keys())  # In DB hinten null-objekt: :null -> Daher hier ein Komma hinten angehängt
                 self.remove_trailing_commas(os.path.join(simulation_dir, "conflicts.csv"))
-                
+
                 # locations.csv file:
                 self.export_locations_csv(os.path.join(simulation_dir, "locations.csv"), simulation["locations"],
                                           ["name", "region", "country", "latitude", "longitude", "location_type",
                                            "conflict_date",
                                            "population"])
-                
+
                 # routes.csv file:
                 self.export_routes_csv(os.path.join(simulation_dir, "routes.csv"), simulation["routes"],
                                        ["from", "to", "distance",
                                         "forced_redirection"])  # null werte ignoriert -> Freie kommas hinten
-                
+
                 # sim_period.csv file (values are single data points, not directories themselves -> unnested function):
                 self.export_csv_sim_period(os.path.join(simulation_dir, "sim_period.csv"), simulation["sim_period"])
-                
+
                 return "All files written"
 
             else:
@@ -445,7 +469,6 @@ class Controller:
 
         except Exception as e:
             raise e
-
 
     # Helper Function to create csv-file from filename, data and fieldnames:
     def export_closures_csv(self, file_name, data):
@@ -613,8 +636,7 @@ class Controller:
             writer = csv.writer(file)
             writer.writerows(processed_rows)
 
-
-# Helper functions - reading files: ------------------------------------------------------------------------------------
+    # Helper functions - reading files: ------------------------------------------------------------------------------------
 
     # Read .yml file for given simsettings:
     def testread_ss(self, simsettings_id: str):
@@ -631,7 +653,7 @@ class Controller:
             with open(simsettings_filename, 'r') as f:
                 return f.read()
         except Exception as e:
-                return "File nicht vorhanden"
+            return "File nicht vorhanden"
 
     # Read all .csv files for given simulation:
     def testread_csv(self, simulation_id):
@@ -681,4 +703,3 @@ class Controller:
 # Define a custom exception for simulation not found
 class SimulationNotFoundError(Exception):
     pass
-

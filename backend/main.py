@@ -133,6 +133,22 @@ async def get_simulation_result(
     return await controller.get_simulation_result(simulation_result_id)
 
 
+@app.delete("/simulation_results/{simulation_result_id}")
+async def delete_simulation_results(
+        simulation_result_id: str = Path(),
+):
+    """
+    Delete the data of a simulation result based on its ID.
+
+    Parameters:
+    - simulation_result_id (str): The ID of the simulation result.
+
+    Returns:
+    - dict: The data of the simulation result.
+    """
+    return await controller.delete_simulation_results(simulation_result_id)
+
+
 # Simulation Settings: --------------------------------------------------------
 
 
@@ -202,11 +218,10 @@ async def delete_simsetting(
 
 # Helper Functions ------------------------------------------------------------
 
-
 @app.get("/teststore/{simsetting_id}")
 async def teststore(
     simsetting_id: str = Path(
-        description="The ID of the simsetting you want to delete."
+        description="The ID of the simsetting you want to store."
     )
 ):
     """
