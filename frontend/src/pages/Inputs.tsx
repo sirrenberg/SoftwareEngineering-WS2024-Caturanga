@@ -16,7 +16,7 @@ function Inputs() {
 
   const [inputs, setInputs] = useState<Input[]>([]);
   const [selectedInputIndex, setSelectedInputIndex] = useState<number>(-1);
-  const [mapCenter, setMapCenter] = useState<LatLngExpression>([0, 0]); // [lat, lng
+  const [mapCenter, setMapCenter] = useState<LatLngExpression>([0, 0]); // [lat, lng]
 
   const context = useContext(StartSimContext);
   if (!context) {

@@ -28,7 +28,7 @@ function LandingPage() {
                 </button>
               </NavLink>
 
-              <NavLink to="/inputs">
+              <NavLink to="/results">
                 <button className="lp-title-button simple-button">
                   Analyze past Simulations
                 </button>
