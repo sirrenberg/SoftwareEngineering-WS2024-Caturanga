@@ -46,7 +46,7 @@
   justify-content: flex-start; /* Change from 'center' to 'flex-start' due to scrolling issues at the top of the list*/
   align-items: center;
   width: 90%;
-  height: 100%;
+  height: 75%;           /* Changed to 100% in order to fix problem of cut of list items at the top of the list */
   overflow-y: scroll;
   box-sizing: border-box; /* Include this property to ensure consistent box sizing due to scrolling issues at the top of the list*/
 }
