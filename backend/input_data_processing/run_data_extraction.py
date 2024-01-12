@@ -146,6 +146,7 @@ def run_extraction(country_name, start_date, end_date):
 
     # 1. create folder for country with start_year and time (for uniqueness)
     folder_name = country_name.lower() + str(start_year) + "_" + datetime.today().strftime('%Y-%m-%d_%H-%M-%S')
+    
     os.mkdir(folder_name)
     
     # 2. get acled data and create acled.csv
@@ -158,12 +159,20 @@ def run_extraction(country_name, start_date, end_date):
     # 4. extract location data and create locations.csv
     # TODO: check how the code (from FabFlee) handels the fact that locations can appear multiple times in the ACLED data
     extract_locations_csv(folder_name, start_date, LOCATION_TYPE, FATALITIES_THRESHOLD, CONFLICT_THRESHOLD, NBR_SHOWN_ROWS)
+    
 
     # 5. add camps to locations.csv
     # Caution: This has to be done manually. 
     # Data for Ethiopia is available here: https://data.unhcr.org/en/documents/details/101743
-    add_camp_locations(folder_name)
+    
+    # create folder in conflict_validation
+    # TODO: error handling if folder already exists
+    os.mkdir(os.path.join('conflict_validation', folder_name))
+    add_camp_locations(folder_name, country_name, NBR_SHOWN_ROWS, start_date, end_date)
 
+
+
+    """
     # 6. extract conflict data and create conflict_info.csv
     extract_conflict_info(country_name, folder_name, start_date, end_date, LOCATION_TYPE, ADDED_CONFLICT_DAYS)
 
@@ -205,13 +214,13 @@ def run_extraction(country_name, start_date, end_date):
     # create refugee.csv
     val_retrieval_date, val_reformatted_start_date, val_reformatted_end_date, val_oldest_date, val_latest_date = create_refugee_csv(folder_name, start_date, end_date)
     # this could also be stored in the database in the future, when the validation data is stored
-
+    """
 
 # variables that can be changed
 # date format: dd-mm-yyyy
 country_name = "Ethiopia"
 start_date = "01-01-2023"
-end_date =  "11-01-2024"
+end_date =  "12-01-2024"
 
 
 run_extraction(country_name, start_date, end_date)
