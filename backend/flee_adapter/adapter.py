@@ -28,6 +28,12 @@ class Adapter:
                          validation_dir,
                          0,
                          simsettings_file)
-        result = sim.run()
+
+        try:
+            result = sim.run()
+        except Exception as e:
+            result = {"error": "{}".format(e)}
+        except SystemExit as e:
+            result = {"error": "{}".format(e)}
 
         return result

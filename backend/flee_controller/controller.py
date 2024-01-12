@@ -137,9 +137,13 @@ class Controller:
         new_simulation = {}
         new_simulation = {
             "simulation_id": simulation_id,
-            "simsettings_id": simsettings_id,
-            "data": result
+            "simsettings_id": simsettings_id
         }
+        if "error" in result:
+            new_simulation["error"] = result["error"]
+        else:
+            new_simulation["data"] = result
+
         simulations_collection.replace_one(
             {"_id": ObjectID(object_id)},
             new_simulation)
