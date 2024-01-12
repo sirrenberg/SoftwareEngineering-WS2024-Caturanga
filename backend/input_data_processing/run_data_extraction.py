@@ -14,7 +14,7 @@ from create_closures_csv import create_empty_closure_csv
 from create_registration_corrections_csv import create_empty_registration_corrections_csv
 from create_sim_period_csv import create_sim_period_csv
 from file_converter import insert_data_into_DB
-from create_validation_data import create_refugee_csv
+from create_validation_data import create_validation_data
 
 
 # global variables (default values)
@@ -167,9 +167,7 @@ def run_extraction(country_name, start_date, end_date):
     
     # create folder in conflict_validation
     # TODO: error handling if folder already exists
-    os.mkdir(os.path.join('conflict_validation', folder_name))
-    add_camp_locations(folder_name, country_name, NBR_SHOWN_ROWS, start_date, end_date)
-
+    camp_data_df, camp_rounds_dict = add_camp_locations(folder_name, NBR_SHOWN_ROWS, start_date, end_date)
 
 
     """
@@ -205,12 +203,14 @@ def run_extraction(country_name, start_date, end_date):
 
     insert_data_into_DB([country_name], folder_path, acled_source_list, population_source_list)
     
-    
+    """
     # 14. create validation data
     # create folder in conflict_validation
     # TODO: error handling if folder already exists
     os.mkdir(os.path.join('conflict_validation', folder_name))
-    
+    create_validation_data(camp_data_df, camp_rounds_dict, folder_name, country_name, start_date, end_date)
+
+    """
     # create refugee.csv
     val_retrieval_date, val_reformatted_start_date, val_reformatted_end_date, val_oldest_date, val_latest_date = create_refugee_csv(folder_name, start_date, end_date)
     # this could also be stored in the database in the future, when the validation data is stored
@@ -224,6 +224,7 @@ end_date =  "12-01-2024"
 
 
 run_extraction(country_name, start_date, end_date)
+# TODO: helper_functions.py for functions that are used in multiple files, e.g. date_format
 
 
 

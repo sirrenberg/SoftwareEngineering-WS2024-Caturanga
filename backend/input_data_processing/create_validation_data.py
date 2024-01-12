@@ -1,8 +1,119 @@
 import csv
 import os
 from datetime import datetime
+from extract_locations_csv import date_format
 
 
+
+def create_validation_data(dtm_merged_df, round_data, folder_name,country_name, start_date, end_date):
+    # TODO: do something with start_date and end_date
+    # reformat the given dates from DD-MM-YYYY to YYYY-MM-DD in order to have the same format as in the ACLED-API
+    reformatted_start_date = date_format(start_date)
+    reformatted_end_date = date_format(end_date)
+
+    create_refugee_csv(folder_name, round_data)
+    location_files, camp_names = create_camp_csv(folder_name, country_name, dtm_merged_df, round_data)
+    create_data_layout_csv(folder_name, location_files, camp_names)
+
+
+    # needed csv files:
+    # refugee.csv with total numbers of IDPs: data, number
+    # country_name-camp_name.csv:
+    # data_layout.csv with: camp name,  country_name-camp_name.csv
+
+
+def create_refugee_csv(folder_name, round_data):
+    """ 
+    Create refugees.csv with the date and the total number of conflict-driven IDPs at that moment
+        Parameters:
+            folder_name (str): Name of the folder where the CSV file will be stored
+            round_data (list): List of dictionaries with the round number, the total number of IDPs and the date
+    """
+    # Get the current directory
+    current_dir = os.getcwd()
+    #open refugees.csv
+    locations_file = os.path.join(current_dir, "conflict_validation", folder_name, "refugees.csv")
+    # write refugees.csv        
+    with open(locations_file, 'w', newline='') as csv_file:
+        writer = csv.writer(csv_file)
+        writer.writerow(['Date', 'Refugee_numbers'])
+        for data in round_data:
+            latest_date = data["covered_to"]
+            total_IDPs = data["total_IDP_conflict_number"]
+            writer.writerow([latest_date, total_IDPs])
+    
+    print("Successfully added total IDP numbers to refugees.csv")
+
+
+def create_camp_csv(folder_name, country_name, dtm_merged_df, round_data):
+    """
+    Create country_name-camp_name.csv for each camp in dtm_merged_df
+        Parameters:
+            folder_name (str): Name of the folder where the CSV files will be stored
+            country_name (str): Name of the country
+            dtm_merged_df (DataFrame): DataFrame containing the camp information
+            round_data (list): List of dictionaries with the round number, the total number of IDPs and the date
+    """
+    # create a csv file for each camp with the title: countryname-campname.csv
+    # write the following information into the csv file: date, population
+    location_files = []
+    camp_names = []
+    for index, row in dtm_merged_df.iterrows():
+        # Get the current directory
+        current_dir = os.getcwd()
+        #open country_name-camp_name.csv
+        camp_name = row["name"]
+        camp_names.append(camp_name)
+        file_name = f"{country_name}-{camp_name}.csv"
+        location_files.append(file_name)
+        locations_file = os.path.join(current_dir, "conflict_validation", folder_name, file_name)
+        # write country_name-camp_name.csv        
+        with open(locations_file, 'w', newline='') as csv_file:
+            writer = csv.writer(csv_file)
+            # accordingly to flee, no header
+            for data in round_data:
+                latest_date = data["covered_to"]
+                total_IDPs = row[f"population_round_{data['round']}"]
+                writer.writerow([latest_date, total_IDPs])
+    
+    print("Successfully created files country_name-camp_name.csv and added conflict-driven IDP numbers to them")
+    return location_files, camp_names
+
+
+
+def create_data_layout_csv(folder_name, location_files, camp_names):
+    """
+    Create data_layout.csv
+        Parameters:
+            folder_name (str): Name of the folder where the CSV file will be stored
+            location_files (list): List of the names of the location files
+            camp_names (list): List of the names of the camps
+    """
+
+    combined_list = zip(location_files, camp_names)
+    # Get the current directory
+    current_dir = os.getcwd()
+    #open data_layout.csv
+    data_layout_file = os.path.join(current_dir, "conflict_validation", folder_name, "data_layout.csv")
+    # write data_layout.csv        
+    with open(data_layout_file, 'w', newline='') as csv_file:
+        writer = csv.writer(csv_file)
+        #header according to flee: https://github.com/djgroen/flee/blob/master/conflict_validation/ethiopia2020/data_layout.csv
+        writer.writerow(['total', 'refugees.csv'])
+        for entry in combined_list:
+            location_file = entry[0]
+            camp_name = entry[1]
+            writer.writerow([camp_name, location_file])
+        
+        
+    print("Successfully created data_layout.csv")
+    
+
+
+
+
+# OLD
+"""
 def date_format(in_date):
     '''
     Function to format "dd-mm-yyyy" into "yyyy-mm-dd" format
@@ -101,4 +212,4 @@ def create_refugee_csv(folder_name, start_date, end_date):
     print("Successfully added total IDP numbers to refugees.csv")
     
     return retrieval_date, reformatted_start_date, reformatted_end_date, oldest_date, latest_date
-
+"""
