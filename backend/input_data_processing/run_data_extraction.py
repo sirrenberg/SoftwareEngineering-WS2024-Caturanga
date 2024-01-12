@@ -17,7 +17,7 @@ from file_converter import insert_data_into_DB
 from create_validation_data import create_validation_data
 
 
-# global variables (default values)
+# global variables (default values mostly from FLEE)
 POPULATION_THRESHOLD = 10000
 FATALITIES_THRESHOLD = 0
 CONFLICT_THRESHOLD = 100

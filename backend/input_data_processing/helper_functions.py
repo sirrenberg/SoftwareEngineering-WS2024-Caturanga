@@ -30,8 +30,8 @@ def between_date(d1, d2):
     '''
     d1list = d1.split("-")
     d2list = d2.split("-")
-    date1 = datetime.datetime(int(d1list[2]), int(d1list[1]), int(d1list[0]))
-    date2 = datetime.datetime(int(d2list[2]), int(d2list[1]), int(d2list[0]))
+    date1 = datetime(int(d1list[2]), int(d1list[1]), int(d1list[0]))
+    date2 = datetime(int(d2list[2]), int(d2list[1]), int(d2list[0]))
 
     return abs((date1 - date2).days)
 
