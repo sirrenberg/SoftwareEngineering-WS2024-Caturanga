@@ -1,5 +1,5 @@
 export function useAPI() {
-  const API_URL = "https://984ft56931.execute-api.eu-west-1.amazonaws.com/backend";
+  const API_URL = "https://sj6mxvhnt8.execute-api.eu-west-1.amazonaws.com";
 
   function sendRequest(route: string, method: string, body?: any) {
     return fetch(API_URL + route, {
