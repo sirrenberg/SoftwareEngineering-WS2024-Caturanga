@@ -1,0 +1,31 @@
+#name,region,country,latitude,longitude,location_type,conflict_date,population
+Kobo,Amhara,Ethiopia,12.15,39.6333,town,98,56100
+Sekota,Amhara,Ethiopia,12.627,39.0343,town,35,50300
+Kemise,Amhara,Ethiopia,10.7244,39.874,town,23,43800
+Gidole,South Ethiopia Region,Ethiopia,5.6488,37.3698,town,1,35500
+Bako,Oromia,Ethiopia,9.1333,37.05,town,32,34100
+Ataye,Amhara,Ethiopia,10.3502,39.9362,town,22,26300
+Gedeb,South Ethiopia Region,Ethiopia,5.9167,38.25,town,24,24000
+Becho,Oromia,Ethiopia,8.5828,38.241,town,37,0
+Abobo,Gambela,Ethiopia,7.8971,34.5402,town,39,0
+Asbuli,Somali,Ethiopia,9.9814,41.1643,town,52,0
+Gonder,Amhara,Ethiopia,12.6,37.4667,conflict_zone,213,466000
+Sodo,Central Ethiopia,Ethiopia,8.3261,38.5217,conflict_zone,276,204100
+Arba Minch,South Ethiopia Region,Ethiopia,6.0333,37.55,conflict_zone,329,201000
+Debre Markos,Amhara,Ethiopia,10.35,37.7333,conflict_zone,219,140700
+Kombolcha,Oromia,Ethiopia,9.5333,37.5,conflict_zone,136,132100
+Welkite,Central Ethiopia,Ethiopia,8.2833,37.7833,conflict_zone,285,77500
+Tepi,South West,Ethiopia,7.2,35.45,conflict_zone,161,66700
+Gimbi,Oromia,Ethiopia,9.1667,35.8333,conflict_zone,297,64300
+Moyale,Oromia,Ethiopia,3.5391,39.049,conflict_zone,322,57000
+Injibara,Amhara,Ethiopia,11.0,36.9167,conflict_zone,160,47500
+Qoliji 2,Somali,Ethiopia,9.1773,42.3936,idpcamp,0,60270
+Qoliji,Somali,Ethiopia,9.1814,42.3908,idpcamp,0,40734
+Mustahil town,Somali,Ethiopia,5.2574,44.7392,idpcamp,0,30000
+Elmahan,Somali,Ethiopia,4.7543,39.2461,idpcamp,0,26184
+Abdi balay,Somali,Ethiopia,6.4429066,40.4214331,idpcamp,0,21397
+Beledul Amin,Somali,Ethiopia,3.5851,39.0436,idpcamp,0,20650
+Dati,Oromia,Ethiopia,4.1851,39.1627,idpcamp,0,15595
+Bula Ad,Somali,Ethiopia,5.2108,42.1669,idpcamp,0,14098
+Sadey,Somali,Ethiopia,3.9537,41.1908,idpcamp,0,13060
+China Camp,Amhara,Ethiopia,9.6417,39.5085,idpcamp,0,12874
