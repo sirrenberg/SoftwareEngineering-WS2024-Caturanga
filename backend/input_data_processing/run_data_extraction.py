@@ -15,6 +15,7 @@ from create_registration_corrections_csv import create_empty_registration_correc
 from create_sim_period_csv import create_sim_period_csv
 from file_converter import insert_data_into_DB
 from create_validation_data import create_validation_data
+from helper_functions import date_format
 
 
 # global variables (default values mostly from FLEE)
@@ -52,8 +53,8 @@ def acled_data_to_csv(country, folder_name, start_date, end_date):
     # reformat the given date from DD-MM-YYYY to YYYY-MM-DD in order to have the same format as in the ACLED-API
     split_start_date = start_date.split("-")
     split_end_date = end_date.split("-")
-    reformatted_start_date = str(split_start_date[2]) + "-" + str(split_start_date[1]) + "-" + str(split_start_date[0])
-    reformatted_end_date = str(split_end_date[2]) + "-" + str(split_end_date[1]) + "-" + str(split_end_date[0])
+    reformatted_start_date = date_format(start_date)
+    reformatted_end_date = date_format(end_date)
 
     # extract start_year and end_year
     start_year = int(split_start_date[2])
@@ -88,55 +89,64 @@ def acled_data_to_csv(country, folder_name, start_date, end_date):
     # Make the GET request
     response = requests.get(url_json, params=params)
 
-    # convert response to json
-    response = response.json()
+    if response.status_code == 200:
+        # convert response to json
+        response = response.json()
 
-    # last_update is the number of hours since the last update to the data
-    acled_last_update = response['last_update']
+        # last_update is the number of hours since the last update to the data
+        acled_last_update = response['last_update']
 
-    # Subtract acled_last_update from current time
-    last_update_datetime = datetime.now() - timedelta(hours=acled_last_update)
+        # Subtract acled_last_update from current time
+        last_update_datetime = datetime.now() - timedelta(hours=acled_last_update)
 
-    # Format in YYYY_MM_DD HH:MM:SS
-    last_update_str = last_update_datetime.strftime('%Y-%m-%d %H:%M:%S')
+        # Format in YYYY_MM_DD HH:MM:SS
+        last_update_str = last_update_datetime.strftime('%Y-%m-%d %H:%M:%S')
 
-    # number of events in the response
-    number_of_events = response['count']
+        # number of events in the response
+        number_of_events = response['count']
 
-    # extract the acled data with the events
-    acled_data = response['data']
+        # extract the acled data with the events
+        acled_data = response['data']
 
-    # convert to dataframe
-    acled_df = pd.DataFrame(acled_data)
+        # convert to dataframe
+        acled_df = pd.DataFrame(acled_data)
 
-    # filter the data by start&end date and reset index
-    acled_df = acled_df[(acled_df['event_date'] >= reformatted_start_date) & (acled_df['event_date'] <= reformatted_end_date)]
-    acled_df = acled_df.reset_index(drop=True)
+        # filter the data by start&end date and reset index
+        acled_df = acled_df[(acled_df['event_date'] >= reformatted_start_date) & (acled_df['event_date'] <= reformatted_end_date)]
+        acled_df = acled_df.reset_index(drop=True)
 
-    # extract latest event date (this is not always the same as the end_date). We want to store the event date in the DB
-    # the extracted format of the date is 'YYYY-MM-DD' - we also want to store it in this format 
-    # from API doc: ACLED data is returned in date order DESC (starting with the latest). 
-    # get latest entry for event_date 
-    latest_event_date = acled_df['event_date'][0]
+        # extract latest event date (this is not always the same as the end_date). We want to store the event date in the DB
+        # the extracted format of the date is 'YYYY-MM-DD' - we also want to store it in this format 
+        # from API doc: ACLED data is returned in date order DESC (starting with the latest). 
+        # get latest entry for event_date 
+        latest_event_date = acled_df['event_date'][0]
 
-    # get oldest event_date
-    oldest_event_date = acled_df['event_date'].iloc[-1]
-    
-    # url we want to show in the frontend and store in DB
-    acled_url = 'https://acleddata.com/data-export-tool/'
-    
-    # store in folder_name as CSV file
-    acled_df.to_csv(os.path.join(folder_name, 'acled.csv'), index=False)
+        # get oldest event_date
+        oldest_event_date = acled_df['event_date'].iloc[-1]
+        
+        # url we want to show in the frontend and store in DB
+        acled_url = 'https://acleddata.com/data-export-tool/'
+        
+        # store in folder_name as CSV file
+        acled_df.to_csv(os.path.join(folder_name, 'acled.csv'), index=False)
+    else: 
+        print(f"Error: Could not retrieve data from ACLED API. Status code: {response.status_code}")
+        acled_url = ""
+        acled_last_update = ""
+        last_update_str = ""
+        oldest_event_date = ""
+        latest_event_date = ""
     
     # return the data source and date information
     return acled_url, retrieval_date, last_update_str, reformatted_start_date, reformatted_end_date, oldest_event_date, latest_event_date
 
 
-def run_extraction(country_name, start_date, end_date):
+def run_extraction(simulation_name, country_name, start_date, end_date):
     '''
     Runs the data extraction process for the given country and time period.
     
             Parameters:
+                simulation_name (str): Name of the simulation
                 country_name (str): Country name
                 start_date (str): Start date of the time period
                 end_date (str): End date of the time period
@@ -190,17 +200,18 @@ def run_extraction(country_name, start_date, end_date):
     acled_source_list=[acled_url, acled_retrieval_date, acled_last_update, acled_reformatted_start_date, acled_reformatted_end_date, acled_oldest_event_date, acled_latest_event_date]
     population_source_list = [population_url, population_retrieval_date, population_date]
 
-    insert_data_into_DB([country_name], current_dir, folder_name, acled_source_list, population_source_list)
+    insert_data_into_DB(simulation_name, [country_name], current_dir, folder_name, acled_source_list, population_source_list)
     
 
 # variables that can be changed
 # date format: dd-mm-yyyy
 country_name = "Ethiopia"
+simulation_name = "caturanga"
 start_date = "01-01-2023"
 end_date =  "12-01-2024"
 
 
-run_extraction(country_name, start_date, end_date)
+run_extraction(simulation_name, country_name, start_date, end_date)
 # TODO: helper_functions.py for functions that are used in multiple files, e.g. date_format
 
 

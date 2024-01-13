@@ -258,10 +258,11 @@ def transform_val_camp_data(validation_camp_data):
 
 
 
-def insert_data_into_DB(country_list, current_dir, folder_name, acled_source_list=[], population_source_list = [], is_test_data=False):
+def insert_data_into_DB(simulation_name, country_list, current_dir, folder_name, acled_source_list=[], population_source_list = [], is_test_data=False):
     '''
     Insert the data into the MongoDB.
         Parameters:
+            simulation_name (str): Name of the simulation
             country_list (list): List of country names
             current_dir (str): Current directory of caller
             folder_path (str): Path to the folder containing the CSV files
@@ -342,7 +343,8 @@ def insert_data_into_DB(country_list, current_dir, folder_name, acled_source_lis
 
         # Create the JSON object to be inserted into the MongoDB
         mongo_document = {
-            'Name': country,
+            'name': simulation_name,
+            'region': country,
             'closures': closures,
             'conflicts': conflicts,
             'locations': locations,
