@@ -342,7 +342,7 @@ def insert_data_into_DB(country_list, current_dir, folder_name, acled_source_lis
 
         # Create the JSON object to be inserted into the MongoDB
         mongo_document = {
-            'region': country,
+            'Name': country,
             'closures': closures,
             'conflicts': conflicts,
             'locations': locations,
