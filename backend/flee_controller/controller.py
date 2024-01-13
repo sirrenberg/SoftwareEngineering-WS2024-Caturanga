@@ -271,6 +271,15 @@ class Controller:
         client.close()
         return rl
 
+    async def get_all_simulation_result_summaries(self):
+        """
+        Retrieves all simulation result summaries.
+
+        Returns:
+        - list of simulation result summaries.
+        """
+        return await self.get_summaries("simulations_results")
+
     # Return specific simulation by simulation_results_id:
     async def get_simulation_result(self, simulation_result_id: str):
         """
@@ -310,6 +319,15 @@ class Controller:
         client.close()
         return rl
 
+    async def get_all_simulation_summaries(self):
+        """
+        Retrieves all simulation summaries.
+
+        Returns:
+        - list of simulation summaries.
+        """
+        return await self.get_summaries("simulations")
+
     # Get specific simulation by simulation_id:
     async def get_simulation(self, simulation_id: str):
         """
@@ -332,6 +350,42 @@ class Controller:
             client.close()
             return None
 
+    async def get_summaries(self, collection_name: str):
+        """
+        Retrieves summaries from the specified collection in the database.
+        A summary contains ID and name of the objects. In the case of
+        simulations, the summary also contains the locations and routes,
+        which is needed for the map view.
+
+        Parameters:
+        - collection (str):
+          The name of the collection to retrieve summaries from.
+
+        Returns:
+        - list: A list of summaries, where each summary
+                is a dictionary with "_id" and "name" fields.
+        """
+
+        client, db = self.connect_db()
+
+        collection = db.get_collection(collection_name)
+        if collection_name == "simulations":
+            summaries = collection.find({}, {"_id": 1,
+                                             "name": 1,
+                                             "locations": 1,
+                                             "routes": 1})
+        else:
+            summaries = collection.find({}, {"_id": 1, "name": 1})
+
+        result = []
+        for summary in summaries:
+            summary["_id"] = str(summary["_id"])
+            result.append(summary)
+
+        client.close()
+
+        return result
+
 
 # Manage simsettings in DB: ---------------------------------------------------
 
@@ -353,6 +407,15 @@ class Controller:
             rl.append(simsetting)
         client.close()
         return rl
+
+    async def get_all_simsetting_summaries(self):
+        """
+        Retrieves all simsetting summaries.
+
+        Returns:
+        - list of simsetting summaries.
+        """
+        return await self.get_summaries("simsettings")
 
     # Get specific simsettings by simsetting_id:
     async def get_simsetting(self, simsetting_id: str):

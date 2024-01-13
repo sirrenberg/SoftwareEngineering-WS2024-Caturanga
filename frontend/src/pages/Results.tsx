@@ -14,7 +14,7 @@ function Results() {
   const [selectedResultIndex, setSelectedResultIndex] = useState<number>(-1);
 
   useEffect(() => {
-    sendRequest("/simulation_results", "GET").then((data) => {
+    sendRequest("/simulation_results/summary", "GET").then((data) => {
       console.log(data);
       setResultPreviews(data);
     });
