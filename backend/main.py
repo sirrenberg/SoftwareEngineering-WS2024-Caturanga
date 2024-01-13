@@ -39,7 +39,7 @@ def read_root():
 
 
 @app.post("/run_simulation/config")
-async def run_simulation_config_post(
+async def run_simulation_config(
         background_tasks: BackgroundTasks,
         simulation_config: JSONStructure = None
 ):
