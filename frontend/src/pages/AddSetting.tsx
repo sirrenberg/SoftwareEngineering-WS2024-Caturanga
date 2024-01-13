@@ -8,8 +8,7 @@ import { movementRulesText, moveSpeedText, walkSpeedText, conflictWeightText,
   campWeightText, foreignWeightText, usePopForLocWeightText,
   popPowerForLocWeightText, conflictMovechanceText, campMovechanceText,
   defaultMovechanceText, awarenessLevelText, startOnFootText, hastenText,
-  optimisationsText, 
-  awarenessLevelOptions} from "../helper/constants";
+  optimisationsText, defaultValues, awarenessLevelOptions} from "../helper/constants";
 
 function AddSetting() {
   const { id } = useParams<{ id: string }>();
@@ -17,30 +16,7 @@ function AddSetting() {
 
   const isNewSetting = id === "new";
 
-  const initialValues: SimSettings = {
-    _id: "",
-    name: "untitled",
-    move_rules: {
-      max_move_speed: 360,
-      max_walk_speed: 35,
-      foreign_weight: 1,
-      conflict_weight: 0.25,
-      camp_weight: 1,
-      use_pop_for_loc_weight: false,
-      pop_power_for_loc_weight: 0.1,
-      conflict_movechance: 1,
-      camp_movechance: 0.001,
-      default_movechance: 0.3,
-      awareness_level: 1,
-      capacity_scaling: 1,
-      avoid_short_stints: false,
-      start_on_foot: false,
-      weight_power: 1,
-    },
-    optimisations: {
-      hasten: 1,
-    },
-  };
+  const initialValues = defaultValues;
 
   const { values, handleInputChange, handlePrefillData, handleSubmit } =
     useForm(initialValues);

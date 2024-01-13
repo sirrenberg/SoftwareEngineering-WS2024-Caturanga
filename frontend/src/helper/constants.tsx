@@ -1,38 +1,79 @@
+import { SimSettings } from "../types";
+
+export const defaultValues: SimSettings = {
+    _id: "",
+    name: "untitled",
+    move_rules: {
+      max_move_speed: 360,
+      max_walk_speed: 35,
+      foreign_weight: 1,
+      conflict_weight: 0.25,
+      camp_weight: 1,
+      use_pop_for_loc_weight: false,
+      pop_power_for_loc_weight: 0.1,
+      conflict_movechance: 1,
+      camp_movechance: 0.001,
+      default_movechance: 0.3,
+      awareness_level: 1,
+      capacity_scaling: 1,
+      avoid_short_stints: false,
+      start_on_foot: false,
+      weight_power: 1,
+    },
+    optimisations: {
+      hasten: 1,
+    },
+  };
+
+export const awarenessLevelOptions = 
+[{value: -1, label: "No awareness"},
+ {value: 0, label: "The length of the road to the closest settlement"}, 
+ {value: 1, label: "The type of the closest settlement"},
+ {value: 2, label: "The type of the settlement adjacent to neighbouring settlements"},
+ {value: 3, label: "The type of the settlements neighbouring those neighbours of neighbours"}]
+
 export const moveSpeedText = 
     `
-    This refers to the most number of kilometers (km) to be traversed by IDPs per day. 
-    The default value is 360 km per day, which refers to a speed of 30 km/hour for 12 hours.
+    This refers to the most number of kilometers (km) to be traveled by IDPs per day. 
+    The default value is ${defaultValues.move_rules.max_move_speed} km per day, 
+    which corresponds to a speed of 30 km/hour for 12 hours.
     `
 ;
 
 export const walkSpeedText = 
     `
-    This refers to the most number of kilometers (km) to be traversed by IDPs per day on foot. 
-    The default value is 35 km per day, which refers to a speed of 3.5 km/hour for 10 hours.
+    This refers to the most number of kilometers (km) to be traveled by IDPs per day on foot. 
+    The default value is ${defaultValues.move_rules.max_walk_speed} km per day,
+    which corresponds to a speed of 3.5 km/hour for 10 hours.
     `
 ;
 
 export const conflictWeightText =
     `
-    This refers to the attraction multiplier for conflict locations (conflict zones).
+    This refers to the attraction multiplier for conflict zones.
+    The default is ${defaultValues.move_rules.conflict_weight}.
     `
 ;
 
 export const campWeightText =
     `
-    This refers to the attraction multiplier for camp locations (camps).
+    This refers to the attraction multiplier for camps.
+    The default is ${defaultValues.move_rules.camp_weight}, which means there is no effect.
     `
 ;
 
 export const foreignWeightText =
     `
     This refers to the attraction multiplier for foreign locations, which is added to the camp multiplier.
+    The default is ${defaultValues.move_rules.foreign_weight}, which means there is no effect.
     `
 ;
 
 export const usePopForLocWeightText =
     `
     This parameter, if checked, includes location population as a weighting factor for non-camp locations.
+    See "Population Power For Location Weight" for more details.
+    By default this is ${defaultValues.move_rules.use_pop_for_loc_weight ? "checked" : "NOT checked"}.
     `
 ;
 
@@ -40,7 +81,7 @@ export const popPowerForLocWeightText =
     `
     This refers to a power factor that adjusts how heavily population is accounted for,
     when "Use Population For Location Weight" is enabled. 
-    By default it is set to 0.1, 
+    By default it is set to ${defaultValues.move_rules.pop_power_for_loc_weight}, 
     which weights a location with 1M population twice as heavily as a location with 1000 population. 
     I.e.: 1000^0.1 = 1.99, 1000000^0.1 = 3.98.
     `
@@ -48,26 +89,32 @@ export const popPowerForLocWeightText =
 
 export const conflictMovechanceText =
     `
-    This is the chance (probability) of IDPs leaving a conflict location (conflict zone) per day.
+    This is the chance (probability) of IDPs leaving a conflict zone per day.
+    The default value is ${defaultValues.move_rules.conflict_movechance}, i.e., 100%. 
+    Therefore IDPs will always leave conflict zones.
     `
 ;
 
 export const campMovechanceText = 
     `
-    This is the chance (probability) of IDPs leaving a camp location per day.
+    This is the chance (probability) of IDPs leaving a camp per day.
+    The default value is ${defaultValues.move_rules.camp_movechance}, i.e., 0.1%.
+    Therefore IDPs will almost never leave camps.
     `
 ;
 
 export const defaultMovechanceText =
     `
     This is the chance (probability) of IDPs leaving a regular location (i.e., town) per day.
+    The default value is ${defaultValues.move_rules.default_movechance}, i.e., 30%.
     `
 ;
 
 export const awarenessLevelText =
     `
-    This parameter is used to adjust the IDPs awareness of locations by incorporating a more wide or narrow awareness level. 
-    Settlements are divided into following three types: camps, towns, conflict zones.
+    This parameter is used to adjust the IDPs awareness for neighboring locations by setting a wider or narrower awareness level. 
+    Settlements are divided into following three types: camps, towns, conflict zones. 
+    The default value is: "${awarenessLevelOptions[defaultValues.move_rules.awareness_level+1].label}".
     `
 ;
 
@@ -86,6 +133,7 @@ export const avoidShortStintsText =
 export const startOnFootText =
     `
     This parameter, if checked, forces IDPs to start their journey on foot.
+    By default it is ${defaultValues.move_rules.start_on_foot ? "checked" : "NOT checked"}.
     `
 ;
 
@@ -97,12 +145,12 @@ export const weightPowerText =
 
 export const hastenText =
     `
-    This is a parameter that can be used to speed up the simulation. 
-    The default is 1.0. 
-    By setting it to a larger value, the simulation will proportionally reduce its number of IDPs,
-    speeding up execution. When using a value for hasten larger than 1.0, 
-    the simulation becomes gradually less accurate and 
-    will exhibit more variability in its results between individual runs.
+    This parameter can be used to speed up the simulation. 
+    The default is ${defaultValues.optimisations.hasten}. 
+    Setting it to a higher value will proportionally reduce the number of simulated IDPs, speeding up execution.
+    Warning: When using a value greater than 1.0, 
+    the simulation will gradually become less accurate and 
+    will show more variability in its results when comparing multiple runs.
     `
 ;
 
@@ -118,10 +166,3 @@ export const optimisationsText =
     The following section contains the parameter that can improve the simulation's runtime.
     `
 ;
-
-export const awarenessLevelOptions = 
-[{value: -1, label: "No awareness"},
- {value: 0, label: "The length of the road to the closest settlement"}, 
- {value: 1, label: "The type of the closest settlement"},
- {value: 2, label: "The type of the settlement adjacent to neighbouring settlements"},
- {value: 3, label: "The type of the settlements neighbouring those neighbours of neighbours"}]
