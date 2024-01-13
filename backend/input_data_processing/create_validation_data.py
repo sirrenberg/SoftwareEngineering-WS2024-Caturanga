@@ -7,13 +7,29 @@ from helper_functions import date_format
 
 def create_validation_data(dtm_merged_df, round_data, folder_name,country_name, start_date, end_date):
     # TODO: do something with start_date and end_date
+
+    # retrieval date
+    retrieval_date = datetime.today().strftime('%Y-%m-%d %H:%M:%S')
+
     # reformat the given dates from DD-MM-YYYY to YYYY-MM-DD in order to have the same format as in the ACLED-API
     reformatted_start_date = date_format(start_date)
     reformatted_end_date = date_format(end_date)
 
+    # TODO: do something with start_date and end_date
+    # sort round_data by round number in descending order to get period covered
+    round_data.sort(key=lambda x: x["round"], reverse=True)
+    covered_to = round_data[0]["covered_to"]
+    covered_from = round_data[-1]["covered_from"]
+    latest_url = round_data[0]["source"]
+    oldest_url = round_data[-1]["source"]
+
+
     create_refugee_csv(folder_name, round_data)
     location_files, camp_names = create_camp_csv(folder_name, country_name, dtm_merged_df, round_data)
     create_data_layout_csv(folder_name, location_files, camp_names)
+
+
+    return retrieval_date, reformatted_start_date, reformatted_end_date, covered_from, covered_to, oldest_url, latest_url
 
 
 def create_refugee_csv(folder_name, round_data):

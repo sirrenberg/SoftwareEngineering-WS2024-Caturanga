@@ -258,16 +258,17 @@ def transform_val_camp_data(validation_camp_data):
 
 
 
-def insert_data_into_DB(simulation_name, country_list, current_dir, folder_name, acled_source_list=[], population_source_list = [], is_test_data=False):
+def insert_data_into_DB(country_list, current_dir, folder_name, acled_source_list=[], population_source_list = [], camp_source_list = [], val_source_list = [], is_test_data=False):
     '''
     Insert the data into the MongoDB.
         Parameters:
-            simulation_name (str): Name of the simulation
             country_list (list): List of country names
             current_dir (str): Current directory of caller
             folder_path (str): Path to the folder containing the CSV files
             acled_source_list (list): List containing the ACLED data source and latest available date
             population_source_list (list): List containing the population data source and latest available date
+            camps_source_list (list): List containing the camps data source and latest available date
+            val_source_list (list): List containing the validation data source and latest available date
             is_test_data (bool): Whether the data is test data or not
     '''
     load_dotenv()
@@ -343,7 +344,7 @@ def insert_data_into_DB(simulation_name, country_list, current_dir, folder_name,
 
         # Create the JSON object to be inserted into the MongoDB
         mongo_document = {
-            'name': simulation_name,
+            'name': folder_name,
             'region': country,
             'closures': closures,
             'conflicts': conflicts,
@@ -373,9 +374,28 @@ def insert_data_into_DB(simulation_name, country_list, current_dir, folder_name,
                     'url': population_source_list[0],
                     'retrieval_date': datetime.strptime(population_source_list[1], '%Y-%m-%d %H:%M:%S'),
                     'latest_population_date': datetime.strptime(population_source_list[2], '%Y-%m-%d')
-                }
-             }
+                },
+                'camps': {
+                    'url_from_last_update': camp_source_list[0],
+                    'retrieval_date': datetime.strptime(camp_source_list[1],'%Y-%m-%d %H:%M:%S'),
+                    'last_update': datetime.strptime(camp_source_list[2], '%Y-%m-%d'),
+                    'latest_survey_date': camp_source_list[5],
+                    'user_start_date': datetime.strptime(camp_source_list[3], '%Y-%m-%d'),
+                    'user_end_date': datetime.strptime(camp_source_list[4], '%Y-%m-%d'),
+                },
+                'validation': {
+                    'url_covered_from': val_source_list[5],
+                    'url_covered_to': val_source_list[6],
+                    'retrieval_date': datetime.strptime(val_source_list[0],'%Y-%m-%d %H:%M:%S'),
+                    'period_covered_from': datetime.strptime(val_source_list[3], '%Y-%m-%d'),
+                    'period_covered_to': datetime.strptime(val_source_list[4], '%Y-%m-%d'),
+                    'user_start_date': datetime.strptime(val_source_list[1], '%Y-%m-%d'),
+                    'user_end_date': datetime.strptime(val_source_list[2], '%Y-%m-%d'),
+                }    
+             }    
         }
+
+
 
         # insert test data into the database
         result = simulations_collection.insert_one(mongo_document)

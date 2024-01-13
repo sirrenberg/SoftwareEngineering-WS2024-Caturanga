@@ -5,9 +5,8 @@ import numpy as np
 from datetime import datetime
 from helper_functions import date_format
 
-# TODO: do this for all date_format calls
 
-def extract_camp_locations(rows_shown):
+def extract_camp_locations(rows_shown, start_date, end_date):
     # TODO: docstring
     '''
     Add camp locations to locations.csv
@@ -16,23 +15,17 @@ def extract_camp_locations(rows_shown):
             rows_shown (int): Number of camps to be shown in the CSV file
     '''
 
-    '''
-    The following files were used:
-    Excel files from this websites where used:
-    https://dtm.iom.int/datasets/ethiopia-site-assessment-round-34
-    https://dtm.iom.int/datasets/ethiopia-site-assessment-round-33
-    https://dtm.iom.int/datasets/ethiopia-site-assessment-round-32
-    https://dtm.iom.int/datasets/ethiopia-site-assessment-round-31
-    '''
-
 
     # according to flee, date must have the format "yyyy-mm-dd"
     # this data is manually added
+    # TODO: move to run_data_extraction.py as a parameter
     round_data = [
-    {"round": 32, "covered_from": "2022-11-25", "covered_to": "2023-01-09"},
-    {"round": 33, "covered_from": "2023-06-11", "covered_to": "2023-06-29"},
-    {"round": 34, "covered_from": "2023-08-01", "covered_to": "2023-09-02"},
+    {"round": 32, "source": "https://dtm.iom.int/datasets/ethiopia-site-assessment-round-32", "covered_from": "2022-11-25", "covered_to": "2023-01-09"},
+    {"round": 33, "source": "https://dtm.iom.int/datasets/ethiopia-site-assessment-round-33", "covered_from": "2023-06-11", "covered_to": "2023-06-29"},
+    {"round": 34, "source": "https://dtm.iom.int/datasets/ethiopia-site-assessment-round-34", "covered_from": "2023-08-01", "covered_to": "2023-09-02"},
     ]
+
+    #TODO: do something with end and start date -> see create_validation_data.py (old code)
 
     # REMARK: neither the data format of the excel files nor the available columns is consistent, therefore the extraction of the data is not universally applicable.
     # data for round 34 has no informatin for longitude and latitude of sites
@@ -41,6 +34,7 @@ def extract_camp_locations(rows_shown):
         #  "DTM Ethiopia - Site Assessment Round 34.xlsx' has "xxxx: Site Classification" instead of "Site Classification"
         #  "DTM Ethiopia - Site Assessment Round 33.xlsx' has "xxxx: Settlement/site type" instead of "1.3.b.1: Settlement/site type"
     
+    #TODO: make it universal. weniger if else für rounds
 
     # get current directory
     current_dir = os.getcwd()
@@ -54,6 +48,7 @@ def extract_camp_locations(rows_shown):
     
     # sort descending
     round_numbers.sort(reverse=True)
+    # create empty dataframe
     dtm_merged_df = pd.DataFrame()
 
     for round_number in round_numbers:
@@ -73,14 +68,16 @@ def extract_camp_locations(rows_shown):
             dtm_df = data.parse("R32 and R33 Consolidated Sites")
         else: 
             print("Sheet not found")
+
+        #TODO: renames columns (nur die notwendigen)
         if (round_number == 32 or round_number == 33):
-            dtm_df = dtm_df[["1.1.a.1: Survey Date", "Country", "1.1.a.2: Survey Round", "1.1.c.1: Site ID", "1.1.d.1: Site Name", "1.1.f.1: GPS: Longitude", "1.1.f.2: GPS: Latitude", "1.1.e.1: Region", "Most reported reason for displacement in the site", "Site Classification", "1.3.b.1: Settlement/site type", "2.1.b.7: Total Number of IDP Individuals", "Reason for Displacement (Individuals): Conflict"]]
+            dtm_df = dtm_df[["1.1.a.1: Survey Date", "Reported Date", "Country", "1.1.a.2: Survey Round", "1.1.c.1: Site ID", "1.1.d.1: Site Name", "1.1.f.1: GPS: Longitude", "1.1.f.2: GPS: Latitude", "1.1.e.1: Region", "Most reported reason for displacement in the site", "Site Classification", "1.3.b.1: Settlement/site type", "2.1.b.7: Total Number of IDP Individuals", "Reason for Displacement (Individuals): Conflict"]]
             # rename columns
-            dtm_df = dtm_df.rename(columns={"1.1.a.1: Survey Date": "survey_date", "Country": "country", "1.1.a.2: Survey Round": "survey_round", "1.1.c.1: Site ID": "site_id", "1.1.d.1: Site Name": "site_name", "1.1.f.1: GPS: Longitude": "longitude", "1.1.f.2: GPS: Latitude": "latitude", "1.1.e.1: Region": "region", "Most reported reason for displacement in the site": "main_reason_for_displacement", "Site Classification": "site_classification", "1.3.b.1: Settlement/site type": "settlement_type", "2.1.b.7: Total Number of IDP Individuals": "total_number_IDPs", "Reason for Displacement (Individuals): Conflict": "number_IDPs_conflict"})
+            dtm_df = dtm_df.rename(columns={"1.1.a.1: Survey Date": "survey_date", "Reported Date": "reported_date", "Country": "country", "1.1.a.2: Survey Round": "survey_round", "1.1.c.1: Site ID": "site_id", "1.1.d.1: Site Name": "site_name", "1.1.f.1: GPS: Longitude": "longitude", "1.1.f.2: GPS: Latitude": "latitude", "1.1.e.1: Region": "region", "Most reported reason for displacement in the site": "main_reason_for_displacement", "Site Classification": "site_classification", "1.3.b.1: Settlement/site type": "settlement_type", "2.1.b.7: Total Number of IDP Individuals": "total_number_IDPs", "Reason for Displacement (Individuals): Conflict": "number_IDPs_conflict"})
         elif round_number == 34:
-            dtm_df = dtm_df[["1.1.a.1: Survey Date", "Country", "1.1.a.2: Survey Round", "1.1.c.1: Site ID", "1.1.d.1: Site Name", "1.1.e.1: Region", "1.5.e.1: Reason for displacement", "xxxx: Site Classification", "1.3.b.1: Settlement/site type", "2.1.b.7: Total Number of IDP Individuals"]]
+            dtm_df = dtm_df[["1.1.a.1: Survey Date", "Reported Date", "Country", "1.1.a.2: Survey Round", "1.1.c.1: Site ID", "1.1.d.1: Site Name", "1.1.e.1: Region", "1.5.e.1: Reason for displacement", "xxxx: Site Classification", "1.3.b.1: Settlement/site type", "2.1.b.7: Total Number of IDP Individuals"]]
             # rename columns
-            dtm_df = dtm_df.rename(columns={"1.1.a.1: Survey Date": "survey_date", "Country": "country", "1.1.a.2: Survey Round": "survey_round", "1.1.c.1: Site ID": "site_id", "1.1.d.1: Site Name": "site_name", "1.1.e.1: Region": "region", "1.5.e.1: Reason for displacement" : "reason_for_displacement", "xxxx: Site Classification": "site_classification", "1.3.b.1: Settlement/site type": "settlement_type", "2.1.b.7: Total Number of IDP Individuals": "total_number_IDPs"})
+            dtm_df = dtm_df.rename(columns={"1.1.a.1: Survey Date": "survey_date", "Reported Date": "reported_date", "Country": "country", "1.1.a.2: Survey Round": "survey_round", "1.1.c.1: Site ID": "site_id", "1.1.d.1: Site Name": "site_name", "1.1.e.1: Region": "region", "1.5.e.1: Reason for displacement" : "reason_for_displacement", "xxxx: Site Classification": "site_classification", "1.3.b.1: Settlement/site type": "settlement_type", "2.1.b.7: Total Number of IDP Individuals": "total_number_IDPs"})
         else: 
             print("Not possible to extract information for this round_number due to incompatibility of data formats!")
 
@@ -139,6 +136,12 @@ def extract_camp_locations(rows_shown):
             # just keep top rows_shown entries
             dtm_df = dtm_df.head(rows_shown)
 
+            # latest reported_date  
+            survey_dates = dtm_df["survey_date"].tolist()
+            survey_dates.sort(reverse=True)
+            latest_survey_date = survey_dates[0]
+
+
         # check if dtm_merged_df is empty
         else:
             # get site ids as list
@@ -154,11 +157,11 @@ def extract_camp_locations(rows_shown):
             # number_IDPs_conflict for each camp (additionally there could be other reasons why IDPs flee. We just focus on conflicts)
             dtm_df = dtm_df[['site_id', 'site_name', 'region', 'country', 'latitude', 'longitude', 'location_type', 'conflict_date', 'number_IDPs_conflict']]
             # Rename the columns
-            dtm_df = dtm_df.rename(columns={"site_id": "site_id", "site_name": "name", "region": "region", "country": "country", "latitude": "latitude", "longitude": "longitude", "location_type": "location_type", "conflict_date": "conflict_date", "number_IDPs_conflict": "population"})
+            dtm_df = dtm_df.rename(columns={"site_name": "name", "number_IDPs_conflict": "population"})
         else: 
             dtm_df = dtm_df[['site_id', 'site_name', 'region', 'country', 'location_type', 'conflict_date', 'total_number_IDPs']]
             # Rename the columns
-            dtm_df = dtm_df.rename(columns={"site_id": "site_id", "site_name": "name", "region": "region", "country": "country", "location_type": "location_type", "conflict_date": "conflict_date", "total_number_IDPs": "population"})
+            dtm_df = dtm_df.rename(columns={"site_name": "name","total_number_IDPs": "population"})
 
         dtm_df_premerged = pd.DataFrame()
 
@@ -187,16 +190,28 @@ def extract_camp_locations(rows_shown):
     
     print("dtm_merged_df:")
     print(dtm_merged_df)
-    return dtm_merged_df, round_data
+    return dtm_merged_df, round_data, latest_survey_date
     
 
 
 def add_camp_locations(folder_name, rows_shown, start_date, end_date):
     # TODO: docstring
-    dtm_merged_df, round_data = extract_camp_locations(rows_shown)
+    dtm_merged_df, round_data, latest_survey_date = extract_camp_locations(rows_shown, start_date, end_date)
+
+    # sort round_data by round number in descending order to get latest info
+    round_data.sort(key=lambda x: x["round"], reverse=True)
+    last_update = round_data[0]["covered_to"]
+    last_update_url = round_data[0]["source"]
+    # date of retrieval, which is the date when the script is executed. Format: YYYY-MM-DD HH:MM:SS
+    retrieval_date = datetime.today().strftime('%Y-%m-%d %H:%M:%S')
+
+    reformatted_start_date = date_format(start_date)
+    reformatted_end_date = date_format(end_date)
+
 
     # TODO: do something with start_date and end_date
 
+    # TODO: make more flexible (not just 34 hardcoded)
     dtm_34_df = dtm_merged_df[["name", "region", "country", "latitude", "longitude", "location_type", "conflict_date", "population_round_34"]]
     dtm_34_df = dtm_34_df.rename(columns={"name":"#name", "population_round_34": "population"})
 
@@ -210,4 +225,4 @@ def add_camp_locations(folder_name, rows_shown, start_date, end_date):
 
     print("Successfully added camp locations to locations.csv")
 
-    return dtm_merged_df, round_data
+    return dtm_merged_df, round_data, last_update_url, retrieval_date, last_update, reformatted_start_date, reformatted_end_date, latest_survey_date

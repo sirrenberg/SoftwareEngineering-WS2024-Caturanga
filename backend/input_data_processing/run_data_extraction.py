@@ -141,12 +141,10 @@ def acled_data_to_csv(country, folder_name, start_date, end_date):
     return acled_url, retrieval_date, last_update_str, reformatted_start_date, reformatted_end_date, oldest_event_date, latest_event_date
 
 
-def run_extraction(simulation_name, country_name, start_date, end_date):
+def run_extraction(country_name, start_date, end_date):
     '''
     Runs the data extraction process for the given country and time period.
-    
             Parameters:
-                simulation_name (str): Name of the simulation
                 country_name (str): Country name
                 start_date (str): Start date of the time period
                 end_date (str): End date of the time period
@@ -169,7 +167,7 @@ def run_extraction(simulation_name, country_name, start_date, end_date):
     extract_locations_csv(folder_name, start_date, LOCATION_TYPE, FATALITIES_THRESHOLD, CONFLICT_THRESHOLD, NBR_SHOWN_ROWS)
     
     # 5. add camps to locations.csv    
-    camp_data_df, camp_rounds_dict = add_camp_locations(folder_name, NBR_SHOWN_ROWS, start_date, end_date)
+    camp_data_df, camp_rounds_dict , camps_last_update_url, camps_retrieval_date, camps_last_update, camps_reformatted_start_date, camps_reformatted_end_date, camps_latest_survey_date = add_camp_locations(folder_name, NBR_SHOWN_ROWS, start_date, end_date)
 
     # 6. extract conflict data and create conflict_info.csv
     extract_conflict_info(country_name, folder_name, start_date, end_date, LOCATION_TYPE, ADDED_CONFLICT_DAYS)
@@ -193,25 +191,27 @@ def run_extraction(simulation_name, country_name, start_date, end_date):
     # create folder in conflict_validation
     # TODO: error handling if folder already exists
     os.mkdir(os.path.join('conflict_validation', folder_name))
-    create_validation_data(camp_data_df, camp_rounds_dict, folder_name, country_name, start_date, end_date)
+    val_retrieval_date, val_reformatted_start_date, val_reformatted_end_date, val_covered_from, val_covered_to, val_oldest_url, val_latest_url = create_validation_data(camp_data_df, camp_rounds_dict, folder_name, country_name, start_date, end_date)
+
 
     # 14. insert data into DB
     current_dir = os.getcwd()
     acled_source_list=[acled_url, acled_retrieval_date, acled_last_update, acled_reformatted_start_date, acled_reformatted_end_date, acled_oldest_event_date, acled_latest_event_date]
     population_source_list = [population_url, population_retrieval_date, population_date]
+    camp_source_list = [camps_last_update_url, camps_retrieval_date, camps_last_update, camps_reformatted_start_date, camps_reformatted_end_date, camps_latest_survey_date]
+    validation_source_list = [val_retrieval_date, val_reformatted_start_date, val_reformatted_end_date, val_covered_from, val_covered_to, val_oldest_url, val_latest_url]
 
-    insert_data_into_DB(simulation_name, [country_name], current_dir, folder_name, acled_source_list, population_source_list)
+    insert_data_into_DB([country_name], current_dir, folder_name, acled_source_list, population_source_list, camp_source_list, validation_source_list)
     
 
 # variables that can be changed
 # date format: dd-mm-yyyy
 country_name = "Ethiopia"
-simulation_name = "caturanga"
 start_date = "01-01-2023"
 end_date =  "12-01-2024"
 
 
-run_extraction(simulation_name, country_name, start_date, end_date)
+run_extraction(country_name, start_date, end_date)
 # TODO: helper_functions.py for functions that are used in multiple files, e.g. date_format
 
 
