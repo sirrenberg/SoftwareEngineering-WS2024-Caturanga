@@ -165,6 +165,7 @@ def run_extraction(country_name, start_date, end_date, round_data):
     
     # 4. extract location data and create locations.csv
     # TODO: check how the code (from FabFlee) handles the fact that locations can appear multiple times in the ACLED data
+    #TODO: check if location can be town and conflict location at the same time?
     extract_locations_csv(folder_name, start_date, LOCATION_TYPE, FATALITIES_THRESHOLD, CONFLICT_THRESHOLD, NBR_SHOWN_ROWS)
     
     # 5. add camps to locations.csv    
@@ -211,7 +212,6 @@ country_name = "Ethiopia"
 start_date = "01-01-2023"
 end_date =  "12-01-2024"
 
-
 # according to flee, date must have the format "yyyy-mm-dd"
 # this data is manually added for now because of the inconsistent format of the data
 round_data = [
@@ -220,10 +220,5 @@ round_data = [
 {"round": 34, "source": "https://dtm.iom.int/datasets/ethiopia-site-assessment-round-34", "covered_from": "2023-08-01", "covered_to": "2023-09-02"},
 ]
 
+# start the script
 run_extraction(country_name, start_date, end_date, round_data)
-
-
-
-
-
-    

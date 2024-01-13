@@ -38,15 +38,17 @@ def add_camp_locations(round_data, folder_name, rows_shown, start_date, end_date
     modified_round_data.sort(key=lambda x: x["round"], reverse=True)
     last_update = modified_round_data[0]["covered_to"]
     last_update_url = modified_round_data[0]["source"]
+    latest_round = modified_round_data[0]["round"]
     # date of retrieval, which is the date when the script is executed. Format: YYYY-MM-DD HH:MM:SS
     retrieval_date = datetime.today().strftime('%Y-%m-%d %H:%M:%S')
 
-    # TODO: make more flexible (not just 34 hardcoded)
-    dtm_34_df = dtm_merged_df[["name", "region", "country", "latitude", "longitude", "location_type", "conflict_date", "population_round_34"]]
-    dtm_34_df = dtm_34_df.rename(columns={"name":"#name", "population_round_34": "population"})
+    # get the key for population for the latest round
+    latest_round_population_key = f"population_round_{latest_round}"
+    latest_dtm_df = dtm_merged_df[["name", "region", "country", "latitude", "longitude", "location_type", "conflict_date", latest_round_population_key]]
+    latest_dtm_df = latest_dtm_df.rename(columns={"name":"#name", latest_round_population_key: "population"})
 
-    # append the locations.csv with the camp information
-    dtm_34_df.to_csv(os.path.join(folder_name, "locations.csv"), mode='a', header=False, index=False)
+    # append the locations.csv with the latest camp information
+    latest_dtm_df.to_csv(os.path.join(folder_name, "locations.csv"), mode='a', header=False, index=False)
 
     print("Successfully added camp locations to locations.csv")
 
@@ -256,6 +258,6 @@ def extract_camp_locations(round_data, rows_shown):
         dtm_merged_df = dtm_merged_df.rename(columns={"population": f"population_round_{round_number}"})
 
         print(f"round_number: {round_number}, total_IDP_conflict_number: {total_IDP_conflict_number}")
-        print(dtm_merged_df)
+    print(dtm_merged_df)
 
     return dtm_merged_df, round_data, latest_survey_date
