@@ -104,7 +104,6 @@ def keep_rows_by_population(input_data_df, rows_shown):
             output_data (DataFrame): Filtered DataFrame
     '''
 
-    print(input_data_df.to_string(index=0))
     # sort by population (descending)
     sorted_df = input_data_df.sort_values(by=['population'], ascending=False)
     
@@ -129,9 +128,6 @@ def extract_locations_csv(folder_name, start_date, location_type, fatalities_thr
     '''
     # Get the current directory
     current_dir = os.getcwd()
-
-    print(folder_name)
-    print(current_dir)
 
     # Load the ACLED data from acled.csv into a DataFrame
     acled_file = os.path.join(current_dir, folder_name, "acled.csv")
@@ -159,14 +155,12 @@ def extract_locations_csv(folder_name, start_date, location_type, fatalities_thr
         print("We found population data for all ACLED locations.")
     else:
         print("We did not find population data for all ACLED locations.")
-
         if locations_without_population:
             print("These locations without populations:")
             for location in locations_without_population:
                 print(f"- {location}")
 
             print("Please refer to extract_population.py to select different population-table from population.html!")
-
     # Extract relevant columns from the ACLED DataFrame
     acled_df = acled_df[["event_date", "country", "admin1", "admin2","admin3", "location", "latitude", "longitude", "fatalities"]]
 
@@ -217,7 +211,7 @@ def extract_locations_csv(folder_name, start_date, location_type, fatalities_thr
     # Concatenate the dataframes for towns and conflict zones
     merged_df = pd.concat([towns_df, conflict_zones_df])
 
-    print(merged_df.to_string(index=0))
+    # print(merged_df.to_string(index=0))
 
     # Write the merged dataframe to a CSV file
     output_file = os.path.join(current_dir, folder_name, "locations.csv")

@@ -77,13 +77,16 @@ def extract_conflict_info(country, folder_name, start_date, end_date, location_t
     # Group the locations by admin-level
     grouped = acled_df.groupby(location_type)
 
+
     # Print groups that differ only in event_date
     for name, group in grouped:
         unique_event_dates = group['event_date'].unique()
+        '''
         if len(unique_event_dates) > 0:
             print(f"Location: {name}, Event Dates: ", end='')
             pp.pprint(unique_event_dates)
-    print("")
+        '''
+    # print("")
 
     # Create a new DataFrame to store the results
     results_df = pd.DataFrame(columns=
@@ -116,7 +119,7 @@ def extract_conflict_info(country, folder_name, start_date, end_date, location_t
             "modified_conflict_date": modified_conflict_date
         }
 
-    print(results_df.to_string(index=False))
+    # print(results_df.to_string(index=False))
 
     # Write the results dataframe to a CSV file
     output_file = os.path.join(current_dir, folder_name, "conflict_info.csv")

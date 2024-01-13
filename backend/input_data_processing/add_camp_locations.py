@@ -5,8 +5,42 @@ import numpy as np
 from datetime import datetime
 from helper_functions import date_format
 
+def add_camp_locations(round_data, folder_name, rows_shown, start_date, end_date):
+    # TODO: docstring
+    dtm_merged_df, round_data, latest_survey_date = extract_camp_locations(round_data, rows_shown, start_date, end_date)
 
-def extract_camp_locations(rows_shown, start_date, end_date):
+    # sort round_data by round number in descending order to get latest info
+    round_data.sort(key=lambda x: x["round"], reverse=True)
+    last_update = round_data[0]["covered_to"]
+    last_update_url = round_data[0]["source"]
+    # date of retrieval, which is the date when the script is executed. Format: YYYY-MM-DD HH:MM:SS
+    retrieval_date = datetime.today().strftime('%Y-%m-%d %H:%M:%S')
+
+    reformatted_start_date = date_format(start_date)
+    reformatted_end_date = date_format(end_date)
+
+
+    # TODO: do something with start_date and end_date
+
+    # TODO: make more flexible (not just 34 hardcoded)
+    dtm_34_df = dtm_merged_df[["name", "region", "country", "latitude", "longitude", "location_type", "conflict_date", "population_round_34"]]
+    dtm_34_df = dtm_34_df.rename(columns={"name":"#name", "population_round_34": "population"})
+
+
+    # Get the current directory
+    current_dir = os.getcwd()
+    #open locations.csv
+    locations_file = os.path.join(current_dir, folder_name, "locations.csv")
+    # append the locations.csv with the camp information
+    dtm_34_df.to_csv(os.path.join(folder_name, "locations.csv"), mode='a', header=False, index=False)
+
+    print("Successfully added camp locations to locations.csv")
+
+    return dtm_merged_df, round_data, last_update_url, retrieval_date, last_update, reformatted_start_date, reformatted_end_date, latest_survey_date
+
+
+
+def extract_camp_locations(round_data, rows_shown, start_date, end_date):
     # TODO: docstring
     '''
     Add camp locations to locations.csv
@@ -14,18 +48,6 @@ def extract_camp_locations(rows_shown, start_date, end_date):
             folder_name (str): Name of the folder containing the CSV files
             rows_shown (int): Number of camps to be shown in the CSV file
     '''
-
-
-    # according to flee, date must have the format "yyyy-mm-dd"
-    # this data is manually added
-    # TODO: move to run_data_extraction.py as a parameter
-    round_data = [
-    {"round": 32, "source": "https://dtm.iom.int/datasets/ethiopia-site-assessment-round-32", "covered_from": "2022-11-25", "covered_to": "2023-01-09"},
-    {"round": 33, "source": "https://dtm.iom.int/datasets/ethiopia-site-assessment-round-33", "covered_from": "2023-06-11", "covered_to": "2023-06-29"},
-    {"round": 34, "source": "https://dtm.iom.int/datasets/ethiopia-site-assessment-round-34", "covered_from": "2023-08-01", "covered_to": "2023-09-02"},
-    ]
-
-    #TODO: do something with end and start date -> see create_validation_data.py (old code)
 
     # REMARK: neither the data format of the excel files nor the available columns is consistent, therefore the extraction of the data is not universally applicable.
     # data for round 34 has no informatin for longitude and latitude of sites
@@ -41,13 +63,20 @@ def extract_camp_locations(rows_shown, start_date, end_date):
     # paths to files with camp information
     paths_dtm = os.path.join(current_dir, "conflict_validation", "data_source")
 
-    # get round numbers from dicct
+    # sort dict by round number in descending order
+    round_data.sort(key=lambda x: x["round"], reverse=True)
+
+    # filter by end_date: Just include the rounds which are covered by the end_date and start_date
+    reformatted_start_date = date_format(start_date)
+    reformatted_end_date = date_format(end_date)
+    round_data = [round for round in round_data if round["covered_from"] >= reformatted_start_date and round["covered_to"] <= reformatted_end_date]
+    
+
+    # get round numbers from dict
     round_numbers = []
     for round in round_data:
         round_numbers.append(round["round"])
-    
-    # sort descending
-    round_numbers.sort(reverse=True)
+
     # create empty dataframe
     dtm_merged_df = pd.DataFrame()
 
@@ -69,7 +98,6 @@ def extract_camp_locations(rows_shown, start_date, end_date):
         else: 
             print("Sheet not found")
 
-        #TODO: renames columns (nur die notwendigen)
         if (round_number == 32 or round_number == 33):
             dtm_df = dtm_df[["1.1.a.1: Survey Date", "Reported Date", "Country", "1.1.a.2: Survey Round", "1.1.c.1: Site ID", "1.1.d.1: Site Name", "1.1.f.1: GPS: Longitude", "1.1.f.2: GPS: Latitude", "1.1.e.1: Region", "Most reported reason for displacement in the site", "Site Classification", "1.3.b.1: Settlement/site type", "2.1.b.7: Total Number of IDP Individuals", "Reason for Displacement (Individuals): Conflict"]]
             # rename columns
@@ -170,7 +198,7 @@ def extract_camp_locations(rows_shown, start_date, end_date):
             dtm_merged_df = dtm_merged_df.rename(columns={"population": f"population_round_{round_number}"})
         else:
             dtm_df_premerged = dtm_df[['site_id', 'latitude', 'longitude', 'population']]
-            dtm_df_premerged = dtm_df_premerged.rename(columns={"site_id": "site_id", "latitude": "latitude", "longitude": "longitude", "population": f"population_round_{round_number}"})
+            dtm_df_premerged = dtm_df_premerged.rename(columns={"population": f"population_round_{round_number}"})
         
 
         # check if column latitude and longitude is in dtm_merged_df. Then drop
@@ -194,35 +222,3 @@ def extract_camp_locations(rows_shown, start_date, end_date):
     
 
 
-def add_camp_locations(folder_name, rows_shown, start_date, end_date):
-    # TODO: docstring
-    dtm_merged_df, round_data, latest_survey_date = extract_camp_locations(rows_shown, start_date, end_date)
-
-    # sort round_data by round number in descending order to get latest info
-    round_data.sort(key=lambda x: x["round"], reverse=True)
-    last_update = round_data[0]["covered_to"]
-    last_update_url = round_data[0]["source"]
-    # date of retrieval, which is the date when the script is executed. Format: YYYY-MM-DD HH:MM:SS
-    retrieval_date = datetime.today().strftime('%Y-%m-%d %H:%M:%S')
-
-    reformatted_start_date = date_format(start_date)
-    reformatted_end_date = date_format(end_date)
-
-
-    # TODO: do something with start_date and end_date
-
-    # TODO: make more flexible (not just 34 hardcoded)
-    dtm_34_df = dtm_merged_df[["name", "region", "country", "latitude", "longitude", "location_type", "conflict_date", "population_round_34"]]
-    dtm_34_df = dtm_34_df.rename(columns={"name":"#name", "population_round_34": "population"})
-
-
-    # Get the current directory
-    current_dir = os.getcwd()
-    #open locations.csv
-    locations_file = os.path.join(current_dir, folder_name, "locations.csv")
-    # append the locations.csv with the camp information
-    dtm_34_df.to_csv(os.path.join(folder_name, "locations.csv"), mode='a', header=False, index=False)
-
-    print("Successfully added camp locations to locations.csv")
-
-    return dtm_merged_df, round_data, last_update_url, retrieval_date, last_update, reformatted_start_date, reformatted_end_date, latest_survey_date

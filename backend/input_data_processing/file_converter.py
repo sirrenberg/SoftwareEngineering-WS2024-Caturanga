@@ -194,7 +194,6 @@ def transform_sim_period_data(sim_period_data):
     for row in sim_period_data:
         date = row['date']
         date = datetime.strptime(date, '%Y-%m-%d') # additionally takes the time
-        print(date)
         length = int(row['length'])
 
         transformed_data.append({
@@ -329,20 +328,10 @@ def insert_data_into_DB(country_list, current_dir, folder_name, acled_source_lis
         validation_refugees = transform_val_refugees_data(validation_refugee_data)
         validation_data_layout = transform_val_data_layout_data(validation_data_layout_data)
         validation_camps = [transform_val_camp_data(camp_data) for camp_data in validation_camps_data]
-
         #TODO: transform_val_camp_data seems unnecessary
-        print(100*"-")
-        print("validation_camps_data")
-        print(validation_camps_data)
-        print("validation_camps")
-        print(validation_camps)
-        print(100*"-")
 
 
-        print(acled_source_list)
-        print(population_source_list)
-
-        # Create the JSON object to be inserted into the MongoDB
+        # Create the JSON object to be inserted into the MongoDB which stores data in BSON format
         mongo_document = {
             'name': folder_name,
             'region': country,
@@ -396,10 +385,14 @@ def insert_data_into_DB(country_list, current_dir, folder_name, acled_source_lis
         }
 
 
-
         # insert test data into the database
         result = simulations_collection.insert_one(mongo_document)
 
+        # check if successfull 
+        if result.acknowledged:
+            print(f"Data for {country} successfully inserted into MongoDB")
+        else:
+            print(f"Data for {country} not inserted into MongoDB")
 
     client.close()
 
