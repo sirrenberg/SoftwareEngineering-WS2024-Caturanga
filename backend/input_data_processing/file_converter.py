@@ -287,6 +287,8 @@ def insert_data_into_DB(country, current_dir, folder_name, acled_source_list=[],
     # Get the data directory and validation data directory
     folder_path = os.path.join(current_dir, folder_name)
     data_dir = folder_path
+    #TODO: docker path
+    # data_dir_validation = os.path.join(current_dir, "input_data_processing", "conflict_validation", folder_name)
     data_dir_validation = os.path.join(current_dir, "conflict_validation", folder_name)
 
     # input data

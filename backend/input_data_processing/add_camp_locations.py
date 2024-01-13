@@ -4,6 +4,7 @@ import pandas as pd
 import numpy as np
 from datetime import datetime
 from helper_functions import date_format
+import openpyxl
 
 def add_camp_locations(round_data, folder_name, rows_shown, start_date, end_date):
     """
@@ -80,6 +81,8 @@ def extract_camp_locations(round_data, rows_shown):
     # get current directory
     current_dir = os.getcwd()
     # paths to files with camp information
+    # TODO: docker path
+    # paths_dtm = os.path.join(current_dir, "input_data_processing", "conflict_validation", "data_source")
     paths_dtm = os.path.join(current_dir, "conflict_validation", "data_source")
 
     # get round numbers from dict
