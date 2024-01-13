@@ -3,13 +3,8 @@ export function useAPI() {
 
   function sendRequest(route: string, 
                        method: string, 
-                       body?: any, 
-                       params?: {simulation_id: string, simsettings_id: string}) {
+                       body?: any) {
     const url = new URL(API_URL + route);
-
-    if(params) {
-      url.search = new URLSearchParams(params).toString();
-    }
 
     console.log(body)
     return fetch(url.toString(), {

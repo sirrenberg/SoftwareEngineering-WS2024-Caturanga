@@ -6,6 +6,10 @@ from typing import Any, Dict, AnyStr, List, Union
 app = FastAPI()
 controller = Controller()
 
+JSONObject = Dict[AnyStr, Any]
+JSONArray = List[Any]
+JSONStructure = Union[JSONArray, JSONObject]
+
 
 # TODO: adjust this for production as allowing all origins is not secure
 origins = ["*"]
@@ -34,11 +38,10 @@ def read_root():
 # Simulation Execution: -------------------------------------------------------
 
 
-@app.get("/run_simulation/config/")
-async def run_simulation_config(
+@app.post("/run_simulation/config")
+async def run_simulation_config_post(
         background_tasks: BackgroundTasks,
-        simulation_id: str = Query(),
-        simsettings_id: str = Query()
+        simulation_config: JSONStructure = None
 ):
     """
     Run simulation with specified simulation input and settings.
@@ -46,25 +49,42 @@ async def run_simulation_config(
     Parameters:
     - background_tasks (BackgroundTasks): The background tasks object used to
       run the simulation asynchronously.
-    - simulation_id (str): The ID of the simulation input.
-    - simsettings_id (str): The ID of the simulation settings.
+    - simulation_config (JSONStructure, optional) containing:
+        - input_id (str): The ID of the simulation input.
+        - input_name (str): The name of the simulation input.
+        - simsettings_id (str): The ID of the simulation settings.
+        - simsettings_name (str): The name of the simulation settings.
 
     Returns:
         dict: A dictionary containing the object ID of the dummy simulation.
 
     Example:
         To query this endpoint, use the following URL format:
-        /run_simulation/config/?simulation_id=<simulation_id>&simsettings_id=<simsettings_id>
+        /run_simulation/config/
+
+        The body has to have following format:
+
+        {
+            input: {
+                input_id: <input_id>,
+                input_name: <input_name>
+            },
+            settings: {
+                simsettings_id: <simsettings_id>,
+                simsettings_name: <simsettings_name>
+            }
+        }
+
     """
     data = await controller.initialize_simulation(
-        simulation_id=simulation_id,
-        simsettings_id=simsettings_id
+        simulation_config=simulation_config
     )
 
     background_tasks.add_task(
         controller.run_simulation_config,
-        simulation_id,
-        simsettings_id,
+        data["name"],
+        data["simulation_id"],
+        data["simsettings_id"],
         data["objectid"],
         data["simsettings_filename"],
         data["simulation_dir"],
@@ -134,11 +154,6 @@ async def get_simulation_result(
 
 
 # Simulation Settings: --------------------------------------------------------
-
-
-JSONObject = Dict[AnyStr, Any]
-JSONArray = List[Any]
-JSONStructure = Union[JSONArray, JSONObject]
 
 
 @app.get("/simsettings")

@@ -22,7 +22,7 @@ function Inputs() {
   if (!context) {
     throw new Error("StartSimContext is null");
   }
-  const { setInput_id } = context;
+  const { setInput_id, setInputName } = context;
 
   useEffect(() => {
     sendRequest("/simulations", "GET").then((data) => {
@@ -60,6 +60,7 @@ function Inputs() {
                   setSelectedInputIndex(index);
                   setMapCenter(calcMapCenter(input.locations));
                   setInput_id(inputs[index]._id);
+                  setInputName(inputs[index].name);
                 }}
               >
                 <p>{input.region}</p>

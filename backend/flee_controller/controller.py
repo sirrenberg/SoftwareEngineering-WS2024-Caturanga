@@ -32,27 +32,35 @@ class Controller:
 
     async def initialize_simulation(
             self,
-            simulation_id: str = "658dec24819bd1bc1ff738cd",
-            simsettings_id: str = "6570f624987cdd647c68bc7d"):
+            simulation_config):
         """
         Initializes a simulation by storing the input directory, simsettings,
         validation directory to the filesystem, and returns the object ID,
         simsettings filename, simulation directory, and validation directory.
 
-        Args:
-            simulation_id (str): The ID of the simulation. 
-            Defaults to "658dec24819bd1bc1ff738cd".(Burundi)
-            simsettings_id (str): The ID of the simulation settings.
-            Defaults to "6570f624987cdd647c68bc7d".(default)
+        Parameters:
+        simulation_config (JSONStructure, optional) containing:
+        - input_id (str): The ID of the simulation input.
+        - input_name (str): The name of the simulation input.
+        - simsettings_id (str): The ID of the simulation settings.
+        - simsettings_name (str): The name of the simulation settings.
 
         Returns:
-            dict: A dictionary containing the object ID, simsettings filename,
-            simulation directory, and validation directory.
+            dict: A dictionary containing the name of the result,
+            the IDs mentioned above, the mongodb object ID, simsettings
+            filename, simulation directory, and validation directory.
         """
+        simulation_id = simulation_config["input"]["input_id"]
+        simsettings_id = simulation_config["settings"]["simsettings_id"]
+
+        name = \
+            simulation_config["input"]["input_name"] + "(" + \
+            simulation_config["settings"]["simsettings_name"] + ")"
 
         objectid = await self.store_dummy_simulation(
             simulation_id,
-            simsettings_id)
+            simsettings_id,
+            name)
 
         simsettings_filename = await self.store_simsettings_to_filesystem(
             simsettings_id)
@@ -62,7 +70,10 @@ class Controller:
 
         validation_dir = await self.store_validation_to_filesystem()
 
-        return {"objectid": objectid,
+        return {"name": name,
+                "simulation_id": simulation_id,
+                "simsettings_id": simsettings_id,
+                "objectid": objectid,
                 "simsettings_filename": simsettings_filename,
                 "simulation_dir": simulation_dir,
                 "validation_dir": validation_dir}
@@ -70,6 +81,7 @@ class Controller:
     # Run simulation with provided simulation_id and simsettings_id and store results in DB:
     def run_simulation_config(
             self,
+            name: str,
             simulation_id: str,
             simsettings_id: str,
             object_id: str,
@@ -97,7 +109,8 @@ class Controller:
             sim,
             object_id=object_id,
             simulation_id=simulation_id,
-            simsettings_id=simsettings_id)
+            simsettings_id=simsettings_id,
+            name=name)
 
 # Store results in database: ----------------------------------------------
 
@@ -120,7 +133,8 @@ class Controller:
             result,
             object_id: str,
             simulation_id: str = "658dec24819bd1bc1ff738cd",
-            simsettings_id: str = "6570f624987cdd647c68bc7d"):
+            simsettings_id: str = "6570f624987cdd647c68bc7d",
+            name: str = "undefined"):
         """
         Stores a simulation result in the database.
 
@@ -131,11 +145,14 @@ class Controller:
           Defaults to "658dec24819bd1bc1ff738cd" (Burundi).
         - simsettings_id (str): The ID of the simulation settings.
           Defaults to "6570f624987cdd647c68bc7d" (Test simsettings).
+        - name (str): The name of the simulation result.
+          Defaults to "undefined".
         """
         client, db = self.connect_db()
         simulations_collection = db.simulations_results
         new_simulation = {}
         new_simulation = {
+            "name": name,
             "simulation_id": simulation_id,
             "simsettings_id": simsettings_id,
             "data": result
@@ -148,7 +165,8 @@ class Controller:
     async def store_dummy_simulation(
                 self,
                 simulation_id: str = "658dec24819bd1bc1ff738cd",
-                simsettings_id: str = "6570f624987cdd647c68bc7d"):
+                simsettings_id: str = "6570f624987cdd647c68bc7d",
+                name: str = "undefined"):
         """
         Stores a dummy simulation in the database so that the user can see
         that the simulation is started.
@@ -158,6 +176,8 @@ class Controller:
           Defaults to "658dec24819bd1bc1ff738cd" (Burundi).
         - simsettings_id (str): The ID of the simulation settings.
           Defaults to "6570f624987cdd647c68bc7d" (Test simsettings).
+        - name (str): The name of the simulation result.
+          Defaults to "undefined".
 
         Returns:
         - str: The ID of the inserted dummy simulation.
@@ -166,6 +186,7 @@ class Controller:
         collection = db.simulations_results
         dummy_simulation = {}
         dummy_simulation = {
+            "name": name,
             "simulation_id": simulation_id,
             "simsettings_id": simsettings_id,
             "data": {"status": "running"}
