@@ -154,9 +154,14 @@ class Controller:
         new_simulation = {
             "name": name,
             "simulation_id": simulation_id,
-            "simsettings_id": simsettings_id,
-            "data": result
+            "simsettings_id": simsettings_id
         }
+        if "error" in result:
+            new_simulation["status"] = "error"
+        else:
+            new_simulation["status"] = "done"
+            new_simulation["data"] = result
+
         simulations_collection.replace_one(
             {"_id": ObjectID(object_id)},
             new_simulation)
@@ -189,7 +194,7 @@ class Controller:
             "name": name,
             "simulation_id": simulation_id,
             "simsettings_id": simsettings_id,
-            "data": {"status": "running"}
+            "status": "running"
         }
         result = collection.insert_one(dummy_simulation)
         client.close()
