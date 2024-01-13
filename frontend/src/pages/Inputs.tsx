@@ -16,7 +16,7 @@ function Inputs() {
 
   const [inputs, setInputs] = useState<Input[]>([]);
   const [selectedInputIndex, setSelectedInputIndex] = useState<number>(-1);
-  const [mapCenter, setMapCenter] = useState<LatLngExpression>([0, 0]); // [lat, lng
+  const [mapCenter, setMapCenter] = useState<LatLngExpression>([0, 0]); // [lat, lng]
 
   const context = useContext(StartSimContext);
   if (!context) {
@@ -42,7 +42,13 @@ function Inputs() {
         <h2 className="items-list-title">Saved Inputs</h2>
 
         <div className="items-list">
-          {inputs.map((input, index) => {
+
+          {inputs.length === 0 && 
+          <h3>Loading...</h3>
+          }
+
+          {inputs &&
+          inputs.map((input, index) => {
             return (
               <button
                 key={input._id}
