@@ -10,7 +10,7 @@ import { movementRulesText, moveSpeedText, walkSpeedText, conflictWeightText,
         campWeightText, foreignWeightText, usePopForLocWeightText,
         popPowerForLocWeightText, conflictMovechanceText, campMovechanceText,
         defaultMovechanceText, awarenessLevelText, startOnFootText, hastenText,
-        optimisationsText, awarenessLevelOptions } from "../helper/constants";
+        optimisationsText, awarenessLevelOptions, spawnRulesText, displacedPerConflictDayText } from "../helper/constants";
 import { CheckboxInputField, NumberInputField, SelectInputField } from "../components/SimsettingField";
 
 function Settings() {
@@ -111,8 +111,6 @@ function Settings() {
                     label="Max Move Speed"
                     infoText={moveSpeedText}
                     name="max_move_speed"
-                    min={0}
-                    max={1000}
                     value={settings[selectedSettingIndex].move_rules.max_move_speed}
                     disabled={true}/>
                 </div>
@@ -120,8 +118,6 @@ function Settings() {
                   <NumberInputField 
                     label="Max Walk Speed"
                     infoText={walkSpeedText}
-                    min={0}
-                    max={1000}
                     name="max_walk_speed"
                     value={settings[selectedSettingIndex].move_rules.max_walk_speed}
                     disabled={true}/>
@@ -134,8 +130,6 @@ function Settings() {
                     <NumberInputField 
                       label="Conflict Weight"
                       infoText={conflictWeightText}
-                      min={0}
-                      max={100}
                       name="conflict_weight"
                       value={settings[selectedSettingIndex].move_rules.conflict_weight}
                       disabled={true}/>
@@ -144,8 +138,6 @@ function Settings() {
                     <NumberInputField 
                       label="Camp Weight"
                       infoText={campWeightText}
-                      min={0}
-                      max={100}
                       name="camp_weight"
                       value={settings[selectedSettingIndex].move_rules.camp_weight}
                       disabled={true}/>
@@ -154,8 +146,6 @@ function Settings() {
                     <NumberInputField 
                       label="Foreign Weight"
                       infoText={foreignWeightText}
-                      min={0}
-                      max={100}
                       name="foreign_weight"
                       value={settings[selectedSettingIndex].move_rules.foreign_weight}
                       disabled={true}/>
@@ -175,8 +165,6 @@ function Settings() {
                     <NumberInputField 
                       label="Population Power For Location Weight"
                       infoText={popPowerForLocWeightText}
-                      min={0}
-                      max={100}
                       name="pop_power_for_loc_weight"
                       value={settings[selectedSettingIndex].move_rules.pop_power_for_loc_weight}
                       disabled={true}/>
@@ -189,8 +177,6 @@ function Settings() {
                     <NumberInputField 
                       label="Conflict Movechance"
                       infoText={conflictMovechanceText}
-                      min={0}
-                      max={1}
                       name="conflict_movechance"
                       value={settings[selectedSettingIndex].move_rules.conflict_movechance}
                       disabled={true}/>
@@ -199,8 +185,6 @@ function Settings() {
                     <NumberInputField 
                       label="Camp Movechance"
                       infoText={campMovechanceText}
-                      min={0}
-                      max={1}
                       name="camp_movechance"
                       value={settings[selectedSettingIndex].move_rules.camp_movechance}
                       disabled={true}/>
@@ -209,8 +193,6 @@ function Settings() {
                     <NumberInputField 
                       label="Default Movechance"
                       infoText={defaultMovechanceText}
-                      min={0}
-                      max={1}
                       name="default_movechance"
                       value={settings[selectedSettingIndex].move_rules.default_movechance}
                       disabled={true}/>
@@ -239,6 +221,22 @@ function Settings() {
               </div>
             </div>
 
+            <div className="spawn-rules-container settings-input-section">
+            <h2 className="page-subtitle">Spawn Rules</h2>
+              <p className="section-subtext">{spawnRulesText}</p>
+              <h3 className="page-subsubtitle">Conflict Driven Spawning</h3>
+              <div className="fields-container">
+                <div className="input-field-container">
+                  <NumberInputField 
+                    label="Displaced Percentage of IDPs Per Conflict Day"
+                    infoText={displacedPerConflictDayText}
+                    name="displaced_per_conflict_day"
+                    value={settings[selectedSettingIndex].spawn_rules.conflict_driven_spawning.displaced_per_conflict_day}
+                    disabled={true}/>
+                </div>
+              </div>
+            </div>
+
             <div className="optimisations-container settings-input-section">
               <h2 className="page-subtitle">Optimisations</h2>
               <p className="section-subtext">{optimisationsText}</p>
@@ -247,8 +245,6 @@ function Settings() {
                     <NumberInputField 
                       label="Hasten"
                       infoText={hastenText}
-                      min={0}
-                      max={1000}
                       name="hasten"
                       value={settings[selectedSettingIndex].optimisations.hasten}
                       disabled={true}/>

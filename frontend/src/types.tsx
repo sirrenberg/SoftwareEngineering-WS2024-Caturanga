@@ -46,6 +46,13 @@ interface Input {
 interface SimSettings {
   _id: string;
   name: string;
+  spawn_rules: {
+    conflict_driven_spawning: {
+      spawn_mode: string;
+      displaced_per_conflict_day: number;
+    }
+    insert_day0: boolean;
+  }
   move_rules: {
     max_move_speed: number;
     max_walk_speed: number;

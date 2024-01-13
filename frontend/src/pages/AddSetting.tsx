@@ -1,6 +1,5 @@
 import "../styles/AddInput.css";
 import { useParams, useNavigate } from "react-router-dom";
-import { SimSettings } from "../types";
 import { useForm } from "../hooks/useForm";
 import { useEffect } from "react";
 import { CheckboxInputField, NumberInputField, SelectInputField} from "../components/SimsettingField";
@@ -8,7 +7,8 @@ import { movementRulesText, moveSpeedText, walkSpeedText, conflictWeightText,
   campWeightText, foreignWeightText, usePopForLocWeightText,
   popPowerForLocWeightText, conflictMovechanceText, campMovechanceText,
   defaultMovechanceText, awarenessLevelText, startOnFootText, hastenText,
-  optimisationsText, defaultValues, awarenessLevelOptions} from "../helper/constants";
+  optimisationsText, defaultValues, awarenessLevelOptions, spawnRulesText,
+  displacedPerConflictDayText, maxValues} from "../helper/constants";
 
 function AddSetting() {
   const { id } = useParams<{ id: string }>();
@@ -42,7 +42,7 @@ function AddSetting() {
               className="input-field"
               type="text"
               placeholder="Input Name"
-              onChange={handleInputChange()}
+              onChange={handleInputChange}
               name="name"
               value={values.name === initialValues.name ? "" : values.name}
             />
@@ -60,22 +60,22 @@ function AddSetting() {
                     label="Max Move Speed"
                     infoText={moveSpeedText}
                     min={0}
-                    max={1000}
+                    max={maxValues.move_rules.max_move_speed}
                     name="max_move_speed"
                     value={values.move_rules.max_move_speed}
                     disabled={false}
-                    onChange={handleInputChange(1000)}/>
+                    onChange={handleInputChange}/>
                 </div>
                 <div className="input-field-container">
                   <NumberInputField 
                     label="Max Walk Speed"
                     infoText={walkSpeedText}
                     min={0}
-                    max={1000}
+                    max={maxValues.move_rules.max_walk_speed}
                     name="max_walk_speed"
                     value={values.move_rules.max_walk_speed}
                     disabled={false}
-                    onChange={handleInputChange(1000)}/>
+                    onChange={handleInputChange}/>
                 </div>
               </div>
               
@@ -86,33 +86,33 @@ function AddSetting() {
                       label="Conflict Weight"
                       infoText={conflictWeightText}
                       min={0}
-                      max={100}
+                      max={maxValues.move_rules.conflict_weight}
                       name="conflict_weight"
                       value={values.move_rules.conflict_weight}
                       disabled={false}
-                      onChange={handleInputChange(100)}/>
+                      onChange={handleInputChange}/>
                 </div>
                 <div className="input-field-container">
                     <NumberInputField 
                       label="Camp Weight"
                       infoText={campWeightText}
                       min={0}
-                      max={100}
+                      max={maxValues.move_rules.camp_weight}
                       name="camp_weight"
                       value={values.move_rules.camp_weight}
                       disabled={false}
-                      onChange={handleInputChange(100)}/>
+                      onChange={handleInputChange}/>
                 </div>
                 <div className="input-field-container">
                     <NumberInputField 
                       label="Foreign Weight"
                       infoText={foreignWeightText}
                       min={0}
-                      max={100}
+                      max={maxValues.move_rules.foreign_weight}
                       name="foreign_weight"
                       value={values.move_rules.foreign_weight}
                       disabled={false}
-                      onChange={handleInputChange(100)}/>
+                      onChange={handleInputChange}/>
                 </div>
               </div>
 
@@ -124,18 +124,18 @@ function AddSetting() {
                       name="use_pop_for_loc_weight"
                       checked={values.move_rules.use_pop_for_loc_weight}
                       disabled={false}
-                      onChange={handleInputChange()}/>
+                      onChange={handleInputChange}/>
                 </div>
                 <div className="input-field-container">
                     <NumberInputField 
                       label="Population Power For Location Weight"
                       infoText={popPowerForLocWeightText}
                       min={0}
-                      max={100}
+                      max={maxValues.move_rules.pop_power_for_loc_weight}
                       name="pop_power_for_loc_weight"
                       value={values.move_rules.pop_power_for_loc_weight}
                       disabled={false}
-                      onChange={handleInputChange(100)}/>
+                      onChange={handleInputChange}/>
                 </div>
               </div>
               
@@ -146,33 +146,33 @@ function AddSetting() {
                       label="Conflict Movechance"
                       infoText={conflictMovechanceText}
                       min={0}
-                      max={1}
+                      max={maxValues.move_rules.conflict_movechance}
                       name="conflict_movechance"
                       value={values.move_rules.conflict_movechance}
                       disabled={false}
-                      onChange={handleInputChange(1)}/>
+                      onChange={handleInputChange}/>
                 </div>
                 <div className="input-field-container">
                     <NumberInputField 
                       label="Camp Movechance"
                       infoText={campMovechanceText}
                       min={0}
-                      max={1}
+                      max={maxValues.move_rules.camp_movechance}
                       name="camp_movechance"
                       value={values.move_rules.camp_movechance}
                       disabled={false}
-                      onChange={handleInputChange(1)}/>
+                      onChange={handleInputChange}/>
                 </div>
                 <div className="input-field-container">
                     <NumberInputField 
                       label="Default Movechance"
                       infoText={defaultMovechanceText}
                       min={0}
-                      max={1}
+                      max={maxValues.move_rules.default_movechance}
                       name="default_movechance"
                       value={values.move_rules.default_movechance}
                       disabled={false}
-                      onChange={handleInputChange(1)}/>
+                      onChange={handleInputChange}/>
                 </div>
               </div>
               
@@ -186,7 +186,7 @@ function AddSetting() {
                       value={values.move_rules.awareness_level}
                       options={awarenessLevelOptions}
                       disabled={false}
-                      onChange={handleInputChange()}/>
+                      onChange={handleInputChange}/>
                 </div>
                 <div className="input-field-container">
                     <CheckboxInputField 
@@ -195,7 +195,26 @@ function AddSetting() {
                       name="start_on_foot"
                       checked={values.move_rules.start_on_foot}
                       disabled={false}
-                      onChange={handleInputChange()}/>
+                      onChange={handleInputChange}/>
+                </div>
+              </div>
+            </div>
+
+            <div className="spawn-rules-container settings-input-section">
+            <h2 className="page-subtitle">Spawn Rules</h2>
+              <p className="section-subtext">{spawnRulesText}</p>
+              <h3 className="page-subsubtitle">Conflict Driven Spawning</h3>
+              <div className="fields-container">
+                <div className="input-field-container">
+                  <NumberInputField 
+                    label="Displaced Percentage of IDPs Per Conflict Day"
+                    infoText={displacedPerConflictDayText}
+                    min={0}
+                    max={maxValues.spawn_rules.conflict_driven_spawning.displaced_per_conflict_day}
+                    name="displaced_per_conflict_day"
+                    value={values.spawn_rules.conflict_driven_spawning.displaced_per_conflict_day}
+                    disabled={false}
+                    onChange={handleInputChange}/>
                 </div>
               </div>
             </div>
@@ -209,11 +228,11 @@ function AddSetting() {
                       label="Hasten"
                       infoText={hastenText}
                       min={0}
-                      max={1000}
+                      max={maxValues.optimisations.hasten}
                       name="hasten"
                       value={values.optimisations.hasten}
                       disabled={false}
-                      onChange={handleInputChange(1000)}/>
+                      onChange={handleInputChange}/>
                 </div>
               </div>
             </div>

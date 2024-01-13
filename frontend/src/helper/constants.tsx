@@ -3,6 +3,13 @@ import { SimSettings } from "../types";
 export const defaultValues: SimSettings = {
     _id: "",
     name: "untitled",
+    spawn_rules: {
+        conflict_driven_spawning: {
+            spawn_mode: "pop_ratio",
+            displaced_per_conflict_day: 0.01
+        },
+        insert_day0: false,
+    },
     move_rules: {
       max_move_speed: 360,
       max_walk_speed: 35,
@@ -22,6 +29,30 @@ export const defaultValues: SimSettings = {
     },
     optimisations: {
       hasten: 1,
+    },
+  };
+
+  export const maxValues = {
+    spawn_rules: {
+        conflict_driven_spawning: {
+            displaced_per_conflict_day: 0.1
+        }
+    },
+    move_rules: {
+      max_move_speed: 1000,
+      max_walk_speed: 1000,
+      foreign_weight: 100,
+      conflict_weight: 100,
+      camp_weight: 100,
+      pop_power_for_loc_weight: 100,
+      conflict_movechance: 1,
+      camp_movechance: 1,
+      default_movechance: 1,
+      capacity_scaling: 10,
+      weight_power: 10,
+    },
+    optimisations: {
+      hasten: 1000,
     },
   };
 
@@ -143,6 +174,17 @@ export const weightPowerText =
     `
 ;
 
+export const displacedPerConflictDayText =
+    `
+    This parameter refers to the percentage of the population in a conflict zone that are displaced per day. 
+    The default value is ${defaultValues.spawn_rules.conflict_driven_spawning.displaced_per_conflict_day},
+    which means that 1% of the population is displaced per day, for a conflict weight of 1.0.
+    Warning: The higher the value, the more IDPs will be spawned, and the longer the simulation will take.
+    Thus the maximum value is limited to 10%. Be careful when increasing this value, and consider adjusting
+    the hasten parameter accordingly.
+    `
+;
+
 export const hastenText =
     `
     This parameter can be used to speed up the simulation. 
@@ -164,5 +206,12 @@ export const movementRulesText =
 export const optimisationsText =
     `
     The following section contains the parameter that can improve the simulation's runtime.
+    `
+;
+
+export const spawnRulesText = 
+    `
+    To be considered for the simulation, IDP "agents" have to be spawned within the region first. 
+    The following section contains the parameters that influence their spawning during the simulation.
     `
 ;

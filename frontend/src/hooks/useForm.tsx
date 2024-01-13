@@ -1,5 +1,6 @@
 import { FormEvent, useState } from "react";
 import { useAPI } from "../hooks/useAPI";
+import { maxValues } from "../helper/constants";
 
 export function useForm(initialFValues: any) {
   const [values, setValues] = useState(initialFValues);
@@ -12,7 +13,7 @@ export function useForm(initialFValues: any) {
     return value;
   }
 
-  const handleInputChange = (max?: number) => 
+  const handleInputChange =
   (
     e:
       | React.ChangeEvent<HTMLInputElement>
@@ -20,7 +21,7 @@ export function useForm(initialFValues: any) {
   ) => {
     let { name, value, type } = e.target;
 
-    // sanitise input
+    // sanitise name input
     if(name === "name" && value.length > 30) {
       value = value.slice(0, 30);
     }
@@ -64,7 +65,9 @@ export function useForm(initialFValues: any) {
         "weight_power",
       ].includes(name)
     ) {
-      value = sanitiseInput(value, max);
+      value = sanitiseInput(value, 
+                            maxValues.
+                            move_rules[name as keyof typeof maxValues.move_rules]);
       setValues({
         ...values,
         move_rules: {
@@ -92,9 +95,29 @@ export function useForm(initialFValues: any) {
       return;
     }
 
+    // Spawn rules
+    if (name === "displaced_per_conflict_day") {
+      value = sanitiseInput(value, 
+                            maxValues.
+                            spawn_rules.
+                            conflict_driven_spawning[name as keyof typeof maxValues.spawn_rules.conflict_driven_spawning]);
+      setValues({
+        ...values,
+        spawn_rules: {
+          ...values.spawn_rules,
+          conflict_driven_spawning: {
+            ...values.spawn_rules.conflict_driven_spawning,
+            [name]: Number(value),
+        }
+      }});
+      return;
+    }
+
     // Optimisations are nested in the sim_settings object
-    if (["hasten"].includes(name)) {
-      value = sanitiseInput(value, max);
+    if (name === "hasten") {
+      value = sanitiseInput(value, 
+                            maxValues.
+                            optimisations[name as keyof typeof maxValues.optimisations]);
       setValues({
         ...values,
         optimisations: {
