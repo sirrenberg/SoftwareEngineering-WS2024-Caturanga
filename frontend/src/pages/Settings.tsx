@@ -21,7 +21,7 @@ function Settings() {
   if (!context) {
     throw new Error("StartSimContext is null");
   }
-  const { setSettings_id, setSettingsName } = context;
+  const { setSettingsId, setSettingsName } = context;
 
   useEffect(() => {
     sendRequest("/simsettings", "GET").then((data) => {
@@ -58,7 +58,7 @@ function Settings() {
                 }
                 onClick={() => {
                   setSelectedSettingIndex(index);
-                  setSettings_id(settings[index]._id);
+                  setSettingsId(settings[index]._id);
                   setSettingsName(settings[index].name);
                 }}
               >
@@ -534,18 +534,18 @@ function Settings() {
           >
             <button
               className="simple-button"
-              disabled={selectedSettingIndex === -1 || context.settings_id === "" || context.input_id === ""}
+              disabled={selectedSettingIndex === -1 || context.settingsId === "" || context.inputId === ""}
               onClick={() => {
-                console.log("Starting simulation with settings id " + context.settings_id + " and input id " + context.input_id)
+                console.log("Starting simulation with settings id " + context.settingsId + " and input id " + context.inputId)
                 sendRequest("/run_simulation/config", 
                             "POST", 
                             {
                               input: {
-                                input_id: context.input_id,
+                                input_id: context.inputId,
                                 input_name: context.inputName
                               },
                              settings: {
-                                simsettings_id: context.settings_id,
+                                simsettings_id: context.settingsId,
                                 simsettings_name: context.settingsName
                               }
                             })
