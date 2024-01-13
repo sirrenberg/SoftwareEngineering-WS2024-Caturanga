@@ -141,13 +141,14 @@ def acled_data_to_csv(country, folder_name, start_date, end_date):
     return acled_url, retrieval_date, last_update_str, reformatted_start_date, reformatted_end_date, oldest_event_date, latest_event_date
 
 
-def run_extraction(country_name, start_date, end_date):
+def run_extraction(country_name, start_date, end_date, round_data):
     '''
     Runs the data extraction process for the given country and time period.
             Parameters:
                 country_name (str): Country name
                 start_date (str): Start date of the time period
                 end_date (str): End date of the time period
+                round_data (list): List of dictionaries with the round number, the source and the covered time period
     '''
     start_year = int(start_date.split('-')[2])
     end_year = int(end_date.split('-')[2])
@@ -167,7 +168,7 @@ def run_extraction(country_name, start_date, end_date):
     extract_locations_csv(folder_name, start_date, LOCATION_TYPE, FATALITIES_THRESHOLD, CONFLICT_THRESHOLD, NBR_SHOWN_ROWS)
     
     # 5. add camps to locations.csv    
-    camp_data_df, camp_rounds_dict , camps_last_update_url, camps_retrieval_date, camps_last_update, camps_reformatted_start_date, camps_reformatted_end_date, camps_latest_survey_date = add_camp_locations(folder_name, NBR_SHOWN_ROWS, start_date, end_date)
+    camp_data_df, camp_rounds_dict , camps_last_update_url, camps_retrieval_date, camps_last_update, camps_reformatted_start_date, camps_reformatted_end_date, camps_latest_survey_date = add_camp_locations(round_data, folder_name, NBR_SHOWN_ROWS, start_date, end_date)
 
     # 6. extract conflict data and create conflict_info.csv
     extract_conflict_info(country_name, folder_name, start_date, end_date, LOCATION_TYPE, ADDED_CONFLICT_DAYS)
@@ -211,8 +212,15 @@ start_date = "01-01-2023"
 end_date =  "12-01-2024"
 
 
-run_extraction(country_name, start_date, end_date)
-# TODO: helper_functions.py for functions that are used in multiple files, e.g. date_format
+# according to flee, date must have the format "yyyy-mm-dd"
+# this data is manually added for now because of the inconsistent format of the data
+round_data = [
+{"round": 32, "source": "https://dtm.iom.int/datasets/ethiopia-site-assessment-round-32", "covered_from": "2022-11-25", "covered_to": "2023-01-09"},
+{"round": 33, "source": "https://dtm.iom.int/datasets/ethiopia-site-assessment-round-33", "covered_from": "2023-06-11", "covered_to": "2023-06-29"},
+{"round": 34, "source": "https://dtm.iom.int/datasets/ethiopia-site-assessment-round-34", "covered_from": "2023-08-01", "covered_to": "2023-09-02"},
+]
+
+run_extraction(country_name, start_date, end_date, round_data)
 
 
 
