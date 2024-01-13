@@ -6,48 +6,65 @@ from datetime import datetime
 from helper_functions import date_format
 
 def add_camp_locations(round_data, folder_name, rows_shown, start_date, end_date):
-    # TODO: docstring
-    dtm_merged_df, round_data, latest_survey_date = extract_camp_locations(round_data, rows_shown, start_date, end_date)
-
-    # sort round_data by round number in descending order to get latest info
+    """
+    The function adds the latest camp information to the locations.csv file.
+    Parameters:
+        round_data (list): List of dictionaries with information about the rounds
+        folder_name (str): Name of the folder containing the CSV files
+        rows_shown (int): Number of camps to be shown in the CSV file
+        start_date (str): Start date of the time period
+        end_date (str): End date of the time period
+    Returns:
+        dtm_merged_df (dataframe): Merged dataframe with the camp locations within the specified time period
+        modified_round_data (list): List of dictionaries with information about the rounds within the time period. The total number of IDPs caused by conflict is added to the dictionary.
+        last_update_url (str): URL of the source of the last update
+        retrieval_date (str): Date of retrieval, which is the date when the script is executed. Format: YYYY-MM-DD HH:MM:SS
+        last_update (str): Last update of the data. Format: YYYY-MM-DD
+        reformatted_start_date (str): Reformatted start date. Format: YYYY-MM-DD
+        reformatted_end_date (str): Reformatted end date. Format: YYYY-MM-DD
+        latest_survey_date (str): Latest survey date. Format: YYYY-MM-DD
+    """
+    # sort dict by round number in descending order
     round_data.sort(key=lambda x: x["round"], reverse=True)
-    last_update = round_data[0]["covered_to"]
-    last_update_url = round_data[0]["source"]
-    # date of retrieval, which is the date when the script is executed. Format: YYYY-MM-DD HH:MM:SS
-    retrieval_date = datetime.today().strftime('%Y-%m-%d %H:%M:%S')
 
+    # filter by end_date: Just include the rounds which are covered by the end_date and start_date
     reformatted_start_date = date_format(start_date)
     reformatted_end_date = date_format(end_date)
+    round_data = [round for round in round_data if round["covered_from"] >= reformatted_start_date and round["covered_to"] <= reformatted_end_date]
+    
+    dtm_merged_df, modified_round_data, latest_survey_date = extract_camp_locations(round_data, rows_shown)
 
-
-    # TODO: do something with start_date and end_date
+    # sort round_data by round number in descending order to get latest info
+    modified_round_data.sort(key=lambda x: x["round"], reverse=True)
+    last_update = modified_round_data[0]["covered_to"]
+    last_update_url = modified_round_data[0]["source"]
+    # date of retrieval, which is the date when the script is executed. Format: YYYY-MM-DD HH:MM:SS
+    retrieval_date = datetime.today().strftime('%Y-%m-%d %H:%M:%S')
 
     # TODO: make more flexible (not just 34 hardcoded)
     dtm_34_df = dtm_merged_df[["name", "region", "country", "latitude", "longitude", "location_type", "conflict_date", "population_round_34"]]
     dtm_34_df = dtm_34_df.rename(columns={"name":"#name", "population_round_34": "population"})
 
-
-    # Get the current directory
-    current_dir = os.getcwd()
-    #open locations.csv
-    locations_file = os.path.join(current_dir, folder_name, "locations.csv")
     # append the locations.csv with the camp information
     dtm_34_df.to_csv(os.path.join(folder_name, "locations.csv"), mode='a', header=False, index=False)
 
     print("Successfully added camp locations to locations.csv")
 
-    return dtm_merged_df, round_data, last_update_url, retrieval_date, last_update, reformatted_start_date, reformatted_end_date, latest_survey_date
+    return dtm_merged_df, modified_round_data, last_update_url, retrieval_date, last_update, reformatted_start_date, reformatted_end_date, latest_survey_date
 
 
 
-def extract_camp_locations(round_data, rows_shown, start_date, end_date):
-    # TODO: docstring
-    '''
-    Add camp locations to locations.csv
-        Parameters:
-            folder_name (str): Name of the folder containing the CSV files
-            rows_shown (int): Number of camps to be shown in the CSV file
-    '''
+def extract_camp_locations(round_data, rows_shown):
+    """
+    The function extracts the camp locations with information from the DTM excel files and returns a dataframe with the camps and IDP numbers. Additionally it adds the total number of IDPs per period to round_data.
+    Parameters:
+        round_data (list): List of dictionaries with information about the rounds
+        rows_shown (int): Number of camps to be shown in the CSV file
+    Returns:
+        dtm_merged_df (dataframe): Merged dataframe with the camp locations
+        round_data (list): List of dictionaries with information about the rounds. The total number of IDPs caused by conflict is added to the dictionary.
+        latest_survey_date (str): Latest survey date. Format: YYYY-MM-DD
+    """
 
     # REMARK: neither the data format of the excel files nor the available columns is consistent, therefore the extraction of the data is not universally applicable.
     # data for round 34 has no informatin for longitude and latitude of sites
@@ -62,15 +79,6 @@ def extract_camp_locations(round_data, rows_shown, start_date, end_date):
     current_dir = os.getcwd()
     # paths to files with camp information
     paths_dtm = os.path.join(current_dir, "conflict_validation", "data_source")
-
-    # sort dict by round number in descending order
-    round_data.sort(key=lambda x: x["round"], reverse=True)
-
-    # filter by end_date: Just include the rounds which are covered by the end_date and start_date
-    reformatted_start_date = date_format(start_date)
-    reformatted_end_date = date_format(end_date)
-    round_data = [round for round in round_data if round["covered_from"] >= reformatted_start_date and round["covered_to"] <= reformatted_end_date]
-    
 
     # get round numbers from dict
     round_numbers = []
@@ -111,7 +119,7 @@ def extract_camp_locations(round_data, rows_shown, start_date, end_date):
 
 
         if round_number == 33:
-            # drop first row and reset index
+            # drop first row and reset index. Due to the fact that the first row contains unnecessary information because of the Excel file
             dtm_df = dtm_df.drop([0])
             dtm_df = dtm_df.reset_index(drop=True)
         
@@ -134,8 +142,6 @@ def extract_camp_locations(round_data, rows_shown, start_date, end_date):
             dtm_df["total_number_IDPs"] = dtm_df["total_number_IDPs"].astype(int)
         else: 
             print("Not possible to extract information for this round_number due to incompatibility of data formats!")
-
-        # TODO: check if site_id unique
         
         # total number of IDPs caused by conflict
         if round_number == 34:
@@ -151,6 +157,44 @@ def extract_camp_locations(round_data, rows_shown, start_date, end_date):
         for round_data_dict in round_data:
             if round_data_dict["round"] == round_number:
                 round_data_dict["total_IDP_conflict_number"] = total_IDP_conflict_number
+
+        
+        # check if site_id unique. If not, then group by site_id and sum relevant columns
+        if not dtm_df["site_id"].is_unique:
+            if round_number == 34:
+                # Group by "site_id" and sum "total_number_IDPs", keeping other columns unchanged (use first value with "first")
+                dtm_df = dtm_df.groupby("site_id").agg({
+                    "survey_date": "first",
+                    "reported_date": "first",
+                    "country": "first",
+                    "survey_round": "first",
+                    "site_name": "first",
+                    "region": "first",
+                    "reason_for_displacement": "first",
+                    "site_classification": "first",
+                    "settlement_type": "first",
+                    "total_number_IDPs": "sum"
+                }).reset_index()
+            elif (round_number == 32 or round_number == 33):
+                # Group by "site_id" and sum "total_number_IDPs" and "number_IDPs_conflict", keeping other columns unchanged
+                dtm_df = dtm_df.groupby("site_id").agg({
+                    "survey_date": "first",
+                    "reported_date": "first",
+                    "country": "first",
+                    "survey_round": "first",
+                    "site_name": "first",
+                    "longitude": "first",
+                    "latitude": "first",
+                    "region": "first",
+                    "main_reason_for_displacement": "first",
+                    "site_classification": "first",
+                    "settlement_type": "first",
+                    "total_number_IDPs": "sum",
+                    "number_IDPs_conflict": "sum"
+                }).reset_index()
+            else:
+                print("Not possible to extract information for this round_number due to incompatibility of data formats!")
+
 
         # first iteration
         if dtm_merged_df.empty:
@@ -212,13 +256,6 @@ def extract_camp_locations(round_data, rows_shown, start_date, end_date):
         dtm_merged_df = dtm_merged_df.rename(columns={"population": f"population_round_{round_number}"})
 
         print(f"round_number: {round_number}, total_IDP_conflict_number: {total_IDP_conflict_number}")
+        print(dtm_merged_df)
 
-        # print("dtm_merged_df:")
-        # print(dtm_merged_df)
-    
-    print("dtm_merged_df:")
-    print(dtm_merged_df)
     return dtm_merged_df, round_data, latest_survey_date
-    
-
-

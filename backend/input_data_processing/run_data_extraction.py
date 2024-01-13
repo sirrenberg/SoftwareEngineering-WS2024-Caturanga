@@ -164,7 +164,7 @@ def run_extraction(country_name, start_date, end_date, round_data):
     population_url, population_retrieval_date, population_date = extract_population_info_from_web(country_name, folder_name, POPULATION_THRESHOLD) 
     
     # 4. extract location data and create locations.csv
-    # TODO: check how the code (from FabFlee) handels the fact that locations can appear multiple times in the ACLED data
+    # TODO: check how the code (from FabFlee) handles the fact that locations can appear multiple times in the ACLED data
     extract_locations_csv(folder_name, start_date, LOCATION_TYPE, FATALITIES_THRESHOLD, CONFLICT_THRESHOLD, NBR_SHOWN_ROWS)
     
     # 5. add camps to locations.csv    
@@ -174,6 +174,7 @@ def run_extraction(country_name, start_date, end_date, round_data):
     extract_conflict_info(country_name, folder_name, start_date, end_date, LOCATION_TYPE, ADDED_CONFLICT_DAYS)
 
     # 7. extract conflict information from conflict_info.csv, modify data and create conflict.csv
+    # TODO: check in FLEE why all entries are set to 1 at the end in the csv
     extract_conflicts_csv(folder_name, start_date, end_date)
 
     # 9. extract routes from locations.csv and create routes.csv
@@ -189,8 +190,7 @@ def run_extraction(country_name, start_date, end_date, round_data):
     create_sim_period_csv(folder_name, start_date, end_date)
 
     # 13. create validation data
-    # create folder in conflict_validation
-    # TODO: error handling if folder already exists
+    # create folder in conflict_validation 
     os.mkdir(os.path.join('conflict_validation', folder_name))
     val_retrieval_date, val_reformatted_start_date, val_reformatted_end_date, val_covered_from, val_covered_to, val_oldest_url, val_latest_url = create_validation_data(camp_data_df, camp_rounds_dict, folder_name, country_name, start_date, end_date)
 
@@ -202,7 +202,7 @@ def run_extraction(country_name, start_date, end_date, round_data):
     camp_source_list = [camps_last_update_url, camps_retrieval_date, camps_last_update, camps_reformatted_start_date, camps_reformatted_end_date, camps_latest_survey_date]
     validation_source_list = [val_retrieval_date, val_reformatted_start_date, val_reformatted_end_date, val_covered_from, val_covered_to, val_oldest_url, val_latest_url]
 
-    insert_data_into_DB([country_name], current_dir, folder_name, acled_source_list, population_source_list, camp_source_list, validation_source_list)
+    insert_data_into_DB(country_name, current_dir, folder_name, acled_source_list, population_source_list, camp_source_list, validation_source_list)
     
 
 # variables that can be changed

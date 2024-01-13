@@ -59,7 +59,14 @@ def csv_to_list_sim_period(file_path):
     return transposed_data_list
 
 def csv_to_list_camps(file_path):
-    #TODO: docstring
+    """ 
+    This function is used to convert the csv files for the camps into a list of dictionaries.
+    The csv files have no header, therefore we add date and refugee_numbers as headers.
+    Parameters:
+        file_path (str): Path to the CSV file
+    Returns:
+        tranposed_data (list): List of dictionaries
+    """
     # the csv have no header. I want to add date and refugee_numbers 
     with open (file_path, 'r') as file:
         csv_reader = csv.reader(file)
@@ -257,142 +264,132 @@ def transform_val_camp_data(validation_camp_data):
 
 
 
-def insert_data_into_DB(country_list, current_dir, folder_name, acled_source_list=[], population_source_list = [], camp_source_list = [], val_source_list = [], is_test_data=False):
+def insert_data_into_DB(country, current_dir, folder_name, acled_source_list=[], population_source_list = [], camp_source_list = [], val_source_list = []):
     '''
     Insert the data into the MongoDB.
         Parameters:
-            country_list (list): List of country names
+            country (str): Name of the country
             current_dir (str): Current directory of caller
             folder_path (str): Path to the folder containing the CSV files
             acled_source_list (list): List containing the ACLED data source and latest available date
             population_source_list (list): List containing the population data source and latest available date
             camps_source_list (list): List containing the camps data source and latest available date
             val_source_list (list): List containing the validation data source and latest available date
-            is_test_data (bool): Whether the data is test data or not
     '''
+
+    # Connect to the MongoDB
     load_dotenv()
     MONGODB_URI = os.environ.get('MONGO_URI')
-
     client = MongoClient(MONGODB_URI)
     db = client.get_database("Caturanga")
     simulations_collection = db.get_collection("simulations")
 
+    # Get the data directory and validation data directory
     folder_path = os.path.join(current_dir, folder_name)
+    data_dir = folder_path
+    data_dir_validation = os.path.join(current_dir, "conflict_validation", folder_name)
 
-    for country in country_list:
-        if is_test_data:
-            # Get the current directory of file_converter.py
-            current_directory = os.path.dirname(os.path.realpath(__file__))
-            # Navigate to the locations.csv file using relative paths
-            data_dir = os.path.join(current_directory, folder_path, country)
+    # input data
+    location_csv_path = os.path.join(data_dir, 'locations.csv')
+    routes_csv_path = os.path.join(data_dir, 'routes.csv')
+    conflicts_csv_path = os.path.join(data_dir, 'conflicts.csv')
+    closures_csv_path = os.path.join(data_dir, 'closures.csv')
+    reg_corrections_csv_path = os.path.join(data_dir, 'registration_corrections.csv')
+    sim_period_csv_path = os.path.join(data_dir, 'sim_period.csv')
 
-            #TODO: data_dir_validation for test
-        else: 
-            data_dir = folder_path
-            data_dir_validation = os.path.join(current_dir, "conflict_validation", folder_name)
-
-        # input data
-        location_csv_path = os.path.join(data_dir, 'locations.csv')
-        routes_csv_path = os.path.join(data_dir, 'routes.csv')
-        conflicts_csv_path = os.path.join(data_dir, 'conflicts.csv')
-        closures_csv_path = os.path.join(data_dir, 'closures.csv')
-        reg_corrections_csv_path = os.path.join(data_dir, 'registration_corrections.csv')
-        sim_period_csv_path = os.path.join(data_dir, 'sim_period.csv')
-
-        # validation data
-        refugees_csv_path = os.path.join(data_dir_validation, 'refugees.csv')
-        data_layout_csv_path = os.path.join(data_dir_validation, 'data_layout.csv')
-        # camps_csvs are all csv files except refugees.csv and data_layout.csv
-        camps_csv_paths = [os.path.join(data_dir_validation, file) for file in os.listdir(data_dir_validation) if file.endswith(".csv") and file != "refugees.csv" and file != "data_layout.csv"]
+    # validation data
+    refugees_csv_path = os.path.join(data_dir_validation, 'refugees.csv')
+    data_layout_csv_path = os.path.join(data_dir_validation, 'data_layout.csv')
+    # camps_csvs are all csv files except refugees.csv and data_layout.csv
+    camps_csv_paths = [os.path.join(data_dir_validation, file) for file in os.listdir(data_dir_validation) if file.endswith(".csv") and file != "refugees.csv" and file != "data_layout.csv"]
 
 
-        # Convert CSV to lists of dictionaries
-        location_data = csv_to_list(location_csv_path)
-        routes_data = csv_to_list(routes_csv_path)
-        conflicts_data = csv_to_list(conflicts_csv_path)
-        closures_data = csv_to_list(closures_csv_path)
-        reg_corr_data = csv_to_list_reg_corr(reg_corrections_csv_path)
-        sim_period_data = csv_to_list_sim_period(sim_period_csv_path)
-        validation_refugee_data = csv_to_list(refugees_csv_path)
-        validation_data_layout_data = csv_to_list(data_layout_csv_path)
-        validation_camps_data = [csv_to_list_camps(camp_csv_path) for camp_csv_path in camps_csv_paths] # list of lists of dicts
+    # Convert CSV to lists of dictionaries
+    location_data = csv_to_list(location_csv_path)
+    routes_data = csv_to_list(routes_csv_path)
+    conflicts_data = csv_to_list(conflicts_csv_path)
+    closures_data = csv_to_list(closures_csv_path)
+    reg_corr_data = csv_to_list_reg_corr(reg_corrections_csv_path)
+    sim_period_data = csv_to_list_sim_period(sim_period_csv_path)
+    validation_refugee_data = csv_to_list(refugees_csv_path)
+    validation_data_layout_data = csv_to_list(data_layout_csv_path)
+    validation_camps_data = [csv_to_list_camps(camp_csv_path) for camp_csv_path in camps_csv_paths] # list of lists of dicts
 
 
-        # Transform CSV data to match MongoDB schema
-        locations = transform_location_data(location_data)
-        routes = transform_routes_data(routes_data)
-        conflicts = transform_conflicts_data(conflicts_data)
-        closures = transform_closure_data(closures_data)
-        reg_corr = transform_reg_corr_data(reg_corr_data)
-        sim_period = transform_sim_period_data(sim_period_data)
-        validation_refugees = transform_val_refugees_data(validation_refugee_data)
-        validation_data_layout = transform_val_data_layout_data(validation_data_layout_data)
-        validation_camps = [transform_val_camp_data(camp_data) for camp_data in validation_camps_data]
-        #TODO: transform_val_camp_data seems unnecessary
+    # Transform CSV data to match MongoDB schema
+    locations = transform_location_data(location_data)
+    routes = transform_routes_data(routes_data)
+    conflicts = transform_conflicts_data(conflicts_data)
+    closures = transform_closure_data(closures_data)
+    reg_corr = transform_reg_corr_data(reg_corr_data)
+    sim_period = transform_sim_period_data(sim_period_data)
+    validation_refugees = transform_val_refugees_data(validation_refugee_data)
+    validation_data_layout = transform_val_data_layout_data(validation_data_layout_data)
+    validation_camps = [transform_val_camp_data(camp_data) for camp_data in validation_camps_data]
+    #TODO: transform_val_camp_data seems unnecessary
 
 
-        # Create the JSON object to be inserted into the MongoDB which stores data in BSON format
-        mongo_document = {
-            'name': folder_name,
-            'region': country,
-            'closures': closures,
-            'conflicts': conflicts,
-            'locations': locations,
-            'registration_corrections': reg_corr,
-            'routes': routes,
-            'sim_period': sim_period[0] if sim_period else None,  # Use the first element or None if the list is empty
-            'validation': {
-                'refugees': validation_refugees,
-                'data_layout': validation_data_layout,
-                # dict with filename (last component of path) as key and transformed data as value
-                'camps': {os.path.basename(camp_path): transform_val_camp_data(camp_data) for camp_path, camp_data in zip(camps_csv_paths, validation_camps_data)} 
+    # Create the JSON object to be inserted into the MongoDB which stores data in BSON format
+    mongo_document = {
+        'name': folder_name,
+        'region': country,
+        'closures': closures,
+        'conflicts': conflicts,
+        'locations': locations,
+        'registration_corrections': reg_corr,
+        'routes': routes,
+        'sim_period': sim_period[0] if sim_period else None,  # Use the first element or None if the list is empty
+        'validation': {
+            'refugees': validation_refugees,
+            'data_layout': validation_data_layout,
+            # dict with filename (last component of path) as key and transformed data as value
+            'camps': {os.path.basename(camp_path): transform_val_camp_data(camp_data) for camp_path, camp_data in zip(camps_csv_paths, validation_camps_data)} 
 
+        },
+        # TODO: change to datetime object in the corresponding transfer functions
+        'data_sources': {
+            'acled': {
+                'url': acled_source_list[0],
+                'retrieval_date': datetime.strptime(acled_source_list[1], '%Y-%m-%d %H:%M:%S'),
+                'last_update': datetime.strptime(acled_source_list[2], '%Y-%m-%d %H:%M:%S'),
+                'user_start_date': datetime.strptime(acled_source_list[3], '%Y-%m-%d'),
+                'user_end_date': datetime.strptime(acled_source_list[4], '%Y-%m-%d'),
+                'oldest_event_date': datetime.strptime(acled_source_list[5], '%Y-%m-%d'),
+                'latest_event_date': datetime.strptime(acled_source_list[6], '%Y-%m-%d')
             },
-            'data_sources': {
-                'acled': {
-                    'url': acled_source_list[0],
-                    # TODO: change to datetime object in the corresponding transfer functions
-                    'retrieval_date': datetime.strptime(acled_source_list[1], '%Y-%m-%d %H:%M:%S'),
-                    'last_update': datetime.strptime(acled_source_list[2], '%Y-%m-%d %H:%M:%S'),
-                    'user_start_date': datetime.strptime(acled_source_list[3], '%Y-%m-%d'),
-                    'user_end_date': datetime.strptime(acled_source_list[4], '%Y-%m-%d'),
-                    'oldest_event_date': datetime.strptime(acled_source_list[5], '%Y-%m-%d'),
-                    'latest_event_date': datetime.strptime(acled_source_list[6], '%Y-%m-%d')
-                },
-                'population': {
-                    'url': population_source_list[0],
-                    'retrieval_date': datetime.strptime(population_source_list[1], '%Y-%m-%d %H:%M:%S'),
-                    'latest_population_date': datetime.strptime(population_source_list[2], '%Y-%m-%d')
-                },
-                'camps': {
-                    'url_from_last_update': camp_source_list[0],
-                    'retrieval_date': datetime.strptime(camp_source_list[1],'%Y-%m-%d %H:%M:%S'),
-                    'last_update': datetime.strptime(camp_source_list[2], '%Y-%m-%d'),
-                    'latest_survey_date': camp_source_list[5],
-                    'user_start_date': datetime.strptime(camp_source_list[3], '%Y-%m-%d'),
-                    'user_end_date': datetime.strptime(camp_source_list[4], '%Y-%m-%d'),
-                },
-                'validation': {
-                    'url_covered_from': val_source_list[5],
-                    'url_covered_to': val_source_list[6],
-                    'retrieval_date': datetime.strptime(val_source_list[0],'%Y-%m-%d %H:%M:%S'),
-                    'period_covered_from': datetime.strptime(val_source_list[3], '%Y-%m-%d'),
-                    'period_covered_to': datetime.strptime(val_source_list[4], '%Y-%m-%d'),
-                    'user_start_date': datetime.strptime(val_source_list[1], '%Y-%m-%d'),
-                    'user_end_date': datetime.strptime(val_source_list[2], '%Y-%m-%d'),
-                }    
-             }    
-        }
+            'population': {
+                'url': population_source_list[0],
+                'retrieval_date': datetime.strptime(population_source_list[1], '%Y-%m-%d %H:%M:%S'),
+                'latest_population_date': datetime.strptime(population_source_list[2], '%Y-%m-%d')
+            },
+            'camps': {
+                'url_from_last_update': camp_source_list[0],
+                'retrieval_date': datetime.strptime(camp_source_list[1],'%Y-%m-%d %H:%M:%S'),
+                'last_update': datetime.strptime(camp_source_list[2], '%Y-%m-%d'),
+                'latest_survey_date': camp_source_list[5],
+                'user_start_date': datetime.strptime(camp_source_list[3], '%Y-%m-%d'),
+                'user_end_date': datetime.strptime(camp_source_list[4], '%Y-%m-%d'),
+            },
+            'validation': {
+                'url_covered_from': val_source_list[5],
+                'url_covered_to': val_source_list[6],
+                'retrieval_date': datetime.strptime(val_source_list[0],'%Y-%m-%d %H:%M:%S'),
+                'period_covered_from': datetime.strptime(val_source_list[3], '%Y-%m-%d'),
+                'period_covered_to': datetime.strptime(val_source_list[4], '%Y-%m-%d'),
+                'user_start_date': datetime.strptime(val_source_list[1], '%Y-%m-%d'),
+                'user_end_date': datetime.strptime(val_source_list[2], '%Y-%m-%d'),
+            }    
+            }    
+    }
 
+    # insert test data into the database
+    result = simulations_collection.insert_one(mongo_document)
 
-        # insert test data into the database
-        result = simulations_collection.insert_one(mongo_document)
-
-        # check if successfull 
-        if result.acknowledged:
-            print(f"Data for {country} successfully inserted into MongoDB")
-        else:
-            print(f"Data for {country} not inserted into MongoDB")
+    # check if successfull 
+    if result.acknowledged:
+        print(f"Data for {country} successfully inserted into MongoDB")
+    else:
+        print(f"Data for {country} not inserted into MongoDB")
 
     client.close()
 
@@ -415,18 +412,6 @@ def delete_data_from_DB(id):
 
     client.close()
 
-
-# insert test data from frontend folder into the database
-"""
-countries = ['burundi' , 'car', 'ethiopia', 'mali', 'ssudan']
-#TODO: changed folder_path to current_dir and folder_name 
-folder_path = "..\\flee\\conflict_input\\"
-# add acled and population information with test values
-acled_source_list = ["test_url", "2024-01-10 11:48:58", "2023-07-01", "2023-11-15", "2023-07-02", "2023-11-15"]
-population_source_list = ["test_url", "2024-01-10 11:48:58", "2021-05-17"]
-
-insert_data_into_DB(countries, folder_path, acled_source_list, population_source_list, is_test_data=True)
-"""
 
 # delete  data from the database
 """
