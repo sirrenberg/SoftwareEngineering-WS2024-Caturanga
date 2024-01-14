@@ -22,8 +22,12 @@ export function useForm(initialFValues: any) {
     let { name, value, type } = e.target;
 
     // sanitise name input
-    if(name === "name" && value.length > 30) {
-      value = value.slice(0, 30);
+    if(name === "name") {
+      if (value.length > 30) {
+        value = value.slice(0, 30);
+      } else if (value.length === 0) {
+        value = "untitled";
+      }
     }
 
     // handle type = checkbox
