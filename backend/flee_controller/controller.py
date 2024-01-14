@@ -482,7 +482,7 @@ class Controller:
 
                 # Write refugees.csv:
                 self.export_refugees_csv(os.path.join(validation_dir, "refugees.csv"),
-                                         simulation["validation"]["refugees"], ["date", "Refugee_numbers"])
+                                         simulation["validation"]["refugees"], ["Date", "Refugee_numbers"])
 
                 return "All validation files written"
 
@@ -775,7 +775,7 @@ class Controller:
 
         backend_root_dir = Path(__file__).resolve().parent
         val_dir = backend_root_dir / "flee_stored_files" / "conflict_validation" / simulation_id
-        val_filename1 = val_dir / "refugees.csv"
+        val_filename1 = val_dir / "Ethiopia-Abdi balay.csv"
 
         print(val_filename1)
 
