@@ -227,7 +227,7 @@ function AddSetting() {
                     <NumberInputField 
                       label="Hasten"
                       infoText={hastenText}
-                      min={0}
+                      min={1}
                       max={maxValues.optimisations.hasten}
                       name="hasten"
                       value={values.optimisations.hasten}
