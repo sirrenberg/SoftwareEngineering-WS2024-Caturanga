@@ -27,7 +27,6 @@ ADDED_CONFLICT_DAYS = 7
 NBR_SHOWN_ROWS = 10
 
 
-
 def acled_data_to_csv(country, folder_name, start_date, end_date):
     '''
     Extracts the ACLED data for the given country and time period and saves it to a CSV file.
@@ -39,24 +38,25 @@ def acled_data_to_csv(country, folder_name, start_date, end_date):
             end_year (int): End year of the time period	
         Returns:
             acled_url (str): URL of the ACLED data source
-            retrieval_date (str): Date of retrieval
+            retrieval_date (str): Date of retrieval. When the script is executed.
             last_update (str): Date of the last update of the ACLED data
             reformatted_start_date (str): Start date of the time period in the format YYYY-MM-DD
             reformatted_end_date (str): End date of the time period in the format YYYY-MM-DD
             oldest_event_date (str): Oldest event date of the ACLED data in the format YYYY-MM-DD
-            latest_event_date (str): Latest event date of the ACLED data in the format YYYY-MM-DD
+            latest_event_date (str): Most recent event date of the ACLED data in the format YYYY-MM-DD
     '''
+
 
     # date of retrieval, which is the date when the script is executed. Format: YYYY-MM-DD HH:MM:SS
     retrieval_date = datetime.today().strftime('%Y-%m-%d %H:%M:%S')
     
     # reformat the given date from DD-MM-YYYY to YYYY-MM-DD in order to have the same format as in the ACLED-API
-    split_start_date = start_date.split("-")
-    split_end_date = end_date.split("-")
     reformatted_start_date = date_format(start_date)
     reformatted_end_date = date_format(end_date)
 
-    # extract start_year and end_year
+    # extract start_year and end_year for API call
+    split_start_date = start_date.split("-")
+    split_end_date = end_date.split("-")
     start_year = int(split_start_date[2])
     end_year = int(split_end_date[2])
 
@@ -75,7 +75,7 @@ def acled_data_to_csv(country, folder_name, start_date, end_date):
     # API endpoint URL
     url_json = 'https://api.acleddata.com/acled/read'
 
-    # parameters for the API call
+    # parameters for the API call. Used these parameter values based on flee.readthedocs
     params = {
     'key': ACLED_API_KEY,
     'email': ACLED_API_MAIL,
@@ -124,7 +124,7 @@ def acled_data_to_csv(country, folder_name, start_date, end_date):
         # get oldest event_date
         oldest_event_date = acled_df['event_date'].iloc[-1]
         
-        # url we want to show in the frontend and store in DB
+        # url we want to show in the frontend as source and store in DB
         acled_url = 'https://acleddata.com/data-export-tool/'
         
         # store in folder_name as CSV file
@@ -164,26 +164,26 @@ def run_extraction(country_name, start_date, end_date, round_data):
     population_url, population_retrieval_date, population_date = extract_population_info_from_web(country_name, folder_name, POPULATION_THRESHOLD) 
     
     # 4. extract location data and create locations.csv
-    # TODO: check how the code (from FabFlee) handles the fact that locations can appear multiple times in the ACLED data
-    #TODO: check if location can be town and conflict location at the same time?
     extract_locations_csv(folder_name, start_date, LOCATION_TYPE, FATALITIES_THRESHOLD, CONFLICT_THRESHOLD, NBR_SHOWN_ROWS)
     
-    # 5. add camps to locations.csv    
-    camp_data_df, camp_rounds_dict , camps_last_update_url, camps_retrieval_date, camps_last_update, camps_reformatted_start_date, camps_reformatted_end_date, camps_latest_survey_date = add_camp_locations(round_data, folder_name, NBR_SHOWN_ROWS, start_date, end_date)
+    # 5. add camps to locations.csv 
+    #TODO: check if camps can already be in locations.csv because they are conflict zones   
+    camp_data_df, camp_rounds_dict, camps_last_update_url, camps_retrieval_date, camps_last_update, camps_reformatted_start_date, camps_reformatted_end_date, camps_latest_survey_date = add_camp_locations(round_data, folder_name, NBR_SHOWN_ROWS, start_date, end_date)
 
     # 6. extract conflict data and create conflict_info.csv
     extract_conflict_info(country_name, folder_name, start_date, end_date, LOCATION_TYPE, ADDED_CONFLICT_DAYS)
 
     # 7. extract conflict information from conflict_info.csv, modify data and create conflict.csv
-    # TODO: check in FLEE why all entries are set to 1 at the end in the csv
     extract_conflicts_csv(folder_name, start_date, end_date)
 
     # 9. extract routes from locations.csv and create routes.csv
     extract_routes_csv(folder_name)
     
+    #TODO: empty closures okay? What does this file do? -> Nico
     # 10. create empty closures.csv
     create_empty_closure_csv(folder_name)
     
+    # TODO: empty reg-corrections okay? What does this file do? -> Nico
     # 11. create empty registration_correction.csv
     create_empty_registration_corrections_csv(folder_name)
     
@@ -197,7 +197,7 @@ def run_extraction(country_name, start_date, end_date, round_data):
     #current_dir = os.getcwd()
     #validation_folder_path = os.path.join(current_dir, "input_data_processing", 'conflict_validation', folder_name)
     #os.mkdir(validation_folder_path)
-    
+    # create validation csv files
     val_retrieval_date, val_reformatted_start_date, val_reformatted_end_date, val_covered_from, val_covered_to, val_oldest_url, val_latest_url = create_validation_data(camp_data_df, camp_rounds_dict, folder_name, country_name, start_date, end_date)
 
 
@@ -211,14 +211,16 @@ def run_extraction(country_name, start_date, end_date, round_data):
     insert_data_into_DB(country_name, current_dir, folder_name, acled_source_list, population_source_list, camp_source_list, validation_source_list)
     
 
-# variables that can be changed
+# variables that can be passed as parameters
 # date format: dd-mm-yyyy
 country_name = "Ethiopia"
 start_date = "01-01-2023"
 end_date =  "12-01-2024"
 
 # according to flee, date must have the format "yyyy-mm-dd"
+# this is necessary for the validation data.
 # this data is manually added for now because of the inconsistent format of the data
+# according to Diana from the development team of FLEE, the last 3 rounds are enough 
 round_data = [
 {"round": 32, "source": "https://dtm.iom.int/datasets/ethiopia-site-assessment-round-32", "covered_from": "2022-11-25", "covered_to": "2023-01-09"},
 {"round": 33, "source": "https://dtm.iom.int/datasets/ethiopia-site-assessment-round-33", "covered_from": "2023-06-11", "covered_to": "2023-06-29"},

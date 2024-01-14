@@ -9,42 +9,6 @@ from helper_functions import date_format, between_date
 pp = pprint.PrettyPrinter(indent=4)
 
 
-def month_convert(month_name):
-    '''
-    Function to convert month names to month numbers.
-        Parameters:
-            month_name (str): Name of the month
-        Returns:
-            (str): Number of the month
-    '''
-    months = {
-        "jan": "01", "january": "01",
-        "feb": "02", "february": "02",
-        "mar": "03", "march": "03",
-        "apr": "04", "april": "04",
-        "may": "05", "may": "05",
-        "jun": "06", "june": "06",
-        "jul": "07", "july": "07",
-        "aug": "08", "august": "08",
-        "sep": "09", "september": "09",
-        "oct": "10", "october": "10",
-        "nov": "11", "november": "11",
-        "dec": "12", "december": "12"
-    }
-
-    # Convert the month name to lowercase and strip leading/trailing whitespace
-    month_name = month_name.strip().lower()
-
-    # Look up the month number in the dictionary
-    if month_name in months:
-        month_num = months[month_name]
-    else:
-        print("Invalid month name entered.")
-
-    return month_num
-
-
-
 def extract_conflict_info(country, folder_name, start_date, end_date, location_type, added_conflict_days):
     '''
     Extract conflict information from ACLED data and write it to a CSV file.
