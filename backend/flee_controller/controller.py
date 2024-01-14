@@ -23,11 +23,9 @@ class Controller:
 
         self.adapter = Adapter()
         self.backend_root_dir = Path(__file__).resolve().parent
-        load_dotenv()
-        self.MONGODB_URI = os.environ.get('MONGO_URI')
-        self.client = MongoClient(self.MONGODB_URI)
-        self.db = self.client.get_database("Caturanga")
+        self.client, self.db = self.connect_db()
         self.csvTransformer = CsvTransformer(self.db)
+
 
 # Run simulations: ------------------------------------------------------------
 
