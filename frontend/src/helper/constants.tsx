@@ -143,7 +143,7 @@ export const defaultMovechanceText =
 
 export const awarenessLevelText =
     `
-    This parameter is used to adjust the simulated IDPs awareness for neighboring locations by setting a wider or narrower awareness level. 
+    This parameter is used to adjust the simulated IDPs' awareness for neighboring locations by setting a wider or narrower awareness level. 
     Settlements are divided into following three types: camps, towns, conflict zones. 
     The default value is: "${awarenessLevelOptions[defaultValues.move_rules.awareness_level+1].label}".
     `
