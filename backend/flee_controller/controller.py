@@ -22,6 +22,7 @@ class Controller:
         Initializes the Controller object.
         """
         self.adapter = Adapter()
+        self.backend_root_dir = Path(__file__).resolve().parent
         load_dotenv()
         self.MONGODB_URI = os.environ.get('MONGO_URI')
         self.client = MongoClient(self.MONGODB_URI)
@@ -29,52 +30,64 @@ class Controller:
 
 # Run simulations: ------------------------------------------------------------
 
-    def run_simulation(self, object_id: str):
+    async def initialize_simulation(
+            self,
+            simulation_config):
         """
-        Runs a simulation and stores the result in the database.
+        Initializes a simulation by storing the input directory, simsettings,
+        validation directory to the filesystem, and returns the object ID,
+        simsettings filename, simulation directory, and validation directory.
 
-        Parameter:
-        - simulation_id (str): The object ID of the dummy simulation.
-        """
-        sim = self.adapter.run_simulation()
-        self.store_simulation(sim, object_id)
-
-    # Run default simulation (burundi) with custom simsettings and store result:
-    async def run_simulation_simsettings(self, simsettings_id: str, object_id: str):
-        """
-        Runs a simulation with custom simsettings stored in the database
-        using the provided simsettings_id.
-        Stores the simulation results in the database associated with the
-        simsettings_id and the default location 'burundi'.
-
-        Patameter:
-        - simsettings_id (str): The ID of the simulation settings in the 
-          database.
-        - object_id (str): The object ID of the dummy simulation.
+        Parameters:
+        simulation_config (JSONStructure, optional) containing:
+        - input_id (str): The ID of the simulation input.
+        - input_name (str): The name of the simulation input.
+        - simsettings_id (str): The ID of the simulation settings.
+        - simsettings_name (str): The name of the simulation settings.
 
         Returns:
-        - The simulation results.
+            dict: A dictionary containing the name of the result,
+            the IDs mentioned above, the mongodb object ID, simsettings
+            filename, simulation directory, and validation directory.
         """
+        simulation_id = simulation_config["input"]["input_id"]
+        simsettings_id = simulation_config["settings"]["simsettings_id"]
 
-        backend_root_dir = Path(__file__).resolve().parent
+        name = \
+            simulation_config["input"]["input_name"] + "(" + \
+            simulation_config["settings"]["simsettings_name"] + ")"
+
+        objectid = await self.store_dummy_simulation(
+            simulation_id,
+            simsettings_id,
+            name)
 
         simsettings_filename = await self.store_simsettings_to_filesystem(
-            simsettings_id,
-            backend_root_dir)
+            simsettings_id)
 
-        sim = self.adapter.run_simulation_ss(simsettings_filename)
+        simulation_dir = await self.store_simulation_to_filesystem(
+            simulation_id)
 
-        self.store_simulation(
-            sim,
-            object_id=object_id,
-            simsettings_id=simsettings_id)
+        validation_dir = await self.store_validation_to_filesystem()
+
+        return {"name": name,
+                "simulation_id": simulation_id,
+                "simsettings_id": simsettings_id,
+                "objectid": objectid,
+                "simsettings_filename": simsettings_filename,
+                "simulation_dir": simulation_dir,
+                "validation_dir": validation_dir}
 
     # Run simulation with provided simulation_id and simsettings_id and store results in DB:
-    async def run_simulation_config(
+    def run_simulation_config(
             self,
+            name: str,
             simulation_id: str,
             simsettings_id: str,
-            object_id: str):
+            object_id: str,
+            simsettings_filename: str,
+            simulation_dir: str,
+            validation_dir: str):
 
         """
         Runs a simulation with custom simsettings and input stored in the database
@@ -87,25 +100,17 @@ class Controller:
         :return: Returns simulation results
         """
 
-        backend_root_dir = Path(__file__).resolve().parent
-
-        simsettings_filename = await self.store_simsettings_to_filesystem(
-            simsettings_id,
-            backend_root_dir)
-
-        simulation_dir = await self.store_simulation_to_filesystem(
-            simulation_id,
-            backend_root_dir)
-
         sim = self.adapter.run_simulation_config(
             simulation_dir,
-            simsettings_filename)
+            simsettings_filename,
+            validation_dir)
 
         self.store_simulation(
             sim,
             object_id=object_id,
             simulation_id=simulation_id,
-            simsettings_id=simsettings_id)
+            simsettings_id=simsettings_id,
+            name=name)
 
 # Store results in database: ----------------------------------------------
 
@@ -128,7 +133,8 @@ class Controller:
             result,
             object_id: str,
             simulation_id: str = "658dec24819bd1bc1ff738cd",
-            simsettings_id: str = "6570f624987cdd647c68bc7d"):
+            simsettings_id: str = "6570f624987cdd647c68bc7d",
+            name: str = "undefined"):
         """
         Stores a simulation result in the database.
 
@@ -139,15 +145,23 @@ class Controller:
           Defaults to "658dec24819bd1bc1ff738cd" (Burundi).
         - simsettings_id (str): The ID of the simulation settings.
           Defaults to "6570f624987cdd647c68bc7d" (Test simsettings).
+        - name (str): The name of the simulation result.
+          Defaults to "undefined".
         """
         client, db = self.connect_db()
         simulations_collection = db.simulations_results
         new_simulation = {}
         new_simulation = {
+            "name": name,
             "simulation_id": simulation_id,
-            "simsettings_id": simsettings_id,
-            "data": result
+            "simsettings_id": simsettings_id
         }
+        if "error" in result:
+            new_simulation["status"] = "error"
+        else:
+            new_simulation["status"] = "done"
+            new_simulation["data"] = result
+
         simulations_collection.replace_one(
             {"_id": ObjectID(object_id)},
             new_simulation)
@@ -156,7 +170,8 @@ class Controller:
     async def store_dummy_simulation(
                 self,
                 simulation_id: str = "658dec24819bd1bc1ff738cd",
-                simsettings_id: str = "6570f624987cdd647c68bc7d"):
+                simsettings_id: str = "6570f624987cdd647c68bc7d",
+                name: str = "undefined"):
         """
         Stores a dummy simulation in the database so that the user can see
         that the simulation is started.
@@ -166,6 +181,8 @@ class Controller:
           Defaults to "658dec24819bd1bc1ff738cd" (Burundi).
         - simsettings_id (str): The ID of the simulation settings.
           Defaults to "6570f624987cdd647c68bc7d" (Test simsettings).
+        - name (str): The name of the simulation result.
+          Defaults to "undefined".
 
         Returns:
         - str: The ID of the inserted dummy simulation.
@@ -174,9 +191,10 @@ class Controller:
         collection = db.simulations_results
         dummy_simulation = {}
         dummy_simulation = {
+            "name": name,
             "simulation_id": simulation_id,
             "simsettings_id": simsettings_id,
-            "data": {"status": "running"}
+            "status": "running"
         }
         result = collection.insert_one(dummy_simulation)
         client.close()
@@ -187,8 +205,7 @@ class Controller:
 
     async def store_simsettings_to_filesystem(
             self,
-            simsettings_id: str,
-            backend_root_dir: Path):
+            simsettings_id: str):
 
         # Get Simsettings from DB:
         try:
@@ -198,7 +215,7 @@ class Controller:
 
         # Total path to simsettings-file:
         simsettings_dir = \
-            backend_root_dir / "flee_stored_files" / "simsettings"
+            self.backend_root_dir / "flee_stored_files" / "simsettings"
         filename = simsettings_id + ".yml"
         simsettings_filename = simsettings_dir / filename
 
@@ -219,8 +236,7 @@ class Controller:
 
     async def store_simulation_to_filesystem(
             self,
-            simulation_id: str,
-            backend_root_dir: Path):
+            simulation_id: str):
 
         try:
             await self.convert_simulations_to_csv(simulation_id)
@@ -229,7 +245,7 @@ class Controller:
 
         # Path to simulation directory (.csv - FLEE files of simulation):
         simulation_dir = \
-            backend_root_dir / "flee_stored_files" / "conflict_input" / \
+            self.backend_root_dir / "flee_stored_files" / "conflict_input" / \
             simulation_id
 
         # Create simulations-directory:
@@ -237,6 +253,24 @@ class Controller:
             simulation_dir.mkdir(parents=True)
 
         return simulation_dir
+
+    async def store_validation_to_filesystem(self):
+
+        validation_dir = \
+            self.backend_root_dir / "flee_stored_files" / "conflict_validation"
+        data_layout = validation_dir / "data_layout.csv"
+
+        if not validation_dir.exists():
+            validation_dir.mkdir(parents=True)
+
+        # create an empty csv file
+        try:
+            open(data_layout, 'w').close()
+        except Exception as e:
+            return f"Exception while creating data_layout.csv: {e}"
+
+        return validation_dir
+
 
 # Simulations and Simulation Results: -----------------------------------------
 
@@ -257,6 +291,15 @@ class Controller:
 
         client.close()
         return rl
+
+    async def get_all_simulation_result_summaries(self):
+        """
+        Retrieves all simulation result summaries.
+
+        Returns:
+        - list of simulation result summaries.
+        """
+        return await self.get_summaries("simulations_results")
 
     # Return specific simulation by simulation_results_id:
     async def get_simulation_result(self, simulation_result_id: str):
@@ -297,6 +340,15 @@ class Controller:
         client.close()
         return rl
 
+    async def get_all_simulation_summaries(self):
+        """
+        Retrieves all simulation summaries.
+
+        Returns:
+        - list of simulation summaries.
+        """
+        return await self.get_summaries("simulations")
+
     # Get specific simulation by simulation_id:
     async def get_simulation(self, simulation_id: str):
         """
@@ -318,6 +370,43 @@ class Controller:
         else:
             client.close()
             return None
+
+    async def get_summaries(self, collection_name: str):
+        """
+        Retrieves summaries from the specified collection in the database.
+        A summary contains ID and name of the objects. In the case of
+        simulations, the summary also contains the locations and routes,
+        which is needed for the map view.
+
+        Parameters:
+        - collection (str):
+          The name of the collection to retrieve summaries from.
+
+        Returns:
+        - list: A list of summaries, where each summary
+                is a dictionary with "_id" and "name" fields.
+        """
+
+        client, db = self.connect_db()
+
+        collection = db.get_collection(collection_name)
+        if collection_name == "simulations":
+            summaries = collection.find({}, {"_id": 1,
+                                             "name": 1,
+                                             "locations": 1,
+                                             "routes": 1})
+        else:
+            summaries = collection.find({}, {"_id": 1, "name": 1})
+
+        result = []
+        for summary in summaries:
+            summary["_id"] = str(summary["_id"])
+            result.append(summary)
+
+        client.close()
+
+        return result
+
 
 # Manage simsettings in DB: ---------------------------------------------------
 
@@ -379,6 +468,15 @@ class Controller:
             rl.append(simsetting)
         client.close()
         return rl
+
+    async def get_all_simsetting_summaries(self):
+        """
+        Retrieves all simsetting summaries.
+
+        Returns:
+        - list of simsetting summaries.
+        """
+        return await self.get_summaries("simsettings")
 
     # Get specific simsettings by simsetting_id:
     async def get_simsetting(self, simsetting_id: str):
@@ -460,10 +558,6 @@ class Controller:
                                           ["name", "region", "country", "latitude", "longitude", "location_type",
                                            "conflict_date",
                                            "population"])
-                
-                # registration_corrections.csv file:
-                self.export_registration_corrections_csv(os.path.join(simulation_dir, "registration_corrections.csv"),
-                                                         simulation["registration_corrections"])
                 
                 # routes.csv file:
                 self.export_routes_csv(os.path.join(simulation_dir, "routes.csv"), simulation["routes"],
@@ -565,30 +659,6 @@ class Controller:
                          row.values()])
 
                 return "File created successfully"
-
-        except Exception as e:
-            return e
-
-    # Helper Function to create csv-file from filename, data and fieldnames:
-    def export_registration_corrections_csv(self, file_name, data):
-
-        """
-        :param file_name: New path of file incl. filename
-        :param data: Row data
-        :return: Returns nothin, only creates and stores files
-        """
-
-        try:
-            with open(file_name, mode='w', newline='') as csv_file:
-                writer = csv.writer(csv_file)
-
-                # Write data
-                for row in data:
-                    name = row['name']
-                    date_str = row['date'].strftime('%Y-%m-%d')
-                    writer.writerow([name, date_str])
-
-                return "File created succesfully"
 
         except Exception as e:
             return e

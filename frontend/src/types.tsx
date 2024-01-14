@@ -43,6 +43,10 @@ interface Input {
   };
 }
 
+interface ResultPreview {
+  _id: string;
+}
+
 interface SimSettings {
   _id: string;
   name: string;
@@ -75,5 +79,5 @@ interface SimSettings {
   };
 }
 
-export type { SimLocation, Route, Input, SimSettings };
+export type { SimLocation, Route, Input, SimSettings, ResultPreview };
 export { LocationType, MapOperatingMode };

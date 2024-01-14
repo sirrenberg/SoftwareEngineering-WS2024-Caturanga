@@ -10,6 +10,10 @@
   background-color: var(--charcoal);
 }
 
+#outputs-menu-container .simple-button {
+  background-color: var(--charcoal);
+}
+
 .items-list-container {
   background-color: var(--tea-green);
   height: 100vh;
@@ -25,20 +29,26 @@
   background-color: var(--air-superiority-blue);
 }
 
+#outputs-list-container {
+  background-color: var(--peach);
+}
+
 .items-list-title {
   font-family: "Cabin", sans-serif;
   font-weight: 600;
   font-size: 1.4rem;
+  margin-bottom: 20px;
 }
 
 .items-list {
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: center;
   width: 90%;
   height: 75%;
   overflow-y: scroll;
+  box-sizing: border-box;
 }
 
 .items-list .simple-button {
@@ -68,6 +78,16 @@
   color: var(--white);
 }
 
+#outputs-items-list .simple-button {
+  background-color: var(--white);
+  color: var(--black)
+}
+
+#outputs-items-list .simple-button:hover {
+  background-color: var(--coquelicot);
+  color: var(--white)
+}
+
 .simple-button.selected-item {
   background-color: var(--dark-green);
   color: var(--white);
@@ -76,6 +96,11 @@
 #settings-items-list .simple-button.selected-item {
   background-color: var(--charcoal);
   color: var(--white);
+}
+
+#outputs-items-list .simple-button.selected-item {
+  background-color: var(--light-charcoal);
+  color: var(--white)
 }
 
 .items-list-item-icons {
@@ -111,6 +136,10 @@ a .items-list-item-icons {
   color: var(--dark-green);
 }
 
+#outputs-list-container .item-icon:hover{
+  color: var(--charcoal);
+}
+
 .content-section {
   width: 100%;
   height: 100vh;
@@ -124,6 +153,10 @@ a .items-list-item-icons {
 
 .map-background {
   background-color: var(--dark-green);
+}
+
+#outputs-menu-container .map-background {
+  background-color: var(--peach);
 }
 
 .leaflet-container {
