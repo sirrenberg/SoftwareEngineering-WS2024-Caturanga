@@ -60,12 +60,12 @@ export const awarenessLevelOptions =
 [{value: -1, label: "No awareness"},
  {value: 0, label: "The length of the road to the closest settlement"}, 
  {value: 1, label: "The type of the closest settlement"},
- {value: 2, label: "The type of the settlement adjacent to neighbouring settlements"},
- {value: 3, label: "The type of the settlements neighbouring those neighbours of neighbours"}]
+ {value: 2, label: "The type of the settlement adjacent to neighboring settlements"},
+ {value: 3, label: "The type of the settlements neighboring neighbors of neighbors"}]
 
 export const moveSpeedText = 
     `
-    This refers to the most number of kilometers (km) to be traveled by IDPs per day. 
+    This refers to the maximum number of kilometers (km) to be traveled by simulated IDPs per day. 
     The default value is ${defaultValues.move_rules.max_move_speed} km per day, 
     which corresponds to a speed of 30 km/hour for 12 hours.
     `
@@ -73,7 +73,7 @@ export const moveSpeedText =
 
 export const walkSpeedText = 
     `
-    This refers to the most number of kilometers (km) to be traveled by IDPs per day on foot. 
+    This refers to the maximum number of kilometers (km) to be traveled by simulated IDPs per day on foot. 
     The default value is ${defaultValues.move_rules.max_walk_speed} km per day,
     which corresponds to a speed of 3.5 km/hour for 10 hours.
     `
@@ -120,66 +120,49 @@ export const popPowerForLocWeightText =
 
 export const conflictMovechanceText =
     `
-    This is the chance (probability) of IDPs leaving a conflict zone per day.
+    This is the chance (probability) of simulated IDPs leaving a conflict zone per day.
     The default value is ${defaultValues.move_rules.conflict_movechance}, i.e., 100%. 
-    Therefore IDPs will always leave conflict zones.
+    Therefore simulated IDPs will always leave conflict zones.
     `
 ;
 
 export const campMovechanceText = 
     `
-    This is the chance (probability) of IDPs leaving a camp per day.
+    This is the chance (probability) of simulated IDPs leaving a camp per day.
     The default value is ${defaultValues.move_rules.camp_movechance}, i.e., 0.1%.
-    Therefore IDPs will almost never leave camps.
+    Therefore simulated IDPs will almost never leave camps.
     `
 ;
 
 export const defaultMovechanceText =
     `
-    This is the chance (probability) of IDPs leaving a regular location (i.e., town) per day.
+    This is the chance (probability) of simulated IDPs leaving a regular location (i.e., town) per day.
     The default value is ${defaultValues.move_rules.default_movechance}, i.e., 30%.
     `
 ;
 
 export const awarenessLevelText =
     `
-    This parameter is used to adjust the IDPs awareness for neighboring locations by setting a wider or narrower awareness level. 
+    This parameter is used to adjust the simulated IDPs awareness for neighboring locations by setting a wider or narrower awareness level. 
     Settlements are divided into following three types: camps, towns, conflict zones. 
     The default value is: "${awarenessLevelOptions[defaultValues.move_rules.awareness_level+1].label}".
     `
 ;
 
-export const capacityScalingText =
-    `
-    This refers to the scaling factor for the capacity of camp locations.
-    `
-;
-
-export const avoidShortStintsText =
-    `
-    This parameter, if checked, prevents IDPs from moving to a location for less than 1 day.
-    `
-;
-
 export const startOnFootText =
     `
-    This parameter, if checked, forces IDPs to start their journey on foot.
+    This parameter, if checked, forces simulated IDPs to start their journey on foot.
     By default it is ${defaultValues.move_rules.start_on_foot ? "checked" : "NOT checked"}.
     `
 ;
 
-export const weightPowerText =
-    `
-    This refers to the power factor that adjusts how heavily the distance between locations is accounted for.
-    `
-;
 
 export const displacedPerConflictDayText =
     `
     This parameter refers to the percentage of the population in a conflict zone that are displaced per day. 
     The default value is ${defaultValues.spawn_rules.conflict_driven_spawning.displaced_per_conflict_day},
     which means that 1% of the population is displaced per day, for a conflict weight of 1.0.
-    Warning: The higher the value, the more IDPs will be spawned, and the longer the simulation will take.
+    Warning: The higher the value, the more  simulated IDPs will be spawned, and the longer the simulation will take.
     Thus the maximum value is limited to 10%. Be careful when increasing this value, and consider adjusting
     the hasten parameter accordingly.
     `
@@ -198,7 +181,7 @@ export const hastenText =
 
 export const movementRulesText =
     `
-    The following section contains the parameters that influence IDPs' movement during the simulation.
+    The following section contains the parameters that influence simulated IDPs' movement during the simulation.
     Each parameter is explained in detail by clicking on the information icon next to it.
     `
 ;
@@ -211,7 +194,7 @@ export const optimisationsText =
 
 export const spawnRulesText = 
     `
-    To be considered for the simulation, IDP "agents" have to be spawned within the region first. 
+    To be considered for the simulation, simulated IDP have to be spawned within the region first. 
     The following section contains the parameters that influence their spawning during the simulation.
     `
 ;
