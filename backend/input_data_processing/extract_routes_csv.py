@@ -1,25 +1,40 @@
 # This script is based on https://github.com/djgroen/FabFlee/blob/master/scripts/05_extract_routes_csv.py 
-# but changed where necessary to work automatically with the data from the ACLED API and the population data
-
+# but changed where necessary to work automatically with the data from the ACLED API and the population data.
+# Additionally, haversine_distance() is written by me. (instead of euclidian distance by FabFlee)
 
 import os 
 import csv
 import requests 
 import pandas as pd
 import numpy as np
+import math
 
-def calculate_distance(lat1, lon1, lat2, lon2):
-    '''
-    Calculate the Euclidean distance between two locations.
-        Parameters:
-            lat1 (float): Latitude of the first location
-            lon1 (float): Longitude of the first location
-            lat2 (float): Latitude of the second location
-            lon2 (float): Longitude of the second location
-        Returns:
-            (float): Euclidean distance between the two locations
-    '''
-    return np.sqrt((lat1 - lat2)**2 + (lon1 - lon2)**2) * 1000
+# FabFlee used the euclidian distance in its implementation. 
+# I use the haversine formula to calculate the linear distance between 2 locations in km
+def haversine_distance(lat1, lon1, lat2, lon2):
+    # TODO: docstring
+    # mean radius of the Earth
+    R = 6371.0 # https://en.wikipedia.org/wiki/Great-circle_distance
+    
+    # Conversion from degrees to radians
+    lat1_rad = math.radians(lat1)
+    lon1_rad = math.radians(lon1)
+    lat2_rad = math.radians(lat2)
+    lon2_rad = math.radians(lon2)
+    
+    # Deltas of the coordinates
+    dlat = lat2_rad - lat1_rad
+    dlon = lon2_rad - lon1_rad
+    
+    # Haversine formula
+    a = math.sin(dlat / 2)**2 + math.cos(lat1_rad) * math.cos(lat2_rad) * math.sin(dlon / 2)**2
+    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+    
+    # calculation of the distance
+    distance = R * c
+
+    return distance
+
 
 def find_nearest_neighbor(current_index, visited, locations_df):
     '''
@@ -36,7 +51,7 @@ def find_nearest_neighbor(current_index, visited, locations_df):
     nearest_index = None
     for i in range(len(locations_df)):
         if not visited[i] and i != current_index:
-            distance = calculate_distance(locations_df.iloc[current_index]['latitude'], locations_df.iloc[current_index]['longitude'],
+            distance = haversine_distance(locations_df.iloc[current_index]['latitude'], locations_df.iloc[current_index]['longitude'],
                                           locations_df.iloc[i]['latitude'], locations_df.iloc[i]['longitude'])
             if distance < nearest_distance:
                 nearest_distance = distance
@@ -76,9 +91,9 @@ def extract_routes_csv(folder_name):
         # Check for possible intermediate stop
         for i in range(len(locations_df)):
             if not visited[i] and i != current_index and i != next_index:
-                intermediate_distance = calculate_distance(locations_df.iloc[current_index]['latitude'], locations_df.iloc[current_index]['longitude'],
+                intermediate_distance = haversine_distance(locations_df.iloc[current_index]['latitude'], locations_df.iloc[current_index]['longitude'],
                                                            locations_df.iloc[i]['latitude'], locations_df.iloc[i]['longitude']) + \
-                                        calculate_distance(locations_df.iloc[i]['latitude'], locations_df.iloc[i]['longitude'],
+                                        haversine_distance(locations_df.iloc[i]['latitude'], locations_df.iloc[i]['longitude'],
                                                            locations_df.iloc[next_index]['latitude'], locations_df.iloc[next_index]['longitude'])
                 # If the route via the intermediate location is shorter, choose it
                 if intermediate_distance < direct_distance:
@@ -98,3 +113,4 @@ def extract_routes_csv(folder_name):
             writer.writerow(route)
 
     print(f'{folder_name}/routes.csv created. Please inspect the file for unwanted anomalies!')
+
