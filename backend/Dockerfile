@@ -21,9 +21,6 @@ RUN apt-get update && apt-get install -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy the FLEE requirements file to the working directory
-COPY flee/requirements.txt ./backend/flee/
-
 # Install FLEE dependencies
 RUN pip install -r flee/requirements.txt
 
