@@ -65,15 +65,15 @@ export const awarenessLevelOptions =
 
 export const moveSpeedText = 
     `
-    This refers to the maximum number of kilometers (km) to be traveled by simulated IDPs per day. 
-    The default value is ${defaultValues.move_rules.max_move_speed} km per day, 
-    which corresponds to a speed of 30 km/hour for 12 hours.
+    This refers to the maximum number of kilometers (km) that the simulated IDPs can travel per day.
+    The default value is ${defaultValues.move_rules.max_move_speed} km per day,
+    which is equivalent to a speed of 30 km/hour for 12 hours.
     `
 ;
 
 export const walkSpeedText = 
     `
-    This refers to the maximum number of kilometers (km) to be traveled by simulated IDPs per day on foot. 
+    This refers to the maximum number of kilometers (km) that simulated IDPs are able to walk per day. 
     The default value is ${defaultValues.move_rules.max_walk_speed} km per day,
     which corresponds to a speed of 3.5 km/hour for 10 hours.
     `
