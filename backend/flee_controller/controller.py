@@ -30,9 +30,9 @@ class Controller:
         Initializes the Controller object.
         """
         self.adapter = Adapter()
-        # secret = self.get_secret("caturanga-db-user-and-pw")
-        self.username = "" # secret["username"] # store username and password in environment variables, so that they don't have to be fetched from the AWS Secrets Manager every time, which is expensive
-        self.password = "" # secret["password"]
+        secret = self.get_secret("caturanga-db-user-and-pw")
+        self.username = secret["username"] # store username and password in environment variables, so that they don't have to be fetched from the AWS Secrets Manager every time, which is expensive
+        self.password = secret["password"]
 
 # Run simulations: ------------------------------------------------------------
 
