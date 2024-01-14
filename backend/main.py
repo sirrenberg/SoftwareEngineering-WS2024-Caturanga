@@ -107,6 +107,18 @@ async def get_all_simulations():
     return await controller.get_all_simulations()
 
 
+@app.get("/simulations/summary")
+async def get_all_simulation_summaries():
+    """
+    Retrieves all simulation summaries.
+    A simulation summary contains the simulation ID and the simulation name.
+
+    Returns:
+    - list of simulation summaries.
+    """
+    return await controller.get_all_simulation_summaries()
+
+
 @app.get("/simulations/{simulation_id}")
 async def get_simulation(
         simulation_id: str = Path(),
@@ -137,6 +149,19 @@ async def get_all_simulation_results():
     return await controller.get_all_simulation_results()
 
 
+@app.get("/simulation_results/summary")
+async def get_all_simulation_result_summaries():
+    """
+    Retrieves all simulation result summaries.
+    A simulation result summary contains the
+    simulation result ID and the simulation result name.
+
+    Returns:
+    - list of simulation result summaries.
+    """
+    return await controller.get_all_simulation_result_summaries()
+
+
 @app.get("/simulation_results/{simulation_result_id}")
 async def get_simulation_result(
         simulation_result_id: str = Path(),
@@ -165,6 +190,18 @@ async def get_all_simsettings():
     - list: A list of all simulation settings.
     """
     return await controller.get_all_simsettings()
+
+
+@app.get("/simsettings/summary")
+async def get_all_simsetting_summaries():
+    """
+    Retrieves all simsetting summaries.
+    A simsetting summary contains the simsetting ID and the simsetting name.
+
+    Returns:
+    - list of simsetting summaries.
+    """
+    return await controller.get_all_simsetting_summaries()
 
 
 @app.get("/simsettings/{simsetting_id}")

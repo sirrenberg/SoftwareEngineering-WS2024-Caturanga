@@ -25,7 +25,7 @@ function Inputs() {
   const { setInputId, setInputName } = context;
 
   useEffect(() => {
-    sendRequest("/simulations", "GET").then((data) => {
+    sendRequest("/simulations/summary", "GET").then((data) => {
       setInputs(data);
     });
   }, []);
@@ -63,7 +63,7 @@ function Inputs() {
                   setInputName(inputs[index].name);
                 }}
               >
-                <p>{input.region}</p>
+                <p>{input.name}</p>
                 <span className="items-list-item-icons">
                   <NavLink to={"/inputs/" + input._id}>
                     <FontAwesomeIcon
