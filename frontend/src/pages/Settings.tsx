@@ -2,7 +2,7 @@ import "../styles/Menu.css";
 import { useEffect, useState, useContext } from "react";
 import { StartSimContext } from "../contexts/StartSimContext";
 import { SimSettings } from "../types";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAPI } from "../hooks/useAPI";
 import { NavLink } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -10,6 +10,7 @@ import { faPenToSquare, faTrash } from "@fortawesome/free-solid-svg-icons";
 
 function Settings() {
   const { sendRequest } = useAPI();
+  const navigate = useNavigate();
 
   const [settings, setSettings] = useState<SimSettings[]>([]);
   const [selectedSettingIndex, setSelectedSettingIndex] = useState<number>(-1);
@@ -20,7 +21,7 @@ function Settings() {
   if (!context) {
     throw new Error("StartSimContext is null");
   }
-  const { setSettings_id } = context;
+  const { setSettingsId, setSettingsName } = context;
 
   useEffect(() => {
     sendRequest("/simsettings", "GET").then((data) => {
@@ -57,7 +58,8 @@ function Settings() {
                 }
                 onClick={() => {
                   setSelectedSettingIndex(index);
-                  setSettings_id(settings[index]._id);
+                  setSettingsId(settings[index]._id);
+                  setSettingsName(settings[index].name);
                 }}
               >
                 <p>{setting.name}</p>
@@ -532,9 +534,28 @@ function Settings() {
           >
             <button
               className="simple-button"
-              disabled={selectedSettingIndex === -1}
+              disabled={selectedSettingIndex === -1 || context.settingsId === "" || context.inputId === ""}
+              onClick={() => {
+                console.log("Starting simulation with settings id " + context.settingsId + " and input id " + context.inputId)
+                sendRequest("/run_simulation/config", 
+                            "POST", 
+                            {
+                              input: {
+                                input_id: context.inputId,
+                                input_name: context.inputName
+                              },
+                             settings: {
+                                simsettings_id: context.settingsId,
+                                simsettings_name: context.settingsName
+                              }
+                            })
+                            .then((data) => {
+                              console.log(data);
+              })
+              navigate("/results");
+            }}
             >
-              Continue
+              Start Simulation
             </button>
           </Link>
         </div>
