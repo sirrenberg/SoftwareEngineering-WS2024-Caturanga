@@ -191,3 +191,10 @@ a .items-list-item-icons {
   cursor: not-allowed;
   opacity: 0.5;
 }
+
+.section-subtext {
+  font-size: 1.2rem;
+  margin-bottom: 2rem;
+  font-family: "Cabin", sans-serif;
+  text-align: center;
+}
