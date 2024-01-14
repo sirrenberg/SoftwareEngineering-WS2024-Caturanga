@@ -227,18 +227,18 @@ def testread(
     return controller.testread_ss(simsetting_id)
 
 
-@app.get("/test_csv/{simulation_id}")
-async def test_csv(
+@app.get("/test__val_csv/{simulation_id}")
+async def test_val_csv(
         simulation_id: str = '658dec24819bd1bc1ff738cd'
 ):
     """
     Convert all data in DB, stored for given simulation, to .csv files and store them in filesystem
     """
-    return await controller.convert_simulations_to_csv(simulation_id)
+    return await controller.store_validation_to_filesystem(simulation_id)
 
 
-@app.get("/testread_csv/{simulation_id}")
-def testread_csv(
+@app.get("/testread_val_csv/{simulation_id}")
+def testread_Val_csv(
         simulation_id: str = Path(
             description="ID of simulation of .csv file, which should be returned"
         )

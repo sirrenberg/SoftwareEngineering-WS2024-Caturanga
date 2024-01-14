@@ -60,7 +60,9 @@ class Controller:
         simulation_dir = await self.store_simulation_to_filesystem(
             simulation_id)
 
-        validation_dir = await self.store_validation_to_filesystem()
+        validation_dir = await self.store_validation_to_filesystem(
+            simulation_id
+        )
 
         return {"objectid": objectid,
                 "simsettings_filename": simsettings_filename,
@@ -227,26 +229,22 @@ class Controller:
             self.backend_root_dir / "flee_stored_files" / "conflict_input" / \
             simulation_id
 
-        # Create simulations-directory:
-        if not simulation_dir.exists():
-            simulation_dir.mkdir(parents=True)
-
         return simulation_dir
 
-    async def store_validation_to_filesystem(self):
 
-        validation_dir = \
-            self.backend_root_dir / "flee_stored_files" / "conflict_validation"
-        data_layout = validation_dir / "data_layout.csv"
+    async def store_validation_to_filesystem(
+            self,
+            simulation_id: str):
 
-        if not validation_dir.exists():
-            validation_dir.mkdir(parents=True)
-
-        # create an empty csv file
         try:
-            open(data_layout, 'w').close()
+            await self.convert_validation_to_csv(simulation_id)
         except Exception as e:
-            return f"Exception while creating data_layout.csv: {e}"
+            return f"No simulation with ID {simulation_id} stored in DB: {e}"
+
+        # Path to validation directory (.csv - FLEE files of validation):
+        validation_dir = \
+            self.backend_root_dir / "flee_stored_files" / "conflict_validation" / \
+            simulation_id
 
         return validation_dir
 
@@ -393,7 +391,7 @@ class Controller:
 
 # Helper functions - Storing .csv-files for given data and path: --------------
 
-    # Store simulation data from DB in csv files for FLEE execution:
+    # Store simulation and validation data from DB in csv files for FLEE execution:
     async def convert_simulations_to_csv(self, simulation_id: str):
 
         """
@@ -414,36 +412,36 @@ class Controller:
             # Create all .csv files for simulation:
             if simulation is not None:
 
-                # Create directory for simulation:
+                # Create directory for simulation and validation:
                 backend_root_dir = Path(__file__).resolve().parent
                 simulation_dir = backend_root_dir / "flee_stored_files" / "conflict_input" / simulation_id
                 os.makedirs(simulation_dir, exist_ok=True)
 
-                # Cretae csv files using helper function export-csv (filename, data, fieldnames):
+                # Simulation Files ---------------------------------------
                 # Closures.csv file:
                 self.export_closures_csv(os.path.join(simulation_dir, "closures.csv"), simulation["closures"])
-                
+
                 # conflicts.csv file:
                 self.export_csv(os.path.join(simulation_dir, "conflicts.csv"), simulation["conflicts"],
                                 simulation["conflicts"][
                                     0].keys())  # In DB hinten null-objekt: :null -> Daher hier ein Komma hinten angehängt
                 self.remove_trailing_commas(os.path.join(simulation_dir, "conflicts.csv"))
-                
+
                 # locations.csv file:
                 self.export_locations_csv(os.path.join(simulation_dir, "locations.csv"), simulation["locations"],
                                           ["name", "region", "country", "latitude", "longitude", "location_type",
                                            "conflict_date",
                                            "population"])
-                
+
                 # routes.csv file:
                 self.export_routes_csv(os.path.join(simulation_dir, "routes.csv"), simulation["routes"],
                                        ["from", "to", "distance",
                                         "forced_redirection"])  # null werte ignoriert -> Freie kommas hinten
-                
+
                 # sim_period.csv file (values are single data points, not directories themselves -> unnested function):
                 self.export_csv_sim_period(os.path.join(simulation_dir, "sim_period.csv"), simulation["sim_period"])
-                
-                return "All files written"
+
+                return "All simulation files written"
 
             else:
                 raise SimulationNotFoundError(f"Simulation with ID {simulation_id} not found")
@@ -451,6 +449,50 @@ class Controller:
         except Exception as e:
             raise e
 
+    async def convert_validation_to_csv(self, simulation_id: str):
+        """
+        Convert validation data into .csv files (for FLEE simulation execution)
+        Read all data from simulation["validation"] in DB
+        Convert Data into .csv files, which are required by FLEE (data_layout, refugees, camps)
+
+        :param simulation_id: ID of the simulation, for which validation data needs to be created
+        :return:
+        """
+
+        # Fetch simulation data from DB by simulation_id:
+        try:
+            simulations_collection = self.db.get_collection("simulations")
+            simulation = simulations_collection.find_one({"_id": ObjectID(simulation_id)})
+
+            # Create all .csv files for simulation:
+            if simulation is not None:
+
+                # Create directory for simulation and validation:
+                backend_root_dir = Path(__file__).resolve().parent
+                validation_dir = backend_root_dir / "flee_stored_files" / "conflict_validation" / simulation_id
+                os.makedirs(validation_dir, exist_ok=True)
+
+                # Validation Files ---------------------------------------
+                # data_layout.csv file:
+                self.export_data_layout_csv(os.path.join(validation_dir, "data_layout.csv"),
+                                            simulation["validation"]["data_layout"], ["total", "refugees.csv"])
+
+                # ALL camp.csv files with date and refugee numbers:
+                self.export_all_camp_csv(validation_dir, simulation["validation"]["camps"])
+
+                # Write refugees.csv:
+                self.export_refugees_csv(os.path.join(validation_dir, "refugees.csv"),
+                                         simulation["validation"]["refugees"], ["date", "Refugee_numbers"])
+
+                return "All validation files written"
+
+            else:
+                raise SimulationNotFoundError(f"Simulation with ID {simulation_id} not found")
+
+        except Exception as e:
+            raise e
+
+    # Simulation helper functions: -----------------------------------------
 
     # Helper Function to create csv-file from filename, data and fieldnames:
     def export_closures_csv(self, file_name, data):
@@ -575,7 +617,6 @@ class Controller:
         """
         :param file_name: New path of file incl. filename
         :param data: Row data
-        :param fieldnames: Name of columns in .csv files
         :return: Returns nothin, only creates and stores files
         """
 
@@ -618,6 +659,97 @@ class Controller:
             writer = csv.writer(file)
             writer.writerows(processed_rows)
 
+    # Validation helper functions: -----------------------------------------
+
+    # Function to create data_layout.csv-file:
+    def export_data_layout_csv(self, file_name, data, fieldnames):
+
+        """
+        :param file_name: New path of file incl. filename
+        :param data: Row data
+        :param fieldnames: Name of columns in .csv files
+        :return: Returns nothin, only creates and stores files
+        """
+
+        try:
+            with open(file_name, mode='w', newline='', encoding='utf-8') as csv_file:
+                writer = csv.writer(csv_file)
+
+                # Write header:
+                writer.writerow(fieldnames)
+
+                # Write data & Skip rows with empty keys
+                for row in data:
+                    if any(value == '' for value in row.values()):
+                        continue
+                    writer.writerow([row['camp_name'], row['file_name']])
+
+                return "File created successfully"
+
+        except Exception as e:
+            return e
+
+    # Function to create refugees.csv-file:
+    def export_refugees_csv(self, file_name, data, fieldnames):
+
+        """
+        :param file_name: New path of file incl. filename
+        :param data: Row data
+        :param fieldnames: Name of columns in .csv files
+        :return: Returns nothing, only creates and stores files
+        """
+
+        try:
+            with open(file_name, mode='w', newline='', encoding='utf-8') as csv_file:
+                writer = csv.writer(csv_file)
+
+                # Write header:
+                writer.writerow(fieldnames)
+
+                # Write data & Skip rows with empty keys
+                for row in data:
+                    formatted_date = row['date'].strftime("%Y-%m-%d")  # Format the date as "YYYY-MM-DD"
+                    writer.writerow([formatted_date] + list(row.values())[1:])
+
+                return "File created successfully"
+
+        except Exception as e:
+            return e
+
+    # Function to create all camp.csv-file:
+    def export_all_camp_csv(self, dir_name, data):
+        """
+
+        :dir_name: directory of the camp.csv-files (Entire filename will be created dynamically later depending on
+                camp name
+        :param data: data object regarding all camps for validation (including date and refugee numbers
+        :return: Creates files, returns Exception of String
+        """
+
+        for camp_name, camp_data in data.items():
+            filename = os.path.join(dir_name, camp_name)
+
+            try:
+                with open(filename, mode='w', newline='', encoding='utf-8') as csv_file:
+                    writer = csv.writer(csv_file)
+
+                    '''
+                    # Write header
+                    first_entry_values = list(camp_data[0].values())
+                    writer.writerow(first_entry_values)
+                    '''
+
+                    # Write data rows
+                    for entry in camp_data:
+                        # Parse the original date
+                        formatted_date = entry['date'].strftime("%Y-%m-%d")       # Format the date as "YYYY-MM-DD"
+                        # Write the formatted date and other values
+                        writer.writerow([formatted_date] + list(entry.values())[1:])
+
+            except Exception as e:
+                return f"Error creating {filename} file: {e}"
+
+        return "Camp.csv files created successfully"
 
 # Helper functions - reading files: ------------------------------------------------------------------------------------
 
@@ -642,46 +774,18 @@ class Controller:
     def testread_csv(self, simulation_id):
 
         backend_root_dir = Path(__file__).resolve().parent
-        sim_dir = backend_root_dir / "flee_stored_files" / "conflict_input" / simulation_id
-        sim_filename1 = sim_dir / "closures.csv"
-        sim_filename2 = sim_dir / "conflicts.csv"
-        sim_filename3 = sim_dir / "locations.csv"
-        sim_filename4 = sim_dir / "registration_corrections.csv"
-        sim_filename5 = sim_dir / "routes.csv"
-        sim_filename6 = sim_dir / "sim_period.csv"
+        val_dir = backend_root_dir / "flee_stored_files" / "conflict_validation" / simulation_id
+        val_filename1 = val_dir / "refugees.csv"
+
+        print(val_filename1)
 
         try:
-            with open(sim_filename1, 'r') as f:
+            with open(val_filename1, 'r') as f:
                 f1 = f.read()
         except Exception as e:
             return "File1 nicht vorhanden"
-        try:
-            with open(sim_filename2, 'r') as f:
-                f2 = f.read()
-        except Exception as e:
-            return "File2 nicht vorhanden"
-        try:
-            with open(sim_filename3, 'r') as f:
-                f3 = f.read()
-        except Exception as e:
-            return "File3 nicht vorhanden"
-        try:
-            with open(sim_filename4, 'r') as f:
-                f4 = f.read()
-        except Exception as e:
-            return "File4 nicht vorhanden"
-        try:
-            with open(sim_filename5, 'r') as f:
-                f5 = f.read()
-        except Exception as e:
-            return "File5 nicht vorhanden"
-        try:
-            with open(sim_filename6, 'r') as f:
-                f6 = f.read()
-        except Exception as e:
-            return "File6 nicht vorhanden"
-        return f1, f2, f3, f4, f5, f6
 
+        return f1
 
 # Define a custom exception for simulation not found
 class SimulationNotFoundError(Exception):
