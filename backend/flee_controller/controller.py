@@ -7,7 +7,7 @@ from pathlib import Path
 import yaml
 import os
 import csv
-
+import subprocess
 
 class Controller:
     """
@@ -696,6 +696,20 @@ class Controller:
         except Exception as e:
             return "File6 nicht vorhanden"
         return f1, f2, f3, f4, f5, f6
+
+    def run_data_extraction():
+        try:
+            # Command to execute the run_data_extraction.py script
+            script_path = "input_data_processing/run_data_extraction.py"
+            result = subprocess.run(["python", script_path], capture_output=True, text=True, check=True)
+
+            # If the script runs successfully, return the output
+            return {"success": True, "output": result.stdout}
+
+        except subprocess.CalledProcessError as e:
+            # If an error occurs during script execution, return the error message
+            return {"success": False, "error": e.stderr}
+    
 
 
 # Define a custom exception for simulation not found

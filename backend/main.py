@@ -2,7 +2,6 @@ from fastapi import FastAPI, Path, BackgroundTasks, Query
 from flee_controller.controller import Controller
 from fastapi.middleware.cors import CORSMiddleware
 from typing import Any, Dict, AnyStr, List, Union
-import subprocess
 
 app = FastAPI()
 controller = Controller()
@@ -311,16 +310,7 @@ def testread_csv(
 
 
 # I want to excecute run_data_extraction.py from the subfolder input_data_processing
-@app.get("/testrun_data_extraction")
-def test_run_data_extraction():
-    try:
-        # Command to execute the run_data_extraction.py script
-        script_path = "input_data_processing/run_data_extraction.py"
-        result = subprocess.run(["python", script_path], capture_output=True, text=True, check=True)
-
-        # If the script runs successfully, return the output
-        return {"success": True, "output": result.stdout}
-
-    except subprocess.CalledProcessError as e:
-        # If an error occurs during script execution, return the error message
-        return {"success": False, "error": e.stderr}
+@app.get("/run_data_extraction")
+def run_data_extraction():
+    #TODO: docstring
+    return controller.run_data_extraction()

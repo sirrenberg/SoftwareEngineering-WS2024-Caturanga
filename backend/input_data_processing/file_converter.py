@@ -87,7 +87,7 @@ def transform_location_data(location_data):
     '''
     transformed_data = []
     for row in location_data:
-        name_key = '#name' if '#name' in row else '#"name"'
+        name_key = '#name' if '#name' in row else '#"name"' # 
         lat_key = 'latitude' if 'latitude' in row else 'lat'
         lon_key = 'longitude' if 'longitude' in row else 'lon'
         transformed_data.append({
@@ -277,6 +277,7 @@ def insert_data_into_DB(country, current_dir, folder_name, acled_source_list=[],
             val_source_list (list): List containing the validation data source and latest available date
     '''
 
+    # TODO: redundant if already done in controller.py for API
     # Connect to the MongoDB
     load_dotenv()
     MONGODB_URI = os.environ.get('MONGO_URI')
@@ -345,7 +346,7 @@ def insert_data_into_DB(country, current_dir, folder_name, acled_source_list=[],
             'refugees': validation_refugees,
             'data_layout': validation_data_layout,
             # dict with filename (last component of path) as key and transformed data as value
-            'camps': {os.path.basename(camp_path): transform_val_camp_data(camp_data) for camp_path, camp_data in zip(camps_csv_paths, validation_camps_data)} 
+            'camps': {os.path.basename(camp_path): transform_val_camp_data(camp_data) for camp_path, camp_data in zip(camps_csv_paths, validation_camps_data)} #TODO: docker: check if stored correctly in DB
 
         },
         # TODO: change to datetime object in the corresponding transfer functions
