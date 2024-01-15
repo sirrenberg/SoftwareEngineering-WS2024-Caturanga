@@ -14,7 +14,7 @@ import { faPenToSquare, faTrash } from "@fortawesome/free-solid-svg-icons";
 function Inputs() {
   const { sendRequest } = useAPI();
 
-  const [inputs, setInputs] = useState<Input[]>([]);
+  const [inputs, setInputs] = useState<Input[] | undefined>(undefined);
   const [selectedInputIndex, setSelectedInputIndex] = useState<number>(-1);
   const [mapCenter, setMapCenter] = useState<LatLngExpression>([0, 0]); // [lat, lng]
 
@@ -31,7 +31,7 @@ function Inputs() {
   }, []);
 
   useEffect(() => {
-    if (inputs.length > 0 && selectedInputIndex !== -1) {
+    if (inputs && selectedInputIndex !== -1) {
       setMapCenter(calcMapCenter(inputs[selectedInputIndex].locations));
     }
   }, []);
@@ -43,9 +43,12 @@ function Inputs() {
 
         <div className="items-list">
 
-          {inputs.length === 0 && 
+          {!inputs && 
           <h3>Loading...</h3>
           }
+
+          {inputs && inputs.length === 0 &&
+          <h3>Empty</h3>}
 
           {inputs &&
           inputs.map((input, index) => {
@@ -85,14 +88,18 @@ function Inputs() {
 
       <div className="content-section">
         <h2 className="selected-item-title page-title">
-          {selectedInputIndex === -1
-            ? "Choose an Input"
-            : inputs[selectedInputIndex].name}
+          {inputs
+            ? inputs.length > 0
+              ? selectedInputIndex === -1
+                ? "Choose an Input"
+                : inputs[selectedInputIndex].name
+              : "Create a New Input"
+            : ""}
         </h2>
 
         <Map
           input={
-            selectedInputIndex === -1 ? undefined : inputs[selectedInputIndex]
+            !inputs || selectedInputIndex === -1 ? undefined : inputs[selectedInputIndex]
           }
           center={mapCenter}
           shouldRecenter={true}
