@@ -50,6 +50,12 @@ function Map({
     return null;
   }
 
+  function calculateSize(input: number) {
+    // calculate the size of the node based on the population
+    if (!input || input <= 10) return 5000;
+    else return 5000 + input * 10;
+  }
+
   function getNodeColor(location: SimLocation) {
     // get the color of the node based on the location type
     switch (location.location_type) {
@@ -108,7 +114,7 @@ function Map({
             <Circle
               key={uuidv4()}
               center={[location.latitude, location.longitude]}
-              radius={location.population ? location.population / 100 : 10000}
+              radius={calculateSize(location.population)}
               color={getNodeColor(location)}
               eventHandlers={{
                 click: () => {
