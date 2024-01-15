@@ -11,6 +11,12 @@ enum MapOperatingMode {
   adding_route = "Adding Route",
 }
 
+enum SimulationStatus {
+  running = "running",
+  done = "done",
+  error = "error",
+}
+
 interface SimLocation {
   // can not be called Location as that conflicts with MongoDB
   name: string;
@@ -44,7 +50,10 @@ interface Input {
 }
 
 interface ResultPreview {
-  _id: string;
+  id: string;
+  name: string;
+  input: Input;
+  status: SimulationStatus;
 }
 
 interface SimSettings {
