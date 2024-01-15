@@ -50,7 +50,7 @@ export function useForm(initialFValues: any) {
         ...values,
         sim_period: {
           ...values.sim_period,
-          [name]: value,
+          [name]: Number(value),
         },
       });
       return;
