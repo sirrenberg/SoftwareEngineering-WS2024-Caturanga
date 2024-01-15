@@ -407,8 +407,75 @@ class Controller:
 
         return result
 
+    async def post_simulation(
+                self,
+                simulation,
+                simulation_id: str = "65a4221b9019061ba0e12e28"):
+        """
+        Posts a new simulation input to the database.
+
+        Parameters:
+        - simulation (dict): The new simulation input to be posted.
+        - simulation_id (str, optional): The ID of the "basic" input
+          to be used as baseline. Defaults to "65a4221b9019061ba0e12e28".
+
+        Returns:
+        - str: The ID of the inserted simulation input.
+        """
+        return await self.post_data(simulation, "simulations", simulation_id)
 
 # Manage simsettings in DB: ---------------------------------------------------
+
+    async def post_data(
+                self,
+                data,
+                collection_name,
+                data_id):
+        """
+        Posts a new data (input or simsetting) to the database.
+        More precisely, this function retrieves the "basic" data (the default,
+        which is not modifiable) from the database, uses it as a baseline,
+        updates the part that has been manipulated by the user and
+        saves the newly created data to the database.
+        This is because parts of the data have implications on
+        logging or the required files and format, thus are not relevant to the
+        user or might break the simulation (with the current setup),
+        and are therefore not shown to the user.
+
+        Parameters:
+        - data (dict): The new simulation data to be posted.
+        - data_id (str, optional): The ID of the "basic" data to be used as
+          baseline.
+
+        Returns:
+        - str: The ID of the inserted simulation data.
+        """
+        if collection_name == "simulations":
+            basic_data = await self.get_simulation(data_id)
+        else:
+            basic_data = await self.get_simsetting(data_id)
+
+        client, db = self.connect_db()
+
+        try:
+            del basic_data["_id"]
+            del data["_id"]
+        except Exception as e:
+            return f"Exception while removing _id key from data: {e}"
+
+        try:
+            for key in data:
+                basic_data[key] = data[key]
+        except Exception as e:
+            return f"Exception while updating basic \
+                    data with new data: {e}"
+
+        collection = db[collection_name]
+        result = collection.insert_one(dict(basic_data))
+
+        client.close()
+
+        return str(result.inserted_id)
 
     async def post_simsettings(
                 self,
@@ -416,13 +483,6 @@ class Controller:
                 simsetting_id: str = "6599846eeb8f8c36cce8307a"):
         """
         Posts a new simulation setting to the database.
-        More precisely, this function retrieves the "basic" simsetting from the
-        database, uses it as a baseline, updates the part that has been
-        manipulated by the user and saves the newly created setting to the
-        database. This is because parts of the simsetting have implications on
-        logging or the required files and format, thus are not relevant to the
-        user or might break the simulation (with the current setup),
-        and are therefore not shown to the user.
 
         Parameters:
         - simsetting (dict): The new simulation setting to be posted.
@@ -432,31 +492,7 @@ class Controller:
         Returns:
         - str: The ID of the inserted simulation setting.
         """
-        basic_simsetting = await self.get_simsetting(simsetting_id)
-
-        client, db = self.connect_db()
-
-        # remove id to create a NEW simsetting
-        try:
-            del basic_simsetting["_id"]
-            del simsetting["_id"]
-        except Exception as e:
-            return f"Exception while removing _id key from simsetting: {e}"
-
-        # Update parts of basic simsetting manipulated by the user
-        try:
-            for key in simsetting:
-                basic_simsetting[key] = simsetting[key]
-        except Exception as e:
-            return f"Exception while updating basic \
-                    simsetting with new simsetting: {e}"
-
-        simsettings_collection = db.simsettings
-        result = simsettings_collection.insert_one(dict(basic_simsetting))
-
-        client.close()
-
-        return str(result.inserted_id)
+        return await self.post_data(simsetting, "simsettings", simsetting_id)
 
     # Return all stored simsettings of DB:
     async def get_all_simsettings(self):
