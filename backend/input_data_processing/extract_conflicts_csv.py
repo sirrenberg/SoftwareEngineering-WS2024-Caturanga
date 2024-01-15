@@ -6,17 +6,17 @@ from datetime import datetime
 from helper_functions import between_date
 
 
-def extract_conflicts_csv(folder_name, start_date, end_date):
+def extract_conflicts_csv(folder_name, start_date, max_simulation_end_date):
     '''
     Extract the conflicts.csv file for the specified country and date range. Reads conflict data from the "conflict_info.csv" file, 
     which includes location names, their corresponding start dates, and conflict periods. The function calculates the number of days 
-    between the start_date and end_date, then creates a DataFrame with a range of days as columns.
+    between the start_date and max_simulation_end_date, then creates a DataFrame with a range of days as columns.
     It populates the DataFrame with 1s for days that fall within the conflict periods of each location and 0s for the rest.
 
         Parameters:
             folder_name (str): Name of the folder containing the CSV files.
             start_date (str): The starting date to consider when calculating conflict periods (e.g., "01-01-2023").
-            end_date (str): The ending date to limit the number of days in the conflicts.csv file (e.g., "31-12-2023").
+            max_simulation_end_date (str): The max ending date to limit the number of days in the conflicts.csv file (e.g., "31-12-2023").
     '''
 
     # Get the current directory
@@ -26,13 +26,13 @@ def extract_conflicts_csv(folder_name, start_date, end_date):
     conflict_info_file = os.path.join(current_dir, folder_name, "conflict_info.csv")
     conflict_info_df = pd.read_csv(conflict_info_file)
 
-    # Calculate the number of days between start_date and end_date
-    period = between_date(start_date, end_date)
+    # Calculate the number of days between start_date and max_simulation_end_date
+    period = between_date(start_date, max_simulation_end_date)
 
     conflict_zones = conflict_info_df["name"].tolist()
 
     # Create a DataFrame to store the conflicts data
-    data = {'day': list(range(period + 1))}  # +1 to include end_date
+    data = {'day': list(range(period + 1))}  # +1 to include max_simulation_end_date
     data.update({zone: [0] * (period + 1) for zone in conflict_zones})
     conflict_df = pd.DataFrame(data)
 
@@ -55,8 +55,9 @@ def extract_conflicts_csv(folder_name, start_date, end_date):
         if end_index > period:
             end_index = period
 
-        # Update the corresponding columns with 1s for conflict days
-        conflict_df.loc[start_index:end_index, location] = 1
+        # Update the corresponding columns with 1s for conflict days, but only up to end_date
+        conflict_df.loc[start_index:min(end_index, period), location] = 1
+
 
     # Save the conflicts DataFrame to a CSV file
     output_file = os.path.join(current_dir, folder_name, "conflicts.csv")

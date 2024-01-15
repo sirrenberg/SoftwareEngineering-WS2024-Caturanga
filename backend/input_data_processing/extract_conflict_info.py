@@ -9,16 +9,16 @@ from helper_functions import date_format, between_date
 pp = pprint.PrettyPrinter(indent=4)
 
 
-def extract_conflict_info(country, folder_name, start_date, end_date, location_type, added_conflict_days):
+def extract_conflict_info(country, folder_name, start_date, max_simulation_end_date, location_type, added_conflict_days):
     '''
     Extract conflict information from ACLED data and write it to a CSV file.
-    The function calculates the conflict period for each location based on the provided start date, and it adds an estimated conflict duration based on the number of added conflict days.
+    The function calculates the conflict period for each location based on the provided start date and the event date
 
         Parameters:
             country (str): Name of the country or dataset
             folder_name (str): Name of the folder containing the CSV files
             start_date (str): The starting date to consider when calculating conflict periods
-            end_date (str): The end date to consider when calculating conflict periods
+            max_simulation_end_date (str): The maximum end date to consider when calculating conflict periods
             location_type (str): The type of location to focus on
             added_conflict_days (int): The number of days to add to the calculated conflict periods for estimating event periods
     '''
@@ -35,22 +35,14 @@ def extract_conflict_info(country, folder_name, start_date, end_date, location_t
     # Process event dates and calculate conflict periods
     event_dates = acled_df["event_date"].tolist()
     formatted_event_dates = [date_format(date) for date in event_dates]
+    # number of days between the start_date and the event_date
     conflict_date = [between_date(d, start_date) for d in formatted_event_dates]
     acled_df['conflict_date'] = conflict_date
 
     # Group the locations by admin-level
+    # TODO: is the grouping necessary? 
     grouped = acled_df.groupby(location_type)
 
-
-    # Print groups that differ only in event_date
-    for name, group in grouped:
-        unique_event_dates = group['event_date'].unique()
-        '''
-        if len(unique_event_dates) > 0:
-            print(f"Location: {name}, Event Dates: ", end='')
-            pp.pprint(unique_event_dates)
-        '''
-    # print("")
 
     # Create a new DataFrame to store the results
     results_df = pd.DataFrame(columns=
@@ -58,7 +50,7 @@ def extract_conflict_info(country, folder_name, start_date, end_date, location_t
                                "country",
                                "event_count",
                                "start_date",
-                               "end_date",
+                               "max_simulation_end_date",
                                "conflict_date",
                                "modified_conflict_date"]
                               )
@@ -67,27 +59,28 @@ def extract_conflict_info(country, folder_name, start_date, end_date, location_t
     for name, group in grouped:
         event_dates = group['event_date'].tolist()
         event_count = len(event_dates)
-        formatted_dates = [date_format(date) for date in event_dates]
+        formatted_dates = [date_format(date) for date in event_dates] 
 
-        conflict_date = [between_date(formatted_dates[0], end_date)]
-        modified_conflict_date = conflict_date[0] + int(added_conflict_days)
+        conflict_date = [between_date(formatted_dates[0], max_simulation_end_date)]
+        modified_conflict_date = conflict_date[0] + int(added_conflict_days) # add the estimated number of days to the conflict period
 
 
         results_df.loc[len(results_df)] = {
             "name": name,
             "country": country,
             "start_date": formatted_dates[0],
-            "end_date": end_date,
+            "max_simulation_end_date": max_simulation_end_date,
             "event_count": event_count,
             "conflict_date": conflict_date[0],
             "modified_conflict_date": modified_conflict_date
         }
 
     # print(results_df.to_string(index=False))
-
+    
     # Write the results dataframe to a CSV file
     output_file = os.path.join(current_dir, folder_name, "conflict_info.csv")
     results_df.to_csv(output_file, index=False)
 
     # Print a completion message
     print(f'{folder_name}/conflict_info.csv created. Please inspect the file for unwanted anomalies!')
+    

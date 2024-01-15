@@ -2,11 +2,11 @@ from datetime import datetime
 
 def date_format(in_date):
     '''
-    Function to format "dd-mm-yyyy" into "yyyy-mm-dd" format
+    Function to format "dd-mm-yyyy" into "yyyy-mm-dd" format or vice versa
         Parameters:
-            in_date (str): Date in "dd-mm-yyyy" format
+            in_date (str): Date in "dd-mm-yyyy" or "yyyy-mm-dd" format
         Returns:
-            (str): Date in "yyyy-mm-dd" format
+            (str): Date in "yyyy-mm-dd" or "dd-mm-yyyy" format
     '''
     
     if "-" in in_date:

@@ -141,13 +141,14 @@ def acled_data_to_csv(country, folder_name, start_date, end_date):
     return acled_url, retrieval_date, last_update_str, reformatted_start_date, reformatted_end_date, oldest_event_date, latest_event_date
 
 
-def run_extraction(country_name, start_date, end_date, round_data):
+def run_extraction(country_name, start_date, end_date, max_simulation_end_date, round_data):
     '''
     Runs the data extraction process for the given country and time period.
             Parameters:
                 country_name (str): Country name
                 start_date (str): Start date of the time period
                 end_date (str): End date of the time period
+                max_simulation_end_date (str): Maximum end date of the simulation
                 round_data (list): List of dictionaries with the round number, the source and the covered time period
     '''
     start_year = int(start_date.split('-')[2])
@@ -171,10 +172,10 @@ def run_extraction(country_name, start_date, end_date, round_data):
     camp_data_df, camp_rounds_dict, camps_last_update_url, camps_retrieval_date, camps_last_update, camps_reformatted_start_date, camps_reformatted_end_date, camps_latest_survey_date = add_camp_locations(round_data, folder_name, NBR_SHOWN_ROWS, start_date, end_date)
 
     # 6. extract conflict data and create conflict_info.csv
-    extract_conflict_info(country_name, folder_name, start_date, end_date, LOCATION_TYPE, ADDED_CONFLICT_DAYS)
+    extract_conflict_info(country_name, folder_name, start_date, max_simulation_end_date, LOCATION_TYPE, ADDED_CONFLICT_DAYS)
 
     # 7. extract conflict information from conflict_info.csv, modify data and create conflict.csv
-    extract_conflicts_csv(folder_name, start_date, end_date)
+    extract_conflicts_csv(folder_name, start_date, max_simulation_end_date)
 
     # 9. extract routes from locations.csv and create routes.csv
     extract_routes_csv(folder_name)
@@ -214,8 +215,9 @@ def run_extraction(country_name, start_date, end_date, round_data):
 # variables that can be passed as parameters
 # date format: dd-mm-yyyy
 country_name = "Ethiopia"
-start_date = "01-01-2023"
-end_date =  "12-01-2024"
+start_date = "01-01-2023" # start date for the data fetching
+end_date =  "15-01-2024" # end date for the data fetching
+max_simulation_end_date = "31-12-2024" # this is the furthest date that can be used for the simulation
 
 # according to flee, date must have the format "yyyy-mm-dd"
 # this is necessary for the validation data.
@@ -228,4 +230,4 @@ round_data = [
 ]
 
 # start the script
-run_extraction(country_name, start_date, end_date, round_data)
+run_extraction(country_name, start_date, end_date, max_simulation_end_date, round_data)
