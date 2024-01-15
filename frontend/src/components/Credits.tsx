@@ -1,8 +1,8 @@
 import React, {useEffect, useState} from 'react';
 import "../styles/Credits.css";
-import smallImage_netlight from '../../public/netlight-logo.png'; // Update the path to your actual image
-import smallImage_FLEE from '../../public/flee.png'; // Update the path to your actual image
-import smallImage_ACLED from '../../public/acled-logo.png'; // Update the path to your actual image
+import smallImage_netlight from '../../public/netlight-logo.png';
+import smallImage_FLEE from '../../public/flee.png';
+import smallImage_ACLED from '../../public/acled-logo.png';
 import FLEE_Credits_text from '../../public/FLEE_Credits.txt';
 import ACLED_Credits_text from '../../public/ACLED_Credits.txt';
 import NL_Credits_text from '../../public/NL_Credits.txt';
