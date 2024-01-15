@@ -93,11 +93,11 @@ jobs:
 
       - name: Update API Gateway to point to new backend ECS service
         id: update-api-gateway-backend
-        run: python3 deployment_scripts/redirect_gateways.py $ECS_CLUSTER $ECS_TASK_DEFINITION_BACKEND
+        run: python3 deployment_scripts/redirect_gateways.py $ECS_CLUSTER $ECS_TASK_DEFINITION_BACKEND $API_GATEWAY_BACKEND
 
       - name: Update API Gateway to point to new frontend ECS service
         id: update-api-gateway-frontend
-        run: python3 deployment_scripts/redirect_gateways.py $ECS_CLUSTER $ECS_TASK_DEFINITION_FRONTEND
+        run: python3 deployment_scripts/redirect_gateways.py $ECS_CLUSTER $ECS_TASK_DEFINITION_FRONTEND $API_GATEWAY_FRONTEND
 
 
 
