@@ -76,6 +76,7 @@ export const moveSpeedText =
 export const walkSpeedText = 
     `
     This refers to the maximum number of kilometers (km) that simulated IDPs are able to walk per day. 
+    This speed applies only when leaving an IDP camp and only for the first route traveled.
     The default value is ${defaultValues.move_rules.max_walk_speed} km per day,
     which corresponds to a speed of 3.5 km/hour for 10 hours.
     `
