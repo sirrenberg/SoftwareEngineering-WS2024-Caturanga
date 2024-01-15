@@ -10,7 +10,8 @@ import { movementRulesText, moveSpeedText, walkSpeedText, conflictWeightText,
         campWeightText, foreignWeightText, usePopForLocWeightText,
         popPowerForLocWeightText, conflictMovechanceText, campMovechanceText,
         defaultMovechanceText, awarenessLevelText, startOnFootText, hastenText,
-        optimisationsText, awarenessLevelOptions, spawnRulesText, displacedPerConflictDayText } from "../helper/constants";
+        optimisationsText, awarenessLevelOptions, spawnRulesText, displacedPerConflictDayText } 
+        from "../helper/constants/SimsettingConstants";
 import { CheckboxInputField, NumberInputField, SelectInputField } from "../components/SimsettingField";
 
 function Settings() {

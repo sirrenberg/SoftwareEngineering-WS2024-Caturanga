@@ -5,8 +5,13 @@ export function useAPI() {
                        method: string, 
                        body?: any) {
     const url = new URL(API_URL + route);
+    
+    // locations and routes should not be POSTed to the server
+    if (body) {
+      delete body['locations']
+      delete body['routes']
+    }
 
-    console.log(body)
     return fetch(url.toString(), {
       method,
       body: JSON.stringify(body),

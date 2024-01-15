@@ -8,7 +8,7 @@ import { movementRulesText, moveSpeedText, walkSpeedText, conflictWeightText,
   popPowerForLocWeightText, conflictMovechanceText, campMovechanceText,
   defaultMovechanceText, awarenessLevelText, startOnFootText, hastenText,
   optimisationsText, defaultValues, awarenessLevelOptions, spawnRulesText,
-  displacedPerConflictDayText, maxValues} from "../helper/constants";
+  displacedPerConflictDayText, maxValues} from "../helper/constants/SimsettingConstants";
 
 function AddSetting() {
   const { id } = useParams<{ id: string }>();
