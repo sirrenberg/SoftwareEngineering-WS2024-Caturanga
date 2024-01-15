@@ -15,11 +15,9 @@ function Results() {
 
   useEffect(() => {
     sendRequest("/simulation_results", "GET").then((data) => {
-      console.log(data);
       setResultPreviews(data);
     });
   }, []);
-
 
   /* Function to delete Simulation_results from DB by clicking on trash-icon in item-List: */
   const handleDeleteClick = async (simulationId: string, index: number) => {  // Call handleDeleteClick with both ID (for backend API call) and index (for updating ResultsPreview)
@@ -27,7 +25,7 @@ function Results() {
       await sendRequest(`/simulation_results/${simulationId}`, "DELETE");    // Call the backend API to delete the simulation result
 
       // Update state to trigger a re-render
-      setResultPreviews((prevResults) => {
+      setResultPreviews((prevResults) => {  // prevResults: previous state value of resultPreviews (Given by React)
         const newResults = [...prevResults];      // Copy, but don´t modify original ResultsPreviews array
         newResults.splice(index, 1);                  // Remove the deleted result from the array
         return newResults;
