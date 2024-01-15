@@ -20,6 +20,7 @@ export const defaultValues: SimSettings = {
       pop_power_for_loc_weight: 0.1,
       conflict_movechance: 1,
       camp_movechance: 0.001,
+      idpcamp_movechance: 0.1,
       default_movechance: 0.3,
       awareness_level: 1,
       capacity_scaling: 1,
@@ -46,6 +47,7 @@ export const defaultValues: SimSettings = {
       camp_weight: 100,
       pop_power_for_loc_weight: 100,
       conflict_movechance: 1,
+      idpcamp_movechance: 1,
       camp_movechance: 1,
       default_movechance: 1,
       capacity_scaling: 10,
@@ -88,7 +90,7 @@ export const conflictWeightText =
 
 export const campWeightText =
     `
-    This refers to the attraction multiplier for camps.
+    This refers to the attraction multiplier for IDP camps.
     The default is ${defaultValues.move_rules.camp_weight}, which means there is no effect.
     `
 ;
@@ -126,11 +128,11 @@ export const conflictMovechanceText =
     `
 ;
 
-export const campMovechanceText = 
+export const idpcampMovechanceText = 
     `
-    This is the chance (probability) of simulated IDPs leaving a camp per day.
-    The default value is ${defaultValues.move_rules.camp_movechance}, i.e., 0.1%.
-    Therefore simulated IDPs will almost never leave camps.
+    This is the chance (probability) of simulated IDPs leaving an IDP camp per day.
+    The default value is ${defaultValues.move_rules.idpcamp_movechance}, i.e., 10%.
+    Therefore, simulated IDPs tend to stay in camps.
     `
 ;
 

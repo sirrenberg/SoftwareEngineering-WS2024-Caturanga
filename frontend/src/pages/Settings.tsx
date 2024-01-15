@@ -8,7 +8,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPenToSquare, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { movementRulesText, moveSpeedText, walkSpeedText, conflictWeightText,
         campWeightText, foreignWeightText, usePopForLocWeightText,
-        popPowerForLocWeightText, conflictMovechanceText, campMovechanceText,
+        popPowerForLocWeightText, conflictMovechanceText, idpcampMovechanceText,
         defaultMovechanceText, awarenessLevelText, startOnFootText, hastenText,
         optimisationsText, awarenessLevelOptions, spawnRulesText, displacedPerConflictDayText } from "../helper/constants";
 import { CheckboxInputField, NumberInputField, SelectInputField } from "../components/SimsettingField";
@@ -233,9 +233,9 @@ function Settings() {
                 <div className="input-field-container">
                     <NumberInputField 
                       label="Camp Movechance"
-                      infoText={campMovechanceText}
-                      name="camp_movechance"
-                      value={settings[selectedSettingIndex].move_rules.camp_movechance}
+                      infoText={idpcampMovechanceText}
+                      name="idpcamp_movechance"
+                      value={settings[selectedSettingIndex].move_rules.idpcamp_movechance}
                       disabled={true}/>
                 </div>
                 <div className="input-field-container">
