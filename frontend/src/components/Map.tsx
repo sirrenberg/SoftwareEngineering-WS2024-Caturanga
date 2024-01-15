@@ -50,7 +50,7 @@ function Map({
     return null;
   }
 
-  function calculateSize(input: number) {
+  function calculateSize(input: number | undefined) {
     // calculate the size of the node based on the population
     if (!input || input <= 10) return 5000;
     else return 5000 + input * 10;
