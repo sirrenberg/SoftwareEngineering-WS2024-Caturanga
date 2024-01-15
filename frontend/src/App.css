@@ -43,6 +43,8 @@ a {
   flex-direction: column;
 
   padding: 2rem 4rem;
+
+  background-color: var(--white)
 }
 
 .simple-button {

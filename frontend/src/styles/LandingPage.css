@@ -127,8 +127,12 @@
 }
 
 #lp-credits-page {
-  background-color: var(--light-gray);
+  background-color: var(--white);
   align-items: center;
+}
+
+.credits-background {
+  background-color: var(--white);
 }
 
 #lp-simulation-title {

@@ -6,6 +6,7 @@
   height: 75%;
 }
 
+
 .row {
   display: flex;
   justify-content: space-between;
@@ -14,7 +15,7 @@
 
 .full-width-card {
   width: 100%;
-  background-color: var(--white); /* Adjust the background color as needed */
+  background-color: var(--white);
   padding: 1em;
   border-radius: 0.5em;
   box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
@@ -22,7 +23,7 @@
 
 .half-width-card {
   width: calc(50% - 0.5em); /* Subtract margin to ensure cards fit within the row */
-  background-color: var(--white); /* Adjust the background color as needed */
+  background-color: var(--white);
   padding: 1em;
   border-radius: 0.5em;
   box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);

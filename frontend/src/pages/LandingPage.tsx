@@ -103,12 +103,14 @@ function LandingPage() {
         <Map/>
       </div>
 
+
       <div id="lp-credits-page" className="content-page">
         <h1 id="lp-credits-title" className="page-title">
           Credits
         </h1>
         <Credits/>
       </div>
+
 
     </div>
   );
