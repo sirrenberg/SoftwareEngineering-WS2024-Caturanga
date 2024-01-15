@@ -697,7 +697,7 @@ class Controller:
             return "File6 nicht vorhanden"
         return f1, f2, f3, f4, f5, f6
 
-    def run_data_extraction():
+    def run_data_extraction(self):
         try:
             # Command to execute the run_data_extraction.py script
             script_path = "input_data_processing/run_data_extraction.py"

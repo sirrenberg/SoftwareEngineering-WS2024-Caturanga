@@ -60,8 +60,8 @@ def create_refugee_csv(folder_name, round_data):
     #open refugees.csv
 
     #TODO: docker path
-    # locations_file = os.path.join(current_dir, "input_data_processing", "conflict_validation", folder_name, "refugees.csv")
-    locations_file = os.path.join(current_dir, "conflict_validation", folder_name, "refugees.csv")
+    locations_file = os.path.join(current_dir, "input_data_processing", "conflict_validation", folder_name, "refugees.csv")
+    # locations_file = os.path.join(current_dir, "conflict_validation", folder_name, "refugees.csv")
 
     # write refugees.csv        
     with open(locations_file, 'w', newline='') as csv_file:
@@ -99,8 +99,8 @@ def create_camp_csv(folder_name, country_name, dtm_merged_df, round_data):
         location_files.append(file_name)
 
         #TODO: docker path
-        locations_file = os.path.join(current_dir, "conflict_validation", folder_name, file_name)
-        # locations_file = os.path.join(current_dir, "input_data_processing", "conflict_validation", folder_name, file_name)
+        # locations_file = os.path.join(current_dir, "conflict_validation", folder_name, file_name)
+        locations_file = os.path.join(current_dir, "input_data_processing", "conflict_validation", folder_name, file_name)
 
         # write country_name-camp_name.csv        
         with open(locations_file, 'w', newline='') as csv_file:
@@ -131,8 +131,8 @@ def create_data_layout_csv(folder_name, location_files, camp_names):
     #open data_layout.csv
 
     #TODO: docker path
-    # data_layout_file = os.path.join(current_dir, "input_data_processing", "conflict_validation", folder_name, "data_layout.csv")
-    data_layout_file = os.path.join(current_dir, "conflict_validation", folder_name, "data_layout.csv")
+    data_layout_file = os.path.join(current_dir, "input_data_processing", "conflict_validation", folder_name, "data_layout.csv")
+    # data_layout_file = os.path.join(current_dir, "conflict_validation", folder_name, "data_layout.csv")
     
     # write data_layout.csv        
     with open(data_layout_file, 'w', newline='') as csv_file:

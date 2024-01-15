@@ -193,11 +193,11 @@ def run_extraction(country_name, start_date, end_date, max_simulation_end_date, 
 
     # 13. create validation data
     # create folder in conflict_validation 
-    os.mkdir(os.path.join('conflict_validation', folder_name))
     #TODO: docker path
-    #current_dir = os.getcwd()
-    #validation_folder_path = os.path.join(current_dir, "input_data_processing", 'conflict_validation', folder_name)
-    #os.mkdir(validation_folder_path)
+    # os.mkdir(os.path.join('conflict_validation', folder_name))
+    current_dir = os.getcwd()
+    validation_folder_path = os.path.join(current_dir, "input_data_processing", 'conflict_validation', folder_name)
+    os.mkdir(validation_folder_path)
     # create validation csv files
     val_retrieval_date, val_reformatted_start_date, val_reformatted_end_date, val_covered_from, val_covered_to, val_oldest_url, val_latest_url = create_validation_data(camp_data_df, camp_rounds_dict, folder_name, country_name, start_date, end_date)
 

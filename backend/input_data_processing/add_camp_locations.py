@@ -82,8 +82,8 @@ def extract_camp_locations(round_data, rows_shown):
     current_dir = os.getcwd()
     # paths to files with camp information
     # TODO: docker path
-    # paths_dtm = os.path.join(current_dir, "input_data_processing", "conflict_validation", "data_source")
-    paths_dtm = os.path.join(current_dir, "conflict_validation", "data_source")
+    paths_dtm = os.path.join(current_dir, "input_data_processing", "conflict_validation", "data_source")
+    # paths_dtm = os.path.join(current_dir, "conflict_validation", "data_source")
 
     # get round numbers from dict
     round_numbers = []

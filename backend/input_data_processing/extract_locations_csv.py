@@ -174,7 +174,7 @@ def extract_locations_csv(folder_name, start_date, location_type, fatalities_thr
 
     # Concatenate the dataframes for towns and conflict zones
     merged_df = pd.concat([towns_df, conflict_zones_df])
-
+    
     # print(merged_df.to_string(index=0))
 
     # Write the merged dataframe to a CSV file
