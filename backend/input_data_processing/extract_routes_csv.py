@@ -40,7 +40,6 @@ def haversine_distance(lat1, lon1, lat2, lon2):
     return round(distance, 2)
 
 
-# Function to extract routes and write to CSV
 def extract_routes_csv(folder_name, top=3):
     """
     Extract the routes.csv file for the specified country.
@@ -84,11 +83,14 @@ def extract_routes_csv(folder_name, top=3):
                 paths.append({'target': target_node, 'path': path, 'distance': distance})
         return sorted(paths, key=lambda x: x['distance'])[:top]
 
+    
     shortest_paths = {}
     for location in locations:
         shortest_paths[location['name']] = find_shortest_paths(G, location['name'], top)
-
     
+    # check if route already exists but with other direction. It should only be listed once.
+    processed_routes = set() # no dublicates are allowed in a set
+
     # Write the results to a new CSV file
     with open(f'{folder_name}/routes.csv', 'w', newline='') as csvfile:
         fieldnames = ['name1', 'name2', 'distance', 'forced_redirection']
@@ -97,10 +99,16 @@ def extract_routes_csv(folder_name, top=3):
 
         for source_node, paths in shortest_paths.items():
             for path in paths:
-                writer.writerow({
-                    'name1': source_node,
-                    'name2': path['target'],
-                    'distance': path['distance'],
-                    'forced_redirection': 0
-                })
-
+                target_node = path['target']
+                # Check if the route or its reverse has already been processed
+                if (source_node, target_node) not in processed_routes and (target_node, source_node) not in processed_routes:
+                    writer.writerow({
+                        'name1': source_node,
+                        'name2': target_node,
+                        'distance': path['distance'],
+                        'forced_redirection': 0
+                    })
+                    # Add route to the set
+                    processed_routes.add((source_node, target_node))
+                    processed_routes.add((target_node, source_node))
+    
