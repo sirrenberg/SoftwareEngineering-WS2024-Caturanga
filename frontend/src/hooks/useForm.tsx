@@ -56,28 +56,6 @@ export function useForm(initialFValues: any) {
       return;
     }
 
-    if (name === "date") {
-      let value1 = new Date(value);
-      let value2 = new Date(inputMaxValues.sim_period.date);
-      let value3 = new Date(inputMinValues.sim_period.date);
-      if (value1 > value2) {
-        value = inputMaxValues.sim_period.date;
-      } else if (value1 < value3) {
-        value = inputMinValues.sim_period.date;
-      } else if (value.length === 0) {
-        value = inputMinValues.sim_period.date;
-      }
-      
-      setValues({
-        ...values,
-        sim_period: {
-          ...values.sim_period,
-          [name]: value,
-        },
-      });
-      return;
-    }
-
     // Simsettings
     // Move rules
     if (

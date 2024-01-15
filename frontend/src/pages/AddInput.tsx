@@ -78,12 +78,9 @@ function AddInput() {
             <DateInputField
               label="Start Date"
               infoText={startDateText}
-              onChange={handleInputChange}
               name="date"
               value={formatDate(values.sim_period["date"])}
-              disabled={false}
-              min={minValues.sim_period["date"]}
-              max={maxValues.sim_period["date"]}
+              disabled={true}
              />
           </div>
           <div className="input-field-container">
