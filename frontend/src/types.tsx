@@ -50,25 +50,21 @@ interface ResultPreview {
 interface SimSettings {
   _id: string;
   name: string;
-  log_levels: {
-    agent: number;
-    link: number;
-    camp: number;
-    conflict: number;
-    init: number;
-    idp_totals: number;
-    granularity: string;
-  };
   spawn_rules: {
-    take_from_population: boolean;
+    conflict_driven_spawning: {
+      spawn_mode: string;
+      displaced_per_conflict_day: number;
+    }
     insert_day0: boolean;
-  };
+  }
   move_rules: {
     max_move_speed: number;
     max_walk_speed: number;
     foreign_weight: number;
     conflict_weight: number;
     camp_weight: number;
+    use_pop_for_loc_weight: boolean;
+    pop_power_for_loc_weight: number;
     conflict_movechance: number;
     camp_movechance: number;
     default_movechance: number;

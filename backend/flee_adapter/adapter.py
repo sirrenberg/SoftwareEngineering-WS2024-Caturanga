@@ -21,6 +21,11 @@ class Adapter:
         - simulation_dir (str): The path to the simulation directory.
         - simsettings_file (str): The path to the simsettings file.
 
+        Exceptions:
+        - All Exceptions and a SystemExit of flee are caught and returned
+          as a string, such that the user can see whether their simulation
+          failed.
+
         Returns:
         -dict: The result of the simulation.
         """
@@ -28,6 +33,12 @@ class Adapter:
                          validation_dir,
                          0,
                          simsettings_file)
-        result = sim.run()
+
+        try:
+            result = sim.run()
+        except Exception as e:
+            result = {"error": "{}".format(e)}
+        except SystemExit as e:
+            result = {"error": "{}".format(e)}
 
         return result

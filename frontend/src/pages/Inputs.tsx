@@ -14,7 +14,7 @@ import { faPenToSquare, faTrash } from "@fortawesome/free-solid-svg-icons";
 function Inputs() {
   const { sendRequest } = useAPI();
 
-  const [inputs, setInputs] = useState<Input[]>([]);
+  const [inputs, setInputs] = useState<Input[] | undefined>(undefined);
   const [selectedInputIndex, setSelectedInputIndex] = useState<number>(-1);
   const [mapCenter, setMapCenter] = useState<LatLngExpression>([0, 0]); // [lat, lng]
 
@@ -22,16 +22,16 @@ function Inputs() {
   if (!context) {
     throw new Error("StartSimContext is null");
   }
-  const { setInput_id } = context;
+  const { setInputId, setInputName } = context;
 
   useEffect(() => {
-    sendRequest("/simulations", "GET").then((data) => {
+    sendRequest("/simulations/summary", "GET").then((data) => {
       setInputs(data);
     });
   }, []);
 
   useEffect(() => {
-    if (inputs.length > 0 && selectedInputIndex !== -1) {
+    if (inputs && selectedInputIndex !== -1) {
       setMapCenter(calcMapCenter(inputs[selectedInputIndex].locations));
     }
   }, []);
@@ -43,9 +43,12 @@ function Inputs() {
 
         <div className="items-list">
 
-          {inputs.length === 0 && 
+          {!inputs && 
           <h3>Loading...</h3>
           }
+
+          {inputs && inputs.length === 0 &&
+          <h3>Empty</h3>}
 
           {inputs &&
           inputs.map((input, index) => {
@@ -59,10 +62,11 @@ function Inputs() {
                 onClick={() => {
                   setSelectedInputIndex(index);
                   setMapCenter(calcMapCenter(input.locations));
-                  setInput_id(inputs[index]._id);
+                  setInputId(inputs[index]._id);
+                  setInputName(inputs[index].name);
                 }}
               >
-                <p>{input.region}</p>
+                <p>{input.name}</p>
                 <span className="items-list-item-icons">
                   <NavLink to={"/inputs/" + input._id}>
                     <FontAwesomeIcon
@@ -84,14 +88,18 @@ function Inputs() {
 
       <div className="content-section">
         <h2 className="selected-item-title page-title">
-          {selectedInputIndex === -1
-            ? "Choose an Input"
-            : inputs[selectedInputIndex].region}
+          {inputs
+            ? inputs.length > 0
+              ? selectedInputIndex === -1
+                ? "Choose an Input"
+                : inputs[selectedInputIndex].region
+              : "Create a New Input"
+            : ""}
         </h2>
 
         <Map
           input={
-            selectedInputIndex === -1 ? undefined : inputs[selectedInputIndex]
+            !inputs || selectedInputIndex === -1 ? undefined : inputs[selectedInputIndex]
           }
           center={mapCenter}
           shouldRecenter={true}
