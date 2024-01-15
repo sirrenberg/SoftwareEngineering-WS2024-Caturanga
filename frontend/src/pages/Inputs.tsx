@@ -16,16 +16,16 @@ function Inputs() {
 
   const [inputs, setInputs] = useState<Input[]>([]);
   const [selectedInputIndex, setSelectedInputIndex] = useState<number>(-1);
-  const [mapCenter, setMapCenter] = useState<LatLngExpression>([0, 0]); // [lat, lng
+  const [mapCenter, setMapCenter] = useState<LatLngExpression>([0, 0]); // [lat, lng]
 
   const context = useContext(StartSimContext);
   if (!context) {
     throw new Error("StartSimContext is null");
   }
-  const { setInput_id } = context;
+  const { setInputId, setInputName } = context;
 
   useEffect(() => {
-    sendRequest("/simulations", "GET").then((data) => {
+    sendRequest("/simulations/summary", "GET").then((data) => {
       setInputs(data);
     });
   }, []);
@@ -42,7 +42,13 @@ function Inputs() {
         <h2 className="items-list-title">Saved Inputs</h2>
 
         <div className="items-list">
-          {inputs.map((input, index) => {
+
+          {inputs.length === 0 && 
+          <h3>Loading...</h3>
+          }
+
+          {inputs &&
+          inputs.map((input, index) => {
             return (
               <button
                 key={input._id}
@@ -53,10 +59,11 @@ function Inputs() {
                 onClick={() => {
                   setSelectedInputIndex(index);
                   setMapCenter(calcMapCenter(input.locations));
-                  setInput_id(inputs[index]._id);
+                  setInputId(inputs[index]._id);
+                  setInputName(inputs[index].name);
                 }}
               >
-                <p>{input.region}</p>
+                <p>{input.name}</p>
                 <span className="items-list-item-icons">
                   <NavLink to={"/inputs/" + input._id}>
                     <FontAwesomeIcon
