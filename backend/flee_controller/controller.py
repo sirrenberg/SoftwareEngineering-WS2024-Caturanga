@@ -747,9 +747,12 @@ class Controller:
 
                 # Write data:
                 for key, value in data.items():
-                    if isinstance(value, datetime):
-                        formatted_date = value.strftime('%Y-%m-%d')
-                        writer.writerow(["StartDate", formatted_date])
+                    if key == "date":
+                        if isinstance(value, datetime):
+                            formatted_date = value.strftime('%Y-%m-%d')
+                            writer.writerow(["StartDate", formatted_date])
+                        else:
+                            writer.writerow(["StartDate", value])
                     else:
                         writer.writerow([key, value])
 
