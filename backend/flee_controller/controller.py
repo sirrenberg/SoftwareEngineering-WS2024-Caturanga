@@ -31,27 +31,35 @@ class Controller:
 
     async def initialize_simulation(
             self,
-            simulation_id: str = "658dec24819bd1bc1ff738cd",
-            simsettings_id: str = "6570f624987cdd647c68bc7d"):
+            simulation_config):
         """
         Initializes a simulation by storing the input directory, simsettings,
         validation directory to the filesystem, and returns the object ID,
         simsettings filename, simulation directory, and validation directory.
 
-        Args:
-            simulation_id (str): The ID of the simulation. 
-            Defaults to "658dec24819bd1bc1ff738cd".(Burundi)
-            simsettings_id (str): The ID of the simulation settings.
-            Defaults to "6570f624987cdd647c68bc7d".(default)
+        Parameters:
+        simulation_config (JSONStructure, optional) containing:
+        - input_id (str): The ID of the simulation input.
+        - input_name (str): The name of the simulation input.
+        - simsettings_id (str): The ID of the simulation settings.
+        - simsettings_name (str): The name of the simulation settings.
 
         Returns:
-            dict: A dictionary containing the object ID, simsettings filename,
-            simulation directory, and validation directory.
+            dict: A dictionary containing the name of the result,
+            the IDs mentioned above, the mongodb object ID, simsettings
+            filename, simulation directory, and validation directory.
         """
+        simulation_id = simulation_config["input"]["input_id"]
+        simsettings_id = simulation_config["settings"]["simsettings_id"]
+
+        name = \
+            simulation_config["input"]["input_name"] + "(" + \
+            simulation_config["settings"]["simsettings_name"] + ")"
 
         objectid = await self.store_dummy_simulation(
             simulation_id,
-            simsettings_id)
+            simsettings_id,
+            name)
 
         simsettings_filename = await self.store_simsettings_to_filesystem(
             simsettings_id)
@@ -61,7 +69,10 @@ class Controller:
 
         validation_dir = await self.store_validation_to_filesystem()
 
-        return {"objectid": objectid,
+        return {"name": name,
+                "simulation_id": simulation_id,
+                "simsettings_id": simsettings_id,
+                "objectid": objectid,
                 "simsettings_filename": simsettings_filename,
                 "simulation_dir": simulation_dir,
                 "validation_dir": validation_dir}
@@ -69,6 +80,7 @@ class Controller:
     # Run simulation with provided simulation_id and simsettings_id and store results in DB:
     def run_simulation_config(
             self,
+            name: str,
             simulation_id: str,
             simsettings_id: str,
             object_id: str,
@@ -96,7 +108,8 @@ class Controller:
             sim,
             object_id=object_id,
             simulation_id=simulation_id,
-            simsettings_id=simsettings_id)
+            simsettings_id=simsettings_id,
+            name=name)
 
 # Store results in database: ----------------------------------------------
 
@@ -119,7 +132,8 @@ class Controller:
             result,
             object_id: str,
             simulation_id: str = "658dec24819bd1bc1ff738cd",
-            simsettings_id: str = "6570f624987cdd647c68bc7d"):
+            simsettings_id: str = "6570f624987cdd647c68bc7d",
+            name: str = "undefined"):
         """
         Stores a simulation result in the database.
 
@@ -130,15 +144,23 @@ class Controller:
           Defaults to "658dec24819bd1bc1ff738cd" (Burundi).
         - simsettings_id (str): The ID of the simulation settings.
           Defaults to "6570f624987cdd647c68bc7d" (Test simsettings).
+        - name (str): The name of the simulation result.
+          Defaults to "undefined".
         """
         client, db = self.connect_db()
         simulations_collection = db.simulations_results
         new_simulation = {}
         new_simulation = {
+            "name": name,
             "simulation_id": simulation_id,
-            "simsettings_id": simsettings_id,
-            "data": result
+            "simsettings_id": simsettings_id
         }
+        if "error" in result:
+            new_simulation["status"] = "error"
+        else:
+            new_simulation["status"] = "done"
+            new_simulation["data"] = result
+
         simulations_collection.replace_one(
             {"_id": ObjectID(object_id)},
             new_simulation)
@@ -147,7 +169,8 @@ class Controller:
     async def store_dummy_simulation(
                 self,
                 simulation_id: str = "658dec24819bd1bc1ff738cd",
-                simsettings_id: str = "6570f624987cdd647c68bc7d"):
+                simsettings_id: str = "6570f624987cdd647c68bc7d",
+                name: str = "undefined"):
         """
         Stores a dummy simulation in the database so that the user can see
         that the simulation is started.
@@ -157,6 +180,8 @@ class Controller:
           Defaults to "658dec24819bd1bc1ff738cd" (Burundi).
         - simsettings_id (str): The ID of the simulation settings.
           Defaults to "6570f624987cdd647c68bc7d" (Test simsettings).
+        - name (str): The name of the simulation result.
+          Defaults to "undefined".
 
         Returns:
         - str: The ID of the inserted dummy simulation.
@@ -165,9 +190,10 @@ class Controller:
         collection = db.simulations_results
         dummy_simulation = {}
         dummy_simulation = {
+            "name": name,
             "simulation_id": simulation_id,
             "simsettings_id": simsettings_id,
-            "data": {"status": "running"}
+            "status": "running"
         }
         result = collection.insert_one(dummy_simulation)
         client.close()
@@ -265,6 +291,15 @@ class Controller:
         client.close()
         return rl
 
+    async def get_all_simulation_result_summaries(self):
+        """
+        Retrieves all simulation result summaries.
+
+        Returns:
+        - list of simulation result summaries.
+        """
+        return await self.get_summaries("simulations_results")
+
     # Return specific simulation by simulation_results_id:
     async def get_simulation_result(self, simulation_result_id: str):
         """
@@ -304,6 +339,15 @@ class Controller:
         client.close()
         return rl
 
+    async def get_all_simulation_summaries(self):
+        """
+        Retrieves all simulation summaries.
+
+        Returns:
+        - list of simulation summaries.
+        """
+        return await self.get_summaries("simulations")
+
     # Get specific simulation by simulation_id:
     async def get_simulation(self, simulation_id: str):
         """
@@ -326,16 +370,92 @@ class Controller:
             client.close()
             return None
 
+    async def get_summaries(self, collection_name: str):
+        """
+        Retrieves summaries from the specified collection in the database.
+        A summary contains ID and name of the objects. In the case of
+        simulations, the summary also contains the locations and routes,
+        which is needed for the map view.
+
+        Parameters:
+        - collection (str):
+          The name of the collection to retrieve summaries from.
+
+        Returns:
+        - list: A list of summaries, where each summary
+                is a dictionary with "_id" and "name" fields.
+        """
+
+        client, db = self.connect_db()
+
+        collection = db.get_collection(collection_name)
+        if collection_name == "simulations":
+            summaries = collection.find({}, {"_id": 1,
+                                             "name": 1,
+                                             "locations": 1,
+                                             "routes": 1})
+        else:
+            summaries = collection.find({}, {"_id": 1, "name": 1})
+
+        result = []
+        for summary in summaries:
+            summary["_id"] = str(summary["_id"])
+            result.append(summary)
+
+        client.close()
+
+        return result
+
 
 # Manage simsettings in DB: ---------------------------------------------------
 
-    # Store dict of simsettings in DB:
-    async def post_simsettings(self, simsetting):
+    async def post_simsettings(
+                self,
+                simsetting,
+                simsetting_id: str = "6599846eeb8f8c36cce8307a"):
+        """
+        Posts a new simulation setting to the database.
+        More precisely, this function retrieves the "basic" simsetting from the
+        database, uses it as a baseline, updates the part that has been
+        manipulated by the user and saves the newly created setting to the
+        database. This is because parts of the simsetting have implications on
+        logging or the required files and format, thus are not relevant to the
+        user or might break the simulation (with the current setup),
+        and are therefore not shown to the user.
+
+        Parameters:
+        - simsetting (dict): The new simulation setting to be posted.
+        - simsetting_id (str, optional): The ID of the "basic" simsetting
+          to be used as baseline. Defaults to "6599846eeb8f8c36cce8307a".
+
+        Returns:
+        - str: The ID of the inserted simulation setting.
+        """
+        basic_simsetting = await self.get_simsetting(simsetting_id)
+
         client, db = self.connect_db()
+
+        # remove id to create a NEW simsetting
+        try:
+            del basic_simsetting["_id"]
+            del simsetting["_id"]
+        except Exception as e:
+            return f"Exception while removing _id key from simsetting: {e}"
+
+        # Update parts of basic simsetting manipulated by the user
+        try:
+            for key in simsetting:
+                basic_simsetting[key] = simsetting[key]
+        except Exception as e:
+            return f"Exception while updating basic \
+                    simsetting with new simsetting: {e}"
+
         simsettings_collection = db.simsettings
-        simsettings_collection.insert_one(dict(simsetting))
+        result = simsettings_collection.insert_one(dict(basic_simsetting))
+
         client.close()
-        return 1
+
+        return str(result.inserted_id)
 
     # Return all stored simsettings of DB:
     async def get_all_simsettings(self):
@@ -347,6 +467,15 @@ class Controller:
             rl.append(simsetting)
         client.close()
         return rl
+
+    async def get_all_simsetting_summaries(self):
+        """
+        Retrieves all simsetting summaries.
+
+        Returns:
+        - list of simsetting summaries.
+        """
+        return await self.get_summaries("simsettings")
 
     # Get specific simsettings by simsetting_id:
     async def get_simsetting(self, simsetting_id: str):

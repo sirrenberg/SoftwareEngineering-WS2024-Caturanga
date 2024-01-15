@@ -1,25 +1,35 @@
 import { useState, createContext, ReactNode } from "react";
 
 interface StartSimContextType {
-  input_id: string;
-  setInput_id: (input_id: string) => void;
-  settings_id: string;
-  setSettings_id: (settings_id: string) => void;
+  inputId: string;
+  setInputId: (input_id: string) => void;
+  inputName: string;
+  setInputName: (inputName: string) => void;
+  settingsId: string;
+  setSettingsId: (settings_id: string) => void;
+  settingsName: string;
+  setSettingsName: (settingsName: string) => void;
 }
 
 const Context = createContext<StartSimContextType | undefined>(undefined);
 
 function ContextProvider({ children }: { children: ReactNode }) {
-  const [input_id, setInput_id] = useState("");
-  const [settings_id, setSettings_id] = useState("");
+  const [inputId, setInputId] = useState("");
+  const [inputName, setInputName] = useState("");
+  const [settingsId, setSettingsId] = useState("");
+  const [settingsName, setSettingsName] = useState("");
 
   return (
     <Context.Provider
       value={{
-        input_id,
-        setInput_id,
-        settings_id,
-        setSettings_id,
+        inputId,
+        setInputId,
+        inputName,
+        setInputName,
+        settingsId,
+        setSettingsId,
+        settingsName,
+        setSettingsName,
       }}
     >
       {children}

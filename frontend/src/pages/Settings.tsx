@@ -2,29 +2,41 @@ import "../styles/Menu.css";
 import { useEffect, useState, useContext } from "react";
 import { StartSimContext } from "../contexts/StartSimContext";
 import { SimSettings } from "../types";
-import { Link } from "react-router-dom";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useAPI } from "../hooks/useAPI";
-import { NavLink } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPenToSquare, faTrash } from "@fortawesome/free-solid-svg-icons";
+import { movementRulesText, moveSpeedText, walkSpeedText, conflictWeightText,
+        campWeightText, foreignWeightText, usePopForLocWeightText,
+        popPowerForLocWeightText, conflictMovechanceText, campMovechanceText,
+        defaultMovechanceText, awarenessLevelText, startOnFootText, hastenText,
+        optimisationsText, awarenessLevelOptions, spawnRulesText, displacedPerConflictDayText } from "../helper/constants";
+import { CheckboxInputField, NumberInputField, SelectInputField } from "../components/SimsettingField";
 
 function Settings() {
   const { sendRequest } = useAPI();
+  const navigate = useNavigate();
 
   const [settings, setSettings] = useState<SimSettings[]>([]);
   const [selectedSettingIndex, setSelectedSettingIndex] = useState<number>(-1);
+
+  const protectedSimSettingIDs: string[] = ["6599846eeb8f8c36cce8307a"];
 
   const context = useContext(StartSimContext);
   if (!context) {
     throw new Error("StartSimContext is null");
   }
-  const { setSettings_id } = context;
+  const { setSettingsId, setSettingsName } = context;
 
   useEffect(() => {
     sendRequest("/simsettings", "GET").then((data) => {
       setSettings(data);
     });
   }, []);
+
+  useEffect(() => {
+    console.log('selectedSettingIndex changed:', selectedSettingIndex);
+  }, [selectedSettingIndex]);
 
   return (
     <div
@@ -35,7 +47,13 @@ function Settings() {
         <h2 className="items-list-title">Saved Settings</h2>
 
         <div className="items-list" id="settings-items-list">
-          {settings.map((setting, index) => {
+
+          {settings.length === 0 && 
+          <h3>Loading...</h3>
+          }
+
+          {settings &&
+          settings.map((setting, index) => {
             return (
               <button
                 key={setting._id}
@@ -45,7 +63,8 @@ function Settings() {
                 }
                 onClick={() => {
                   setSelectedSettingIndex(index);
-                  setSettings_id(settings[index]._id);
+                  setSettingsId(settings[index]._id);
+                  setSettingsName(settings[index].name);
                 }}
               >
                 <p>{setting.name}</p>
@@ -56,7 +75,37 @@ function Settings() {
                       className="item-icon"
                     />
                   </NavLink>
-                  <FontAwesomeIcon icon={faTrash} className="item-icon" />
+                  {!protectedSimSettingIDs.includes(setting._id) && (
+                    <FontAwesomeIcon
+                      icon={faTrash}
+                      className="item-icon"
+                      //style={{ border: "none" , backgroundColor: "transparent" , padding : 0, color: "inherit"}}
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        console.log("Deleting " + setting._id + " ...");
+                        // if the setting to be deleted is the one that is currently selected, deselect it
+                        if (selectedSettingIndex === index){
+                          console.log("Entered the branch where selectedSettingIndex === index", selectedSettingIndex, index);
+                          setSelectedSettingIndex(-1);
+                          console.log("selectedSettingIndex is now", selectedSettingIndex);
+                        }
+                        sendRequest("/simsettings/" + setting._id, "DELETE")
+                        .then(_ => {
+                          // if the setting to be deleted is before the currently selected one, decrement the selected index
+                          const indexOfDeleted = settings.findIndex(s => s._id === setting._id);
+                          if (indexOfDeleted < selectedSettingIndex){
+                            setSelectedSettingIndex(selectedSettingIndex - 1);
+                          }
+                          console.log("Deleted setting with id " + setting._id);
+                          setSettings(settings.filter(simsetting => simsetting._id !== setting._id));
+                        })
+                        .catch(err => {
+                          console.log("Deleting setting with id " + setting._id + " lead to an error.");
+                          console.log(err);
+                        });
+                      }}
+                    />
+                  )}
                 </span>
               </button>
             );
@@ -96,386 +145,153 @@ function Settings() {
               </div>
             </div>
 
-            <div className="log-levels-container settings-input-section">
-              <h2 className="page-subtitle">Log Levels</h2>
+            <div className="move-rules-container settings-input-section">
+              <h2 className="page-subtitle">Movement Rules</h2>
+              <p className="section-subtext">{movementRulesText}</p>
+              <h3 className="page-subsubtitle">Movement Speed</h3>
               <div className="fields-container">
                 <div className="input-field-container">
-                  <label htmlFor="">
-                    Agent: <br />
-                    <input
-                      className="input-field"
-                      type="number"
-                      placeholder="0"
-                      name="agent"
-                      value={settings[selectedSettingIndex].log_levels.agent}
-                      disabled={true}
-                    />
-                  </label>
+                  <NumberInputField 
+                    label="Max Move Speed"
+                    infoText={moveSpeedText}
+                    name="max_move_speed"
+                    value={settings[selectedSettingIndex].move_rules.max_move_speed}
+                    disabled={true}/>
                 </div>
                 <div className="input-field-container">
-                  <label htmlFor="">
-                    Link: <br />
-                    <input
-                      className="input-field"
-                      type="number"
-                      placeholder="0"
-                      name="link"
-                      value={settings[selectedSettingIndex].log_levels.link}
-                      disabled={true}
-                    />
-                  </label>
+                  <NumberInputField 
+                    label="Max Walk Speed"
+                    infoText={walkSpeedText}
+                    name="max_walk_speed"
+                    value={settings[selectedSettingIndex].move_rules.max_walk_speed}
+                    disabled={true}/>
+                </div>
+              </div>
+              
+              <h3 className="page-subsubtitle">Location Weight</h3>
+              <div className="fields-container">
+               <div className="input-field-container">
+                    <NumberInputField 
+                      label="Conflict Weight"
+                      infoText={conflictWeightText}
+                      name="conflict_weight"
+                      value={settings[selectedSettingIndex].move_rules.conflict_weight}
+                      disabled={true}/>
                 </div>
                 <div className="input-field-container">
-                  <label htmlFor="">
-                    Camp: <br />
-                    <input
-                      className="input-field"
-                      type="number"
-                      placeholder="0"
-                      name="camp"
-                      value={settings[selectedSettingIndex].log_levels.camp}
-                      disabled={true}
-                    />
-                  </label>
+                    <NumberInputField 
+                      label="Camp Weight"
+                      infoText={campWeightText}
+                      name="camp_weight"
+                      value={settings[selectedSettingIndex].move_rules.camp_weight}
+                      disabled={true}/>
                 </div>
                 <div className="input-field-container">
-                  <label htmlFor="">
-                    Conflict: <br />
-                    <input
-                      className="input-field"
-                      type="number"
-                      placeholder="0"
-                      name="conflict"
-                      value={settings[selectedSettingIndex].log_levels.conflict}
-                      disabled={true}
-                    />
-                  </label>
+                    <NumberInputField 
+                      label="Foreign Weight"
+                      infoText={foreignWeightText}
+                      name="foreign_weight"
+                      value={settings[selectedSettingIndex].move_rules.foreign_weight}
+                      disabled={true}/>
                 </div>
               </div>
 
               <div className="fields-container">
                 <div className="input-field-container">
-                  <label htmlFor="">
-                    Init: <br />
-                    <input
-                      className="input-field"
-                      type="number"
-                      placeholder="0"
-                      name="init"
-                      value={settings[selectedSettingIndex].log_levels.init}
-                      disabled={true}
-                    />
-                  </label>
+                    <CheckboxInputField 
+                      label="Utilize the Population For Location Weight"
+                      infoText={usePopForLocWeightText}
+                      name="use_pop_for_loc_weight"
+                      checked={settings[selectedSettingIndex].move_rules.use_pop_for_loc_weight}
+                      disabled={true}/>
                 </div>
                 <div className="input-field-container">
-                  <label htmlFor="">
-                    IDP Totals: <br />
-                    <input
-                      className="input-field"
-                      type="number"
-                      placeholder="0"
-                      name="idp_totals"
-                      value={
-                        settings[selectedSettingIndex].log_levels.idp_totals
-                      }
-                      disabled={true}
-                    />
-                  </label>
+                    <NumberInputField 
+                      label="Population Power For Location Weight"
+                      infoText={popPowerForLocWeightText}
+                      name="pop_power_for_loc_weight"
+                      value={settings[selectedSettingIndex].move_rules.pop_power_for_loc_weight}
+                      disabled={true}/>
+                </div>
+              </div>
+              
+              <h3 className="page-subsubtitle">Movement Chance</h3>
+              <div className="fields-container">
+                <div className="input-field-container">
+                    <NumberInputField 
+                      label="Conflict Movechance"
+                      infoText={conflictMovechanceText}
+                      name="conflict_movechance"
+                      value={settings[selectedSettingIndex].move_rules.conflict_movechance}
+                      disabled={true}/>
                 </div>
                 <div className="input-field-container">
-                  <label htmlFor="">
-                    Granularity: <br />
-                    <input
-                      className="input-field"
-                      type="text"
-                      placeholder="0"
-                      name="granularity"
-                      value={
-                        settings[selectedSettingIndex].log_levels.granularity
-                      }
-                      disabled={true}
-                    />
-                  </label>
+                    <NumberInputField 
+                      label="Camp Movechance"
+                      infoText={campMovechanceText}
+                      name="camp_movechance"
+                      value={settings[selectedSettingIndex].move_rules.camp_movechance}
+                      disabled={true}/>
+                </div>
+                <div className="input-field-container">
+                    <NumberInputField 
+                      label="Default Movechance"
+                      infoText={defaultMovechanceText}
+                      name="default_movechance"
+                      value={settings[selectedSettingIndex].move_rules.default_movechance}
+                      disabled={true}/>
+                </div>
+              </div>
+              
+              <h3 className="page-subsubtitle">Advanced</h3>
+              <div className="fields-container">
+               <div className="input-field-container">
+                    <SelectInputField
+                      label="Awareness Level"
+                      infoText={awarenessLevelText}
+                      name="awareness_level"
+                      value={settings[selectedSettingIndex].move_rules.awareness_level}
+                      options={awarenessLevelOptions}
+                      disabled={true}/>
+                </div>
+                <div className="input-field-container">
+                    <CheckboxInputField 
+                      label="Start On Foot"
+                      infoText={startOnFootText}
+                      name="start_on_foot"
+                      checked={settings[selectedSettingIndex].move_rules.start_on_foot}
+                      disabled={true}/>
                 </div>
               </div>
             </div>
 
             <div className="spawn-rules-container settings-input-section">
-              <h2 className="page-subtitle">Spawn Rules</h2>
+            <h2 className="page-subtitle">Spawn Rules</h2>
+              <p className="section-subtext">{spawnRulesText}</p>
+              <h3 className="page-subsubtitle">Conflict Driven Spawning</h3>
               <div className="fields-container">
                 <div className="input-field-container">
-                  <label htmlFor="" className="checkbox-label">
-                    Take From Population: <br />
-                    <input
-                      className="input-field"
-                      type="checkbox"
-                      placeholder="0"
-                      name="take_from_population"
-                      checked={
-                        settings[selectedSettingIndex].spawn_rules
-                          .take_from_population
-                      }
-                      disabled={true}
-                    />
-                  </label>
-                </div>
-                <div className="input-field-container">
-                  <label htmlFor="" className="checkbox-label">
-                    Insert Day0: <br />
-                    <input
-                      className="input-field"
-                      type="checkbox"
-                      placeholder="0"
-                      name="take_from_population"
-                      checked={
-                        settings[selectedSettingIndex].spawn_rules.insert_day0
-                      }
-                      disabled={true}
-                    />
-                  </label>
-                </div>
-              </div>
-            </div>
-
-            <div className="move-rules-container settings-input-section">
-              <h2 className="page-subtitle">Movement Rules</h2>
-              <div className="fields-container">
-                <div className="input-field-container">
-                  <label htmlFor="">
-                    Max Move Speed: <br />
-                    <input
-                      className="input-field"
-                      type="number"
-                      placeholder="0"
-                      name="max_move_speed"
-                      value={
-                        settings[selectedSettingIndex].move_rules.max_move_speed
-                      }
-                      disabled={true}
-                    />
-                  </label>
-                </div>
-                <div className="input-field-container">
-                  <label htmlFor="">
-                    Max Walk Speed: <br />
-                    <input
-                      className="input-field"
-                      type="number"
-                      placeholder="0"
-                      name="max_walk_speed"
-                      value={
-                        settings[selectedSettingIndex].move_rules.max_walk_speed
-                      }
-                      disabled={true}
-                    />
-                  </label>
-                </div>
-              </div>
-
-              <div className="fields-container">
-                <div className="input-field-container">
-                  <label htmlFor="">
-                    Foreign Weight: <br />
-                    <input
-                      className="input-field"
-                      type="number"
-                      placeholder="0"
-                      name="foreign_weight"
-                      value={
-                        settings[selectedSettingIndex].move_rules.foreign_weight
-                      }
-                      disabled={true}
-                    />
-                  </label>
-                </div>
-                <div className="input-field-container">
-                  <label htmlFor="">
-                    Conflict Weight: <br />
-                    <input
-                      className="input-field"
-                      type="number"
-                      placeholder="0"
-                      name="conflict_weight"
-                      value={
-                        settings[selectedSettingIndex].move_rules
-                          .conflict_weight
-                      }
-                      disabled={true}
-                    />
-                  </label>
-                </div>
-                <div className="input-field-container">
-                  <label htmlFor="">
-                    Camp Weight: <br />
-                    <input
-                      className="input-field"
-                      type="number"
-                      placeholder="0"
-                      name="camp_weight"
-                      value={
-                        settings[selectedSettingIndex].move_rules.camp_weight
-                      }
-                      disabled={true}
-                    />
-                  </label>
-                </div>
-              </div>
-
-              <div className="fields-container">
-                <div className="input-field-container">
-                  <label htmlFor="">
-                    Conflict Movechance: <br />
-                    <input
-                      className="input-field"
-                      type="number"
-                      placeholder="0"
-                      name="conflict_movechance"
-                      value={
-                        settings[selectedSettingIndex].move_rules
-                          .conflict_movechance
-                      }
-                      disabled={true}
-                    />
-                  </label>
-                </div>
-
-                <div className="input-field-container">
-                  <label htmlFor="">
-                    Camp Movechance: <br />
-                    <input
-                      className="input-field"
-                      type="number"
-                      placeholder="0"
-                      name="camp_movechance"
-                      value={
-                        settings[selectedSettingIndex].move_rules
-                          .camp_movechance
-                      }
-                      disabled={true}
-                    />
-                  </label>
-                </div>
-                <div className="input-field-container">
-                  <label htmlFor="">
-                    Default Movechance: <br />
-                    <input
-                      className="input-field"
-                      type="number"
-                      placeholder="0"
-                      name="default_movechance"
-                      value={
-                        settings[selectedSettingIndex].move_rules
-                          .default_movechance
-                      }
-                      disabled={true}
-                    />
-                  </label>
-                </div>
-              </div>
-
-              <div className="fields-container">
-                <div className="input-field-container">
-                  <label htmlFor="">
-                    Awareness Level: <br />
-                    <input
-                      className="input-field"
-                      type="number"
-                      placeholder="0"
-                      name="awareness_level"
-                      value={
-                        settings[selectedSettingIndex].move_rules
-                          .awareness_level
-                      }
-                      disabled={true}
-                    />
-                  </label>
-                </div>
-                <div className="input-field-container">
-                  <label htmlFor="">
-                    Capacity Scaling: <br />
-                    <input
-                      className="input-field"
-                      type="number"
-                      placeholder="0"
-                      name="capacity_scaling"
-                      value={
-                        settings[selectedSettingIndex].move_rules
-                          .capacity_scaling
-                      }
-                      disabled={true}
-                    />
-                  </label>
-                </div>
-
-                <div className="input-field-container">
-                  <label htmlFor="">
-                    Weight Power: <br />
-                    <input
-                      className="input-field"
-                      type="number"
-                      placeholder="0"
-                      name="weight_power"
-                      value={
-                        settings[selectedSettingIndex].move_rules.weight_power
-                      }
-                      disabled={true}
-                    />
-                  </label>
-                </div>
-              </div>
-
-              <div className="fields-container">
-                <div className="input-field-container">
-                  <label htmlFor="" className="checkbox-label">
-                    Avoid Short Stints: <br />
-                    <input
-                      className="input-field"
-                      type="checkbox"
-                      placeholder="0"
-                      name="avoid_short_stints"
-                      checked={
-                        settings[selectedSettingIndex].move_rules
-                          .avoid_short_stints
-                      }
-                      disabled={true}
-                    />
-                  </label>
-                </div>
-                <div className="input-field-container">
-                  <label htmlFor="" className="checkbox-label">
-                    Start On Foot: <br />
-                    <input
-                      className="input-field"
-                      type="checkbox"
-                      placeholder="0"
-                      name="start_on_foot"
-                      checked={
-                        settings[selectedSettingIndex].move_rules.start_on_foot
-                      }
-                      disabled={true}
-                    />
-                  </label>
+                  <NumberInputField 
+                    label="Displaced Percentage of IDPs Per Conflict Day"
+                    infoText={displacedPerConflictDayText}
+                    name="displaced_per_conflict_day"
+                    value={settings[selectedSettingIndex].spawn_rules.conflict_driven_spawning.displaced_per_conflict_day}
+                    disabled={true}/>
                 </div>
               </div>
             </div>
 
             <div className="optimisations-container settings-input-section">
               <h2 className="page-subtitle">Optimisations</h2>
+              <p className="section-subtext">{optimisationsText}</p>
               <div className="fields-container">
-                <div className="input-field-container">
-                  <label htmlFor="">
-                    Hasten: <br />
-                    <input
-                      className="input-field"
-                      type="number"
-                      placeholder="0"
+              <div className="input-field-container">
+                    <NumberInputField 
+                      label="Hasten"
+                      infoText={hastenText}
                       name="hasten"
-                      value={
-                        settings[selectedSettingIndex].optimisations.hasten
-                      }
-                      disabled={true}
-                    />
-                  </label>
+                      value={settings[selectedSettingIndex].optimisations.hasten}
+                      disabled={true}/>
                 </div>
               </div>
             </div>
@@ -486,13 +302,32 @@ function Settings() {
 
         <div className="buttons-container">
           <Link
-            to={selectedSettingIndex === -1 ? "/settings/" : "/simulations"}
+            to={selectedSettingIndex === -1 ? "/settings/" : "/results"}
           >
             <button
               className="simple-button"
-              disabled={selectedSettingIndex === -1}
+              disabled={selectedSettingIndex === -1 || context.settingsId === "" || context.inputId === ""}
+              onClick={() => {
+                console.log("Starting simulation with settings id " + context.settingsId + " and input id " + context.inputId)
+                sendRequest("/run_simulation/config", 
+                            "POST", 
+                            {
+                              input: {
+                                input_id: context.inputId,
+                                input_name: context.inputName
+                              },
+                             settings: {
+                                simsettings_id: context.settingsId,
+                                simsettings_name: context.settingsName
+                              }
+                            })
+                            .then((data) => {
+                              console.log(data);
+              })
+              navigate("/results");
+            }}
             >
-              Continue
+              Start Simulation
             </button>
           </Link>
         </div>
