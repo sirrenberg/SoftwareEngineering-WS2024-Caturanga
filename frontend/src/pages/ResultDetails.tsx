@@ -6,6 +6,8 @@ import { Input, Result, SimLocation } from "../types";
 import { calcMapCenter } from "../helper/misc";
 import { LatLngExpression } from "leaflet";
 import Slider from "@mui/material/Slider";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faPlay, faPause } from "@fortawesome/free-solid-svg-icons";
 
 function ResultDetails() {
   const { sendRequest } = useAPI();
@@ -14,7 +16,9 @@ function ResultDetails() {
   const [result, setResult] = useState<Result | undefined>(undefined);
   const [mapCenter, setMapCenter] = useState<LatLngExpression>([12.6, 37.4667]); // [lat, lng]
   const [playSimulationIndex, setPlaySimulationIndex] = useState<number>(360);
+  const [playingSimulation, setPlayingSimulation] = useState(false);
 
+  // fetch result and corresponding input
   useEffect(() => {
     sendRequest(`/simulation_results/${id}`, "GET").then(
       (resultData: Result) => {
@@ -60,6 +64,26 @@ function ResultDetails() {
     return inputForMap;
   }
 
+  // if playingSimulation is true, increment playSimulationIndex every 1000ms
+  useEffect(() => {
+    if (playingSimulation) {
+      if (!result) {
+        return;
+      }
+      const interval = setInterval(() => {
+        setPlaySimulationIndex((prev) => {
+          if (prev === result?.data.length - 1) {
+            setPlayingSimulation(false);
+            return prev;
+          } else {
+            return prev + 1;
+          }
+        });
+      }, 100);
+      return () => clearInterval(interval);
+    }
+  }, [playingSimulation]);
+
   return (
     <div className="content-page result-detail-container">
       <h1 className="page-title">{result ? result.name : "Loading..."}</h1>
@@ -75,21 +99,47 @@ function ResultDetails() {
           shouldRecenter={false}
           input={formatMapInput()}
         />
+        <div className="slider-container">
+          <button
+            className="play-button simple-button"
+            onClick={() => {
+              // if no result, do nothing
+              if (!result) {
+                return;
+              }
 
-        <Slider
-          value={playSimulationIndex}
-          onChange={handleSliderChange}
-          min={0}
-          max={result?.data.length ? result?.data.length - 1 : 0}
-          sx={{
-            width: "50%",
-            marginTop: "20px",
-            color: "#f3b391", // Change the color here
-            "& .MuiSlider-thumb": {
-              backgroundColor: "#f15025", // Change the thumb color here
-            },
-          }}
-        />
+              if (playingSimulation) {
+                setPlayingSimulation(false);
+              } else {
+                // if playSimulationIndex is at the end, reset it to 0
+                if (playSimulationIndex === result?.data.length - 1) {
+                  setPlaySimulationIndex(0);
+                }
+                setPlayingSimulation(true);
+              }
+            }}
+          >
+            <FontAwesomeIcon
+              className=""
+              icon={playingSimulation ? faPause : faPlay}
+            />
+          </button>
+
+          <Slider
+            value={playSimulationIndex}
+            onChange={handleSliderChange}
+            min={0}
+            max={result?.data.length ? result?.data.length - 1 : 0}
+            sx={{
+              width: "50%",
+              marginTop: "20px",
+              color: "#f3b391", // Change the color here
+              "& .MuiSlider-thumb": {
+                backgroundColor: "#f15025", // Change the thumb color here
+              },
+            }}
+          />
+        </div>
       </div>
     </div>
   );
