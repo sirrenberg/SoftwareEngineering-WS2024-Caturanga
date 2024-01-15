@@ -1,18 +1,22 @@
-# This script is based on https://github.com/djgroen/FabFlee/blob/master/scripts/05_extract_routes_csv.py 
-# but changed where necessary to work automatically with the data from the ACLED API and the population data.
-# Additionally, haversine_distance() is written by me. (instead of euclidian distance by FabFlee)
-
-import os 
 import csv
-import requests 
-import pandas as pd
-import numpy as np
 import math
+import networkx as nx
+import os
 
 # FabFlee used the euclidian distance in its implementation. 
 # I use the haversine formula to calculate the linear distance between 2 locations in km
 def haversine_distance(lat1, lon1, lat2, lon2):
-    # TODO: docstring
+    """
+    This function calculates the distance between two locations on Earth using the Haversine formula.
+    The function takes the latitude and longitude of the two locations as parameters and returns the distance in km.
+        Parameters:
+            lat1 (float): Latitude of the first location
+            lon1 (float): Longitude of the first location
+            lat2 (float): Latitude of the second location
+            lon2 (float): Longitude of the second location
+        Returns:
+            distance (float): Distance between the two locations in km
+    """
     # mean radius of the Earth
     R = 6371.0 # https://en.wikipedia.org/wiki/Great-circle_distance
     
@@ -32,85 +36,71 @@ def haversine_distance(lat1, lon1, lat2, lon2):
     
     # calculation of the distance
     distance = R * c
+    # round to 2 decimals
+    return round(distance, 2)
 
-    return distance
 
-
-def find_nearest_neighbor(current_index, visited, locations_df):
-    '''
-    Find the nearest neighbor for the current location.
-        Parameters:
-            current_index (int): Index of the current location
-            visited (list): List of booleans indicating whether a location has been visited
-            locations_df (DataFrame): DataFrame containing location data
-        Returns:
-            nearest_index (int): Index of the nearest neighbor
-            nearest_distance (float): Distance to the nearest neighbor
-    '''
-    nearest_distance = float('inf')
-    nearest_index = None
-    for i in range(len(locations_df)):
-        if not visited[i] and i != current_index:
-            distance = haversine_distance(locations_df.iloc[current_index]['latitude'], locations_df.iloc[current_index]['longitude'],
-                                          locations_df.iloc[i]['latitude'], locations_df.iloc[i]['longitude'])
-            if distance < nearest_distance:
-                nearest_distance = distance
-                nearest_index = i
-    return nearest_index, nearest_distance
-
-def extract_routes_csv(folder_name):
-    '''
+# Function to extract routes and write to CSV
+def extract_routes_csv(folder_name, top=3):
+    """
     Extract the routes.csv file for the specified country.
-    The function processes location data to generate a set of routes between locations. It uses a nearest neighbor approach, enhanced with the consideration of intermediate stops, to determine the most efficient routes based on Euclidean distance. 
-
+    The function processes location data to generate a set of routes between locations.
         Parameters:
-            country (str): Name of the country or dataset.
-            folder_name (str): Name of the folder containing the CSV files.
-    '''
+            folder_name (str): Name of the folder with the data.
+            top (int): Number of routes to find for each location.
+    """
+    #TODO: Add comments
 
     # Get the current directory
     current_dir = os.getcwd()
-
     # Get the locations file
     locations_file = os.path.join(current_dir, folder_name, "locations.csv")
+    # Read CSV file and create a graph
+    locations = []
+    with open(locations_file, 'r') as csvfile:
+        reader = csv.DictReader(csvfile)
+        for row in reader:
+            locations.append({
+                'name': row['#name'],
+                'latitude': float(row['latitude']),
+                'longitude': float(row['longitude'])
+            })
 
-    # Load the locations data from locations.csv into a DataFrame
-    locations_df = pd.read_csv(locations_file)
+    G = nx.Graph()
+    for i in range(len(locations)):
+        for j in range(i + 1, len(locations)):
+            distance = haversine_distance(locations[i]['latitude'], locations[i]['longitude'],
+                                locations[j]['latitude'], locations[j]['longitude'])
+            G.add_edge(locations[i]['name'], locations[j]['name'], weight=distance)
+        
 
-    # Nearest Neighbor with Intermediate Stops
-    visited = [False] * len(locations_df)
-    route = [0]  # Start from the first location (index 0)
-    visited[0] = True
+    # Function to find the shortest paths for each node
+    def find_shortest_paths(graph, node, top=3):
+        paths = []
+        for target_node in graph.nodes():
+            if target_node != node:
+                path = nx.shortest_path(graph, source=node, target=target_node, weight='weight')
+                distance = nx.shortest_path_length(graph, source=node, target=target_node, weight='weight')
+                paths.append({'target': target_node, 'path': path, 'distance': distance})
+        return sorted(paths, key=lambda x: x['distance'])[:top]
 
-    routes = []  # To store the routes and distances
+    shortest_paths = {}
+    for location in locations:
+        shortest_paths[location['name']] = find_shortest_paths(G, location['name'], top)
 
-    while not all(visited):
-        current_index = route[-1]
-        next_index, direct_distance = find_nearest_neighbor(current_index, visited, locations_df)
+    
+    # Write the results to a new CSV file
+    with open(f'{folder_name}/routes.csv', 'w', newline='') as csvfile:
+        fieldnames = ['name1', 'name2', 'distance', 'forced_redirection']
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+        writer.writeheader()
 
-        # Check for possible intermediate stop
-        for i in range(len(locations_df)):
-            if not visited[i] and i != current_index and i != next_index:
-                intermediate_distance = haversine_distance(locations_df.iloc[current_index]['latitude'], locations_df.iloc[current_index]['longitude'],
-                                                           locations_df.iloc[i]['latitude'], locations_df.iloc[i]['longitude']) + \
-                                        haversine_distance(locations_df.iloc[i]['latitude'], locations_df.iloc[i]['longitude'],
-                                                           locations_df.iloc[next_index]['latitude'], locations_df.iloc[next_index]['longitude'])
-                # If the route via the intermediate location is shorter, choose it
-                if intermediate_distance < direct_distance:
-                    next_index = i
-                    direct_distance = intermediate_distance
-                    break
-
-        route.append(next_index)
-        visited[next_index] = True
-        routes.append([locations_df.iloc[current_index]['#name'], locations_df.iloc[next_index]['#name'], round(direct_distance, 2), 0])
-
-    # Save the routes to a CSV file
-    with open(f'{folder_name}/routes.csv', mode='w', newline='') as file:
-        writer = csv.writer(file)
-        writer.writerow(['name1', 'name2', 'distance', 'forced_redirection'])
-        for route in routes:
-            writer.writerow(route)
-
-    print(f'{folder_name}/routes.csv created. Please inspect the file for unwanted anomalies!')
+        for source_node, paths in shortest_paths.items():
+            for path in paths:
+                writer.writerow({
+                    'name1': source_node,
+                    'name2': path['target'],
+                    'distance': path['distance'],
+                    'forced_redirection': 0
+                })
 
