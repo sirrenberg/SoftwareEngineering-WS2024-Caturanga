@@ -10,7 +10,7 @@ import { faTrash } from "@fortawesome/free-solid-svg-icons";
 function Results() {
   const { sendRequest } = useAPI();
 
-  const [resultPreviews, setResultPreviews] = useState<ResultPreview[]>([]);
+  const [resultPreviews, setResultPreviews] = useState<ResultPreview[] | undefined>(undefined);
   const [selectedResultIndex, setSelectedResultIndex] = useState<number>(-1);
 
   useEffect(() => {
@@ -27,10 +27,13 @@ function Results() {
 
         <div className="items-list" id="outputs-items-list">
 
-          {resultPreviews.length === 0 &&
+          {!resultPreviews &&
           <h3>Loading...</h3>}
 
-          {resultPreviews &&
+          {resultPreviews && resultPreviews.length === 0 &&
+          <h3>Empty</h3>}
+
+          {resultPreviews && resultPreviews.length > 0 &&
           resultPreviews.map((resultPreview, index) => {
             return (
               <button
@@ -59,9 +62,13 @@ function Results() {
 
       <div className="content-section">
         <h2 className="selected-item-title page-title">
-          {selectedResultIndex === -1
-            ? "Choose a Simulation Result"
-            : resultPreviews[selectedResultIndex]._id}
+          {resultPreviews
+            ? resultPreviews.length > 0
+              ? selectedResultIndex === -1
+                ? "Choose a Simulation Result"
+                : resultPreviews[selectedResultIndex]._id
+              : "Run a New Simulation"
+            : ""}
         </h2>
 
         <Map

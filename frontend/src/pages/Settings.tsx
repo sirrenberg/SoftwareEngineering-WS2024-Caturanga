@@ -17,7 +17,7 @@ function Settings() {
   const { sendRequest } = useAPI();
   const navigate = useNavigate();
 
-  const [settings, setSettings] = useState<SimSettings[]>([]);
+  const [settings, setSettings] = useState<SimSettings[] | undefined>(undefined);
   const [selectedSettingIndex, setSelectedSettingIndex] = useState<number>(-1);
 
   const protectedSimSettingIDs: string[] = ["6599846eeb8f8c36cce8307a"];
@@ -48,9 +48,12 @@ function Settings() {
 
         <div className="items-list" id="settings-items-list">
 
-          {settings.length === 0 && 
+          {!settings && 
           <h3>Loading...</h3>
           }
+
+          {settings && settings.length === 0 &&
+          <h3>Empty</h3>}
 
           {settings &&
           settings.map((setting, index) => {
@@ -119,12 +122,14 @@ function Settings() {
 
       <div className="content-section">
         <h2 className="selected-item-title page-title">
-          {selectedSettingIndex === -1
-            ? "Choose a Setting"
-            : settings[selectedSettingIndex].name}
+          {settings
+            ? selectedSettingIndex === -1
+              ? "Choose a Setting"
+              : settings[selectedSettingIndex].name
+            : ""}
         </h2>
 
-        {selectedSettingIndex !== -1 ? (
+        {settings && selectedSettingIndex !== -1 ? (
           <div className="settings-preview-container">
             <div className="name-container settings-input-section">
               <h2 className="page-subtitle">Name</h2>
