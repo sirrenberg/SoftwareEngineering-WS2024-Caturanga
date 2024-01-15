@@ -11,6 +11,11 @@ enum MapOperatingMode {
   adding_route = "Adding Route",
 }
 
+enum MapInputType {
+  results = "Results",
+  inputs = "Inputs",
+}
+
 interface SimLocation {
   // can not be called Location as that conflicts with MongoDB
   name: string;
@@ -89,4 +94,4 @@ interface SimSettings {
 }
 
 export type { SimLocation, Route, Input, SimSettings, ResultPreview, Result };
-export { LocationType, MapOperatingMode };
+export { LocationType, MapOperatingMode, MapInputType };

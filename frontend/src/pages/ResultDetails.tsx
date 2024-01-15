@@ -2,8 +2,7 @@ import { useParams } from "react-router-dom";
 import Map from "../components/Map";
 import { useEffect, useState } from "react";
 import { useAPI } from "../hooks/useAPI";
-import { Input, Result, SimLocation } from "../types";
-import { calcMapCenter } from "../helper/misc";
+import { Input, Result, SimLocation, MapInputType } from "../types";
 import { LatLngExpression } from "leaflet";
 import Slider from "@mui/material/Slider";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -14,8 +13,8 @@ function ResultDetails() {
   const { id } = useParams<{ id: string }>();
   const [input, setInput] = useState<Input | undefined>(undefined);
   const [result, setResult] = useState<Result | undefined>(undefined);
-  const [mapCenter, setMapCenter] = useState<LatLngExpression>([12.6, 37.4667]); // [lat, lng]
-  const [playSimulationIndex, setPlaySimulationIndex] = useState<number>(360);
+  const [mapCenter, _] = useState<LatLngExpression>([12.6, 37.4667]); // [lat, lng]
+  const [playSimulationIndex, setPlaySimulationIndex] = useState<number>(0);
   const [playingSimulation, setPlayingSimulation] = useState(false);
 
   // fetch result and corresponding input
@@ -26,21 +25,20 @@ function ResultDetails() {
         sendRequest(`/simulations/${resultData.simulation_id}`, "GET").then(
           (inputData: Input) => {
             setInput(inputData);
-            if (input) {
-              setMapCenter(calcMapCenter(inputData.locations));
-            }
+            console.log(inputData);
+            console.log(resultData);
           }
         );
       }
     );
   }, []);
 
-  function handleSliderChange(event: any, newValue: number | number[]) {
+  function handleSliderChange(_: any, newValue: number | number[]) {
     setPlaySimulationIndex(newValue as number);
   }
 
   function formatMapInput(): Input | undefined {
-    if (!input || !result) {
+    if (!input || !result || !result?.data) {
       return undefined;
     }
 
@@ -60,6 +58,8 @@ function ResultDetails() {
         return inputLocation;
       }),
     };
+
+    console.log("input for map", inputForMap);
 
     return inputForMap;
   }
@@ -89,22 +89,25 @@ function ResultDetails() {
       <h1 className="page-title">{result ? result.name : "Loading..."}</h1>
 
       <div className="result-map-container">
-        <p>
-          Day: {playSimulationIndex} -{" "}
-          {result?.data[playSimulationIndex]["Date"]}
-        </p>
+        {result?.data && (
+          <p>
+            Day: {playSimulationIndex} -{" "}
+            {result?.data[playSimulationIndex]["Date"]}
+          </p>
+        )}
 
         <Map
           center={mapCenter}
           shouldRecenter={false}
           input={formatMapInput()}
+          mapMode={MapInputType.inputs}
         />
         <div className="slider-container">
           <button
             className="play-button simple-button"
             onClick={() => {
               // if no result, do nothing
-              if (!result) {
+              if (!result || !result?.data) {
                 return;
               }
 
@@ -129,7 +132,7 @@ function ResultDetails() {
             value={playSimulationIndex}
             onChange={handleSliderChange}
             min={0}
-            max={result?.data.length ? result?.data.length - 1 : 0}
+            max={result?.data?.length ? result?.data.length - 1 : 0}
             sx={{
               width: "50%",
               marginTop: "20px",

@@ -7,7 +7,13 @@ import {
   Polyline,
 } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
-import { LocationType, SimLocation, Input, Route } from "../types";
+import {
+  LocationType,
+  SimLocation,
+  Input,
+  Route,
+  MapInputType,
+} from "../types";
 import { LatLngExpression } from "leaflet";
 import { useMap } from "react-leaflet/hooks";
 import { useEffect } from "react";
@@ -21,6 +27,7 @@ function Map({
   NodeDoubleClickHandler,
   RouteDoubleClickHandler,
   shouldRecenter,
+  mapMode,
 }: {
   input?: Input;
   center?: LatLngExpression;
@@ -29,6 +36,7 @@ function Map({
   NodeDoubleClickHandler?: (location: SimLocation) => void;
   RouteDoubleClickHandler?: (route: Route) => void;
   shouldRecenter?: boolean;
+  mapMode?: string;
 }) {
   const zoomLevel = 5;
 
@@ -51,9 +59,15 @@ function Map({
   }
 
   function calculateSize(input: number | undefined) {
-    // calculate the size of the node based on the population
-    if (!input || input <= 10) return 5000;
-    else return 5000 + input * 10;
+    if (!input) {
+      return 5000;
+    }
+
+    if (mapMode === MapInputType.results) {
+      return 5000 + input * 10;
+    } else {
+      return 5000 + input / 10;
+    }
   }
 
   function getNodeColor(location: SimLocation) {
