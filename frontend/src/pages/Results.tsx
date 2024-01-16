@@ -81,7 +81,8 @@ function Results() {
             to={
               selectedResultIndex === -1
                 ? "/results/"
-                : "/results/" + resultPreviews[selectedResultIndex]._id
+                : "/results/" +
+                  (resultPreviews?.[selectedResultIndex]?._id ?? "")
             }
           >
             <button className="simple-button">Show Details</button>
