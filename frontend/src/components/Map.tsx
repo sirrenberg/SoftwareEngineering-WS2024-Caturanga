@@ -64,7 +64,7 @@ function Map({
     }
 
     if (mapMode === MapInputType.results) {
-      return 5000 + input * 10;
+      return 5000 + input;
     } else {
       return 5000 + input / 10;
     }
