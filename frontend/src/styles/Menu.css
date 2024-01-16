@@ -239,3 +239,16 @@ a .items-list-item-icons {
 .play-button:hover {
   background-color: var(--coquelicot);
 }
+
+.sources-button {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  border-radius: 50%;
+  height: 50px;
+  width: 50px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1.3em;
+}

@@ -9,7 +9,12 @@ import { useAPI } from "../hooks/useAPI";
 import { calcMapCenter } from "../helper/misc";
 import { NavLink } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPenToSquare, faTrash } from "@fortawesome/free-solid-svg-icons";
+import {
+  faPenToSquare,
+  faTrash,
+  faInfo,
+} from "@fortawesome/free-solid-svg-icons";
+import DataSourceModal from "../components/DataSourceModal";
 
 function Inputs() {
   const { sendRequest } = useAPI();
@@ -17,6 +22,7 @@ function Inputs() {
   const [inputs, setInputs] = useState<Input[] | undefined>(undefined);
   const [selectedInputIndex, setSelectedInputIndex] = useState<number>(-1);
   const [mapCenter, setMapCenter] = useState<LatLngExpression>([0, 0]); // [lat, lng]
+  const [isDataSourceModal, setDataSourceModal] = useState(false);
 
   const context = useContext(StartSimContext);
   if (!context) {
@@ -36,49 +42,47 @@ function Inputs() {
     }
   }, []);
 
+  console.log("inputs", inputs);
+
   return (
     <div className="menu-items-container content-page">
       <div className="items-list-container">
         <h2 className="items-list-title">Saved Inputs</h2>
 
         <div className="items-list">
+          {!inputs && <h3>Loading...</h3>}
 
-          {!inputs && 
-          <h3>Loading...</h3>
-          }
-
-          {inputs && inputs.length === 0 &&
-          <h3>Empty</h3>}
+          {inputs && inputs.length === 0 && <h3>Empty</h3>}
 
           {inputs &&
-          inputs.map((input, index) => {
-            return (
-              <button
-                key={input._id}
-                className={
-                  "simple-button" +
-                  (index === selectedInputIndex ? " selected-item" : "")
-                }
-                onClick={() => {
-                  setSelectedInputIndex(index);
-                  setMapCenter(calcMapCenter(input.locations));
-                  setInputId(inputs[index]._id);
-                  setInputName(inputs[index].name);
-                }}
-              >
-                <p>{input.name}</p>
-                <span className="items-list-item-icons">
-                  <NavLink to={"/inputs/" + input._id}>
-                    <FontAwesomeIcon
-                      icon={faPenToSquare}
-                      className="item-icon"
-                    />
-                  </NavLink>
-                  <FontAwesomeIcon icon={faTrash} className="item-icon" />
-                </span>
-              </button>
-            );
-          })}
+            inputs.map((input, index) => {
+              return (
+                <button
+                  key={input._id}
+                  className={
+                    "simple-button" +
+                    (index === selectedInputIndex ? " selected-item" : "")
+                  }
+                  onClick={() => {
+                    setSelectedInputIndex(index);
+                    setMapCenter(calcMapCenter(input.locations));
+                    setInputId(inputs[index]._id);
+                    setInputName(inputs[index].name);
+                  }}
+                >
+                  <p>{input.name}</p>
+                  <span className="items-list-item-icons">
+                    <NavLink to={"/inputs/" + input._id}>
+                      <FontAwesomeIcon
+                        icon={faPenToSquare}
+                        className="item-icon"
+                      />
+                    </NavLink>
+                    <FontAwesomeIcon icon={faTrash} className="item-icon" />
+                  </span>
+                </button>
+              );
+            })}
         </div>
 
         <NavLink to="/inputs/new">
@@ -99,7 +103,9 @@ function Inputs() {
 
         <Map
           input={
-            !inputs || selectedInputIndex === -1 ? undefined : inputs[selectedInputIndex]
+            !inputs || selectedInputIndex === -1
+              ? undefined
+              : inputs[selectedInputIndex]
           }
           center={mapCenter}
           shouldRecenter={true}
@@ -116,6 +122,40 @@ function Inputs() {
           </Link>
         </div>
       </div>
+
+      {inputs && selectedInputIndex !== -1 && (
+        <div
+          className="simple-button sources-button"
+          onClick={() => {
+            setDataSourceModal(true);
+          }}
+        >
+          <FontAwesomeIcon icon={faInfo} className="sources-icon" />
+        </div>
+      )}
+
+      {isDataSourceModal && (
+        <DataSourceModal
+          setDataSourceModalOpen={setDataSourceModal}
+          acled_url={inputs![selectedInputIndex].data_sources.acled.url}
+          acled_last_update_date={
+            inputs![selectedInputIndex].data_sources.acled.last_update
+          }
+          population_url={
+            inputs![selectedInputIndex].data_sources.population.url
+          }
+          population_last_update_date={
+            inputs![selectedInputIndex].data_sources.population
+              .latest_population_date
+          }
+          camp_url={
+            inputs![selectedInputIndex].data_sources.camps.url_from_last_update
+          }
+          camp_last_update_date={
+            inputs![selectedInputIndex].data_sources.camps.last_update
+          }
+        />
+      )}
     </div>
   );
 }

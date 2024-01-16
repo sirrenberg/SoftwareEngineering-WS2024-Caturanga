@@ -34,6 +34,20 @@ function AddInput() {
     name: "",
     _id: "",
     conflicts: [],
+    data_sources: {
+      acled: {
+        url: "",
+        last_update_date: "",
+      },
+      population: {
+        url: "",
+        last_update_date: "",
+      },
+      camps: {
+        url: "",
+        last_update_date: "",
+      },
+    },
   };
 
   const {
