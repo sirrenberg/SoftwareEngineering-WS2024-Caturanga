@@ -76,14 +76,13 @@ def extract_camp_locations(round_data, rows_shown):
         #  "DTM Ethiopia - Site Assessment Round 34.xlsx' has "xxxx: Site Classification" instead of "Site Classification"
         #  "DTM Ethiopia - Site Assessment Round 33.xlsx' has "xxxx: Settlement/site type" instead of "1.3.b.1: Settlement/site type"
     
-    #TODO: make it universal. weniger if else für rounds
 
     # get current directory
     current_dir = os.getcwd()
     # paths to files with camp information
     # TODO: docker path
-    paths_dtm = os.path.join(current_dir, "input_data_processing", "conflict_validation", "data_source")
-    # paths_dtm = os.path.join(current_dir, "conflict_validation", "data_source")
+    # paths_dtm = os.path.join(current_dir, "input_data_processing", "conflict_validation", "data_source")
+    paths_dtm = os.path.join(current_dir, "conflict_validation", "data_source")
 
     # get round numbers from dict
     round_numbers = []

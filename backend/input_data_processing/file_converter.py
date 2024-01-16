@@ -277,7 +277,6 @@ def insert_data_into_DB(country, current_dir, folder_name, acled_source_list=[],
             val_source_list (list): List containing the validation data source and latest available date
     '''
 
-    # TODO: redundant if already done in controller.py for API
     # Connect to the MongoDB
     load_dotenv()
     MONGODB_URI = os.environ.get('MONGO_URI')
@@ -289,8 +288,8 @@ def insert_data_into_DB(country, current_dir, folder_name, acled_source_list=[],
     folder_path = os.path.join(current_dir, folder_name)
     data_dir = folder_path
     #TODO: docker path
-    data_dir_validation = os.path.join(current_dir, "input_data_processing", "conflict_validation", folder_name)
-    # data_dir_validation = os.path.join(current_dir, "conflict_validation", folder_name)
+    # data_dir_validation = os.path.join(current_dir, "input_data_processing", "conflict_validation", folder_name)
+    data_dir_validation = os.path.join(current_dir, "conflict_validation", folder_name)
 
     # input data
     location_csv_path = os.path.join(data_dir, 'locations.csv')
@@ -305,6 +304,7 @@ def insert_data_into_DB(country, current_dir, folder_name, acled_source_list=[],
     data_layout_csv_path = os.path.join(data_dir_validation, 'data_layout.csv')
     # camps_csvs are all csv files except refugees.csv and data_layout.csv
     camps_csv_paths = [os.path.join(data_dir_validation, file) for file in os.listdir(data_dir_validation) if file.endswith(".csv") and file != "refugees.csv" and file != "data_layout.csv"]
+
 
 
     # Convert CSV to lists of dictionaries
@@ -329,8 +329,14 @@ def insert_data_into_DB(country, current_dir, folder_name, acled_source_list=[],
     validation_refugees = transform_val_refugees_data(validation_refugee_data)
     validation_data_layout = transform_val_data_layout_data(validation_data_layout_data)
     validation_camps = [transform_val_camp_data(camp_data) for camp_data in validation_camps_data]
-    #TODO: transform_val_camp_data seems unnecessary
-
+    # convert each camp_path to the camp_name
+    for i in range(len(camps_csv_paths)):
+        camp_path = camps_csv_paths[i]
+        # just get the last component of the path
+        camp_name = os.path.basename(camp_path)
+        # without the extension
+        camp_name = os.path.splitext(camp_name)[0]
+        camps_csv_paths[i] = camp_name
 
     # Create the JSON object to be inserted into the MongoDB which stores data in BSON format
     mongo_document = {
@@ -346,7 +352,8 @@ def insert_data_into_DB(country, current_dir, folder_name, acled_source_list=[],
             'refugees': validation_refugees,
             'data_layout': validation_data_layout,
             # dict with filename (last component of path) as key and transformed data as value
-            'camps': {os.path.basename(camp_path): transform_val_camp_data(camp_data) for camp_path, camp_data in zip(camps_csv_paths, validation_camps_data)} #TODO: docker: check if stored correctly in DB
+            #TODO: docker: check if stored correctly in DB -> NEIN
+            'camps': {camp_path: transform_val_camp_data(camp_data) for camp_path, camp_data in zip(camps_csv_paths, validation_camps_data)} #TODO: docker: check if stored correctly in DB
 
         },
         # TODO: change to datetime object in the corresponding transfer functions
@@ -386,6 +393,7 @@ def insert_data_into_DB(country, current_dir, folder_name, acled_source_list=[],
     }
 
     # insert test data into the database
+    
     result = simulations_collection.insert_one(mongo_document)
 
     # check if successfull 
@@ -393,7 +401,7 @@ def insert_data_into_DB(country, current_dir, folder_name, acled_source_list=[],
         print(f"Data for {country} successfully inserted into MongoDB")
     else:
         print(f"Data for {country} not inserted into MongoDB")
-
+    
     client.close()
 
 
@@ -422,3 +430,4 @@ delete_ids = ["65a1bfd59dee96171d22019b", "65a1bb68da12cf8b0eadb400", "65a1b3656
 for ids in delete_ids:
     delete_data_from_DB(ids)
 """
+
