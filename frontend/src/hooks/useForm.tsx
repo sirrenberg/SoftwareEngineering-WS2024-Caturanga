@@ -68,6 +68,7 @@ export function useForm(initialFValues: any) {
         "pop_power_for_loc_weight",
         "conflict_movechance",
         "camp_movechance",
+        "idpcamp_movechance",
         "default_movechance",
         "awareness_level",
         "capacity_scaling",
