@@ -100,7 +100,7 @@ function ResultDetails() {
           center={mapCenter}
           shouldRecenter={false}
           input={formatMapInput()}
-          mapMode={MapInputType.inputs}
+          mapMode={MapInputType.results}
         />
         <div className="slider-container">
           <button
