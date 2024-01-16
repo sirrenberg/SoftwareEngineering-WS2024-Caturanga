@@ -81,6 +81,7 @@ function Inputs() {
                     <FontAwesomeIcon
                       icon={faTrash}
                       className="item-icon"
+                      title="ATTENTION! This will delete the input and all simulation results that were generated with this input!"
                       //style={{ border: "none" , backgroundColor: "transparent" , padding : 0, color: "inherit"}}
                       onClick={(event) => {
                         event.stopPropagation();
