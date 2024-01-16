@@ -75,8 +75,6 @@ function ResultDetails() {
       }),
     };
 
-    console.log("input for map", inputForMap);
-
     return inputForMap;
   }
 
