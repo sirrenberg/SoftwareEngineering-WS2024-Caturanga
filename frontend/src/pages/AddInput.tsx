@@ -33,6 +33,7 @@ function AddInput() {
     routes: [],
     name: "",
     _id: "",
+    conflicts: [],
   };
 
   const {

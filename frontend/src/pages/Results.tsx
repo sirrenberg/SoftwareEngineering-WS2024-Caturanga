@@ -8,11 +8,14 @@ import { calcMapCenter } from "../helper/misc";
 import { useAPI } from "../hooks/useAPI";
 import "../styles/Menu.css";
 import { ResultPreview } from "../types";
+import { Link } from "react-router-dom";
 
 function Results() {
   const { sendRequest } = useAPI();
 
-  const [resultPreviews, setResultPreviews] = useState<ResultPreview[] | undefined>(undefined);
+  const [resultPreviews, setResultPreviews] = useState<
+    ResultPreview[] | undefined
+  >(undefined);
   const [selectedResultIndex, setSelectedResultIndex] = useState<number>(-1);
   const [mapCenter, setMapCenter] = useState<LatLngExpression>([0, 0]); // [lat, lng]
 
@@ -38,39 +41,38 @@ function Results() {
   }, []);
 
   return (
-    <div className="menu-items-container content-page" id="outputs-menu-container">
+    <div
+      className="menu-items-container content-page"
+      id="outputs-menu-container"
+    >
       <div className="items-list-container" id="outputs-list-container">
         <h2 className="items-list-title">Saved Simulation Results</h2>
 
         <div className="items-list" id="outputs-items-list">
+          {!resultPreviews && <h3>Loading...</h3>}
 
-          {!resultPreviews &&
-            <h3>Loading...</h3>}
-
-          {resultPreviews && resultPreviews.length === 0 &&
-            <h3>Empty</h3>}
+          {resultPreviews && resultPreviews.length === 0 && <h3>Empty</h3>}
 
           {resultPreviews && resultPreviews.length > 0 &&
-            resultPreviews.map((resultPreview, index) => {
-              return (
-                <button
-                  key={resultPreview.id}
-                  className={
-                    "simple-button" +
-                    (index === selectedResultIndex ? " selected-item" : "")
-                  }
-                  onClick={() => {
-                    setSelectedResultIndex(index);
-                    setMapCenter(calcMapCenter(resultPreviews[index].input.locations));
-                  }}
-                >
-                  <p>{resultPreview.id}</p>
-                  <span className="items-list-item-icons">
-                    <FontAwesomeIcon icon={faTrash} className="item-icon" />
-                  </span>
-                </button>
-              );
-            })}
+          resultPreviews.map((resultPreview, index) => {
+            return (
+              <button
+                key={resultPreview.id}
+                className={
+                  "simple-button" +
+                  (index === selectedResultIndex ? " selected-item" : "")
+                }
+                onClick={() => {
+                  setSelectedResultIndex(index);
+                }}
+              >
+                <p>{resultPreview.id}</p>
+                <span className="items-list-item-icons">
+                  <FontAwesomeIcon icon={faTrash} className="item-icon" />
+                </span>
+              </button>
+            );
+          })}
         </div>
 
         <NavLink to="/">
@@ -96,9 +98,16 @@ function Results() {
         />
 
         <div className="buttons-container">
-          <button className="simple-button">
-            Show Details
-          </button>
+          <Link
+            to={
+              selectedResultIndex === -1
+                ? "/results/"
+                : "/results/" +
+                  (resultPreviews?.[selectedResultIndex]?._id ?? "")
+            }
+          >
+            <button className="simple-button">Show Details</button>
+          </Link>
         </div>
       </div>
     </div>
