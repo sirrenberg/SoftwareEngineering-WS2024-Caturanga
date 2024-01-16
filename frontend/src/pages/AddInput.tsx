@@ -28,7 +28,6 @@ function AddInput() {
       date: new Date().toISOString().slice(0, 10),
       length: 0,
     },
-
     locations: [],
     routes: [],
     name: "",
@@ -37,15 +36,15 @@ function AddInput() {
     data_sources: {
       acled: {
         url: "",
-        last_update_date: "",
+        last_update: "",
       },
       population: {
         url: "",
-        last_update_date: "",
+        latest_population_date: "",
       },
       camps: {
-        url: "",
-        last_update_date: "",
+        url_from_last_update: "",
+        last_update: "",
       },
     },
   };

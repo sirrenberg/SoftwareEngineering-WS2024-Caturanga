@@ -12,7 +12,8 @@ import {
 import { LatLngExpression } from "leaflet";
 import Slider from "@mui/material/Slider";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPlay, faPause } from "@fortawesome/free-solid-svg-icons";
+import { faPlay, faPause, faInfo } from "@fortawesome/free-solid-svg-icons";
+import DataSourceModal from "../components/DataSourceModal";
 
 function ResultDetails() {
   const { sendRequest } = useAPI();
@@ -22,6 +23,7 @@ function ResultDetails() {
   const [mapCenter, _] = useState<LatLngExpression>([12.6, 37.4667]); // [lat, lng]
   const [playSimulationIndex, setPlaySimulationIndex] = useState<number>(0);
   const [playingSimulation, setPlayingSimulation] = useState(false);
+  const [isDataSourceModal, setDataSourceModal] = useState(false);
 
   // fetch result and corresponding input
   useEffect(() => {
@@ -158,6 +160,31 @@ function ResultDetails() {
           />
         </div>
       </div>
+
+      {input && (
+        <div
+          className="simple-button sources-button"
+          onClick={() => {
+            setDataSourceModal(true);
+          }}
+        >
+          <FontAwesomeIcon icon={faInfo} className="sources-icon" />
+        </div>
+      )}
+
+      {isDataSourceModal && input && (
+        <DataSourceModal
+          setDataSourceModalOpen={setDataSourceModal}
+          acled_url={input.data_sources.acled.url}
+          acled_last_update_date={input.data_sources.acled.last_update}
+          population_url={input.data_sources.population.url}
+          population_last_update_date={
+            input.data_sources.population.latest_population_date
+          }
+          camp_url={input.data_sources.camps.url_from_last_update}
+          camp_last_update_date={input.data_sources.camps.last_update}
+        />
+      )}
     </div>
   );
 }
