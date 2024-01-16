@@ -9,7 +9,8 @@ export const defaultValues: Input = {
       length: 1,
     },
     locations: [],
-    routes: []
+    routes: [],
+    conflicts: [],
 };
 
 export const minValues = {

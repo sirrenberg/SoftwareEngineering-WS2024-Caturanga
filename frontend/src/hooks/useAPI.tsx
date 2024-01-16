@@ -1,15 +1,14 @@
 export function useAPI() {
   const API_URL = "http://localhost:8080";
 
-  function sendRequest(route: string, 
-                       method: string, 
-                       body?: any) {
+  function sendRequest(route: string, method: string, body?: any) {
     const url = new URL(API_URL + route);
     
-    // locations and routes should not be POSTed to the server
+    // locations, routes and conflicts should not be POSTed to the server
     if (body) {
       delete body['locations']
       delete body['routes']
+      delete body['conflicts']
     }
 
     return fetch(url.toString(), {
