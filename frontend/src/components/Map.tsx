@@ -18,7 +18,7 @@ import { LatLngExpression } from "leaflet";
 import { useMap } from "react-leaflet/hooks";
 import { useEffect } from "react";
 import { v4 as uuidv4 } from "uuid";
-import { Colors } from "../helper/constants";
+import { Colors } from "../helper/constants/DesignConstants";
 
 function Map({
   input,

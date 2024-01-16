@@ -13,7 +13,7 @@ import { LatLngExpression } from "leaflet";
 import Slider from "@mui/material/Slider";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlay, faPause } from "@fortawesome/free-solid-svg-icons";
-import { Colors } from "../helper/constants";
+import { Colors } from "../helper/constants/DesignConstants";
 
 function ResultDetails() {
   const { sendRequest } = useAPI();
