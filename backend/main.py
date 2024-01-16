@@ -134,6 +134,21 @@ async def get_simulation(
     """
     return await controller.get_simulation(simulation_id)
 
+@app.delete("/simulations/{simulation_id}")
+async def delete_simulation_and_associated_results(
+        simulation_id: str = Path(),
+):
+    """
+    Deletes a simulation (called "input" in the GUI) with the given ID.
+
+    Parameters:
+    - simulation_id (str): The ID of the simulation to delete.
+
+    Returns:
+    - The result of the deletion operation.
+    """
+    return await controller.delete_simulation_and_associated_results(simulation_id)
+
 
 @app.post("/simulations")
 async def post_simulation(

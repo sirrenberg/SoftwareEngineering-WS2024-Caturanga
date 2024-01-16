@@ -17,6 +17,7 @@ function Inputs() {
   const [inputs, setInputs] = useState<Input[] | undefined>(undefined);
   const [selectedInputIndex, setSelectedInputIndex] = useState<number>(-1);
   const [mapCenter, setMapCenter] = useState<LatLngExpression>([0, 0]); // [lat, lng]
+  const [protectedInputIDs, setProtectedInputIDs] = useState<string[]>([]);
 
   const context = useContext(StartSimContext);
   if (!context) {
@@ -25,8 +26,10 @@ function Inputs() {
   const { setInputId, setInputName } = context;
 
   useEffect(() => {
-    sendRequest("/simulations/summary", "GET").then((data) => {
+    sendRequest("/simulations/summary", "GET").then((response) => {
+      const { data, protectedIDs } = response;
       setInputs(data);
+      setProtectedInputIDs(protectedIDs);
     });
   }, []);
 
@@ -74,7 +77,38 @@ function Inputs() {
                       className="item-icon"
                     />
                   </NavLink>
-                  <FontAwesomeIcon icon={faTrash} className="item-icon" />
+                  {!protectedInputIDs.includes(input._id) && (
+                    <FontAwesomeIcon
+                      icon={faTrash}
+                      className="item-icon"
+                      title="ATTENTION! This will delete the input and all simulation results that were generated with this input!"
+                      //style={{ border: "none" , backgroundColor: "transparent" , padding : 0, color: "inherit"}}
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        console.log("Deleting " + input._id + " ...");
+                        // if the input to be deleted is the one that is currently selected, deselect it
+                        if (selectedInputIndex === index){
+                          console.log("Entered the branch where selectedInputIndex === index", selectedInputIndex, index);
+                          setSelectedInputIndex(-1);
+                          console.log("selectedInputIndex is now", selectedInputIndex);
+                        }
+                        sendRequest("/simulations/" + input._id, "DELETE")
+                        .then(_ => {
+                          // if the input to be deleted is before the currently selected one, decrement the selected index
+                          const indexOfDeleted = inputs.findIndex(i => i._id === input._id);
+                          if (indexOfDeleted < selectedInputIndex){
+                            setSelectedInputIndex(selectedInputIndex - 1);
+                          }
+                          console.log("Deleted simulation with id " + input._id);
+                          setInputs(inputs.filter(i => i._id !== input._id));
+                        })
+                        .catch(err => {
+                          console.log("Deleting simulation with id " + input._id + " lead to an error.");
+                          console.log(err);
+                        });
+                      }}
+                    />
+                  )}
                 </span>
               </button>
             );

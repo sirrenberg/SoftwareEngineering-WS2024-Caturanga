@@ -2,6 +2,7 @@ from pymongo import MongoClient
 from dotenv import load_dotenv
 from flee_adapter.adapter import Adapter
 from flee_controller.csvtransformer import CsvTransformer
+
 import yaml
 from bson.objectid import ObjectId as ObjectID
 from pathlib import Path
@@ -26,7 +27,7 @@ class Controller:
         self.client, self.db = self.connect_db()
         self.csvTransformer = CsvTransformer(self.db)
 
-        self.default_input_id = "65a6a042619bb91dd9091165"
+        self.default_input_id = "65a6d3eb9ae2636fa2b3e3c6"
         self.default_setting_id = "6599846eeb8f8c36cce8307a"
 
     # Run simulations: ------------------------------------------------------------
@@ -380,7 +381,8 @@ class Controller:
         Returns:
         - list of simulation summaries.
         """
-        return await self.get_summaries("simulations")
+        data = await self.get_summaries("simulations")
+        return {"data": data, "protectedIDs": [self.default_input_id]}
 
     # Get specific simulation by simulation_id:
     async def get_simulation(self, simulation_id: str):
@@ -448,6 +450,21 @@ class Controller:
         client.close()
 
         return result
+    
+    async def delete_simulation_and_associated_results(self, simulation_id: str):
+        """
+        Deletes a simulation from the database.
+        ATTENTION: DELETES ALL SIMULATION RESULTS ASSOCIATED WITH THE SIMULATION!
+
+        Parameters:
+        - simulation_id (str): The ID of the simulation to be deleted.
+        """
+        # Delete simulation results associated with the simulation:
+        client, db = self.connect_db()
+        simulations_results_collection = db.get_collection("simulations_results")
+        simulations_results_collection.delete_many({"simulation_id": simulation_id})
+        client.close()
+        return self.delete_document("simulations", simulation_id)
 
     async def post_simulation(
                 self,
@@ -551,7 +568,7 @@ class Controller:
             simsetting["_id"] = str(simsetting["_id"])
             rl.append(simsetting)
         client.close()
-        return rl
+        return {"data": rl, "protectedIDs": [self.default_setting_id]}
 
     async def get_all_simsetting_summaries(self):
         """
@@ -560,7 +577,8 @@ class Controller:
         Returns:
         - list of simsetting summaries.
         """
-        return await self.get_summaries("simsettings")
+        data = await self.get_summaries("simsettings")
+        return {"data": data, "protectedIDs": [self.default_setting_id]}
 
     # Get specific simsettings by simsetting_id:
     async def get_simsetting(self, simsetting_id: str):
@@ -589,11 +607,24 @@ class Controller:
             simsetting_dict["_id"] = str(simsetting_dict["_id"])
             return simsetting_dict
 
-    # Delete specfici simsettings by simsetting_id:
+    # Delete specific simsettings by simsetting_id:
     async def delete_simsetting(self, simsetting_id: str):
+        return self.delete_document("simsettings", simsetting_id)
+
+
+# Helper functions - Database: ------------------------------------------------
+
+
+    def delete_document(self, collection_name: str, document_id: str):
+        """
+        Deletes a document from the specified collection in the database.
+
+        Parameters:
+        - collection_name (str): The name of the collection.
+        - document_id (str): The ID of the document to be deleted.
+        """
         client, db = self.connect_db()
-        db.get_collection("simsettings").delete_one(
-            {"_id": ObjectID(simsetting_id)}
-        )
+        collection = db.get_collection(collection_name)
+        collection.delete_one({"_id": ObjectID(document_id)})
         client.close()
         return

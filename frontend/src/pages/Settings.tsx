@@ -22,8 +22,7 @@ function Settings() {
     undefined
   );
   const [selectedSettingIndex, setSelectedSettingIndex] = useState<number>(-1);
-
-  const protectedSimSettingIDs: string[] = ["6599846eeb8f8c36cce8307a"];
+  const [protectedSimSettingIDs, setProtectedSimSettingIDs] = useState<string[]>([]);
 
   const context = useContext(StartSimContext);
   if (!context) {
@@ -32,7 +31,12 @@ function Settings() {
   const { setSettingsId, setSettingsName } = context;
 
   useEffect(() => {
-    sendRequest("/simsettings", "GET").then((data) => {
+    sendRequest("/simsettings", "GET").then((response) => {
+      const { data, protectedIDs } = response;
+      console.log("Response: ", response);
+      console.log("Protected IDs: ", protectedIDs);
+      setProtectedSimSettingIDs(protectedIDs);
+      console.log("Data: ", data);
       setSettings(data);
     });
   }, []);
