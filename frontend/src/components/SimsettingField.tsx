@@ -44,6 +44,12 @@ interface SelectInputFieldProps extends Props {
     options: {value: number, label: string}[];
 }
 
+interface DateInputFieldProps extends Props {
+    value: string;
+    min?: string;
+    max?: string;
+}
+
 
 export function CheckboxInputField(props: Readonly<CheckboxInputFieldProps>) {
     return (
@@ -95,6 +101,23 @@ export function SelectInputField(props: Readonly<SelectInputFieldProps>) {
                     </option>
                 ))}
             </select>
+        </SimsettingFieldWrapper>
+    )
+}
+
+export function DateInputField(props: Readonly<DateInputFieldProps>) {
+    return (
+        <SimsettingFieldWrapper label={props.label} infoText={props.infoText}>
+            <input
+                className="input-field"
+                type="date"
+                name={props.name}
+                value={props.value}
+                min={props.min}
+                max={props.max}
+                disabled={props.disabled}
+                onChange={props.onChange}
+            />
         </SimsettingFieldWrapper>
     )
 }

@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, Path, BackgroundTasks, Query
+from fastapi import FastAPI, HTTPException, Path, BackgroundTasks
 from flee_controller.controller import Controller
 from fastapi.middleware.cors import CORSMiddleware
 from typing import Any, Dict, AnyStr, List, Union
@@ -135,6 +135,25 @@ async def get_simulation(
     return await controller.get_simulation(simulation_id)
 
 
+@app.post("/simulations")
+async def post_simulation(
+        simulation: JSONStructure = None):
+    """
+    Posts the simulation input to the controller.
+
+    Parameters:
+    - simulation (JSONStructure, optional): The simulation input.
+
+    Returns:
+    - dict: A dictionary containing the posted simulation input.
+    """
+    try:
+        simulation_id = await controller.post_simulation(simulation)
+        return {"id": simulation_id}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 # Simulation results: -------------------------------------------------------
 
 
@@ -253,52 +272,3 @@ async def delete_simsetting(
     - The result of the deletion operation.
     """
     return await controller.delete_simsetting(simsetting_id)
-
-
-# Helper Functions ------------------------------------------------------------
-
-
-@app.get("/teststore/{simsetting_id}")
-async def teststore(
-    simsetting_id: str = Path(
-        description="The ID of the simsetting you want to delete."
-    )
-):
-    """
-    Store a simsetting, given by the simsetting_id in the filesystem
-    """
-    return await controller.teststore_ss(simsetting_id)
-
-
-@app.get("/testread_ss/{simsetting_id}")
-def testread(
-        simsetting_id: str = Path(
-            description="The ID of the simsetting you want to read the yml file from."
-        )
-):
-    """
-    Read a simsettings.yml file for a given simsettings_id, stored in the filesystem
-    """
-    return controller.testread_ss(simsetting_id)
-
-
-@app.get("/test_csv/{simulation_id}")
-async def test_csv(
-        simulation_id: str = '658dec24819bd1bc1ff738cd'
-):
-    """
-    Convert all data in DB, stored for given simulation, to .csv files and store them in filesystem
-    """
-    return await controller.convert_simulations_to_csv(simulation_id)
-
-
-@app.get("/testread_csv/{simulation_id}")
-def testread_csv(
-        simulation_id: str = Path(
-            description="ID of simulation of .csv file, which should be returned"
-        )
-):
-    """
-    Read all data for given simulation from stored .csv files in filesystem
-    """
-    return controller.testread_csv(simulation_id)
