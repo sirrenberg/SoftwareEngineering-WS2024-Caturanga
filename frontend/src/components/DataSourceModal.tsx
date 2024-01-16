@@ -38,7 +38,7 @@ function DataSourceModal({
               <strong>Source:</strong> <a href={acled_url}>{acled_url}</a>
             </p>
             <p>
-              <strong>Last update date:</strong>{" "}
+              <strong>Last updated:</strong>{" "}
               {acled_last_update_date.slice(0, 10)}
             </p>
           </div>
@@ -49,7 +49,7 @@ function DataSourceModal({
               <a href={population_url}>{population_url}</a>
             </p>
             <p>
-              <strong>Last update date:</strong>{" "}
+              <strong>Last updated:</strong>{" "}
               {population_last_update_date.slice(0, 10)}
             </p>
           </div>
@@ -59,7 +59,7 @@ function DataSourceModal({
               <strong>Source:</strong> <a href={camp_url}>{camp_url}</a>
             </p>
             <p>
-              <strong>Last update date:</strong>{" "}
+              <strong>Last updated:</strong>{" "}
               {camp_last_update_date.slice(0, 10)}
             </p>
           </div>
