@@ -27,6 +27,8 @@ class Controller:
         self.MONGODB_URI = os.environ.get('MONGO_URI')
         self.client = MongoClient(self.MONGODB_URI)
         self.db = self.client.get_database("Caturanga")
+        self.default_setting_id = "6599846eeb8f8c36cce8307a"
+        self.default_input_id = "65a6a042619bb91dd9091165"
 
 # Run simulations: ------------------------------------------------------------
 
@@ -347,7 +349,8 @@ class Controller:
         Returns:
         - list of simulation summaries.
         """
-        return await self.get_summaries("simulations")
+        data = await self.get_summaries("simulations")
+        return {"data": data, "protectedIDs": [self.default_input_id]}
 
     # Get specific simulation by simulation_id:
     async def get_simulation(self, simulation_id: str):
@@ -476,7 +479,7 @@ class Controller:
             simsetting["_id"] = str(simsetting["_id"])
             rl.append(simsetting)
         client.close()
-        return rl
+        return {"data": rl, "protectedIDs": [self.default_setting_id]}
 
     async def get_all_simsetting_summaries(self):
         """
@@ -485,7 +488,8 @@ class Controller:
         Returns:
         - list of simsetting summaries.
         """
-        return await self.get_summaries("simsettings")
+        data = await self.get_summaries("simsettings")
+        return {"data": data, "protectedIDs": [self.default_setting_id]}
 
     # Get specific simsettings by simsetting_id:
     async def get_simsetting(self, simsetting_id: str):

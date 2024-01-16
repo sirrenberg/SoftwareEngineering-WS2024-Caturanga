@@ -17,8 +17,7 @@ function Inputs() {
   const [inputs, setInputs] = useState<Input[] | undefined>(undefined);
   const [selectedInputIndex, setSelectedInputIndex] = useState<number>(-1);
   const [mapCenter, setMapCenter] = useState<LatLngExpression>([0, 0]); // [lat, lng]
-
-  const protectedInputIDs: string[] = ["65a6a042619bb91dd9091165"];
+  const [protectedInputIDs, setProtectedInputIDs] = useState<string[]>([]);
 
   const context = useContext(StartSimContext);
   if (!context) {
@@ -27,8 +26,10 @@ function Inputs() {
   const { setInputId, setInputName } = context;
 
   useEffect(() => {
-    sendRequest("/simulations/summary", "GET").then((data) => {
+    sendRequest("/simulations/summary", "GET").then((response) => {
+      const { data, protectedIDs } = response;
       setInputs(data);
+      setProtectedInputIDs(protectedIDs);
     });
   }, []);
 
