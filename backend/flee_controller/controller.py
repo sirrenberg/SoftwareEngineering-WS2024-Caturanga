@@ -28,6 +28,9 @@ class Controller:
         self.client = MongoClient(self.MONGODB_URI)
         self.db = self.client.get_database("Caturanga")
 
+        self.default_input_id = "65a6a042619bb91dd9091165"
+        self.default_setting_id = "6599846eeb8f8c36cce8307a"
+
 # Run simulations: ------------------------------------------------------------
 
     async def initialize_simulation(
@@ -132,8 +135,8 @@ class Controller:
             self,
             result,
             object_id: str,
-            simulation_id: str = "658dec24819bd1bc1ff738cd",
-            simsettings_id: str = "6570f624987cdd647c68bc7d",
+            simulation_id: str = None,
+            simsettings_id: str = None,
             name: str = "undefined"):
         """
         Stores a simulation result in the database.
@@ -142,12 +145,15 @@ class Controller:
         - result (dict): The result of the simulation.
         - object_id (str): The ID of the dummy simulation result.
         - simulation_id (str): The ID of the simulation input.
-          Defaults to "658dec24819bd1bc1ff738cd" (Burundi).
         - simsettings_id (str): The ID of the simulation settings.
-          Defaults to "6570f624987cdd647c68bc7d" (Test simsettings).
         - name (str): The name of the simulation result.
           Defaults to "undefined".
         """
+        if simulation_id is None:
+            simulation_id = self.default_input_id
+        if simsettings_id is None:
+            simsettings_id = self.default_setting_id
+
         client, db = self.connect_db()
         simulations_collection = db.simulations_results
         new_simulation = {}
@@ -169,8 +175,8 @@ class Controller:
 
     async def store_dummy_simulation(
                 self,
-                simulation_id: str = "658dec24819bd1bc1ff738cd",
-                simsettings_id: str = "6570f624987cdd647c68bc7d",
+                simulation_id: str = None,
+                simsettings_id: str = None,
                 name: str = "undefined"):
         """
         Stores a dummy simulation in the database so that the user can see
@@ -178,15 +184,18 @@ class Controller:
 
         Parameters:
         - simulation_id (str): The ID of the simulation input.
-          Defaults to "658dec24819bd1bc1ff738cd" (Burundi).
         - simsettings_id (str): The ID of the simulation settings.
-          Defaults to "6570f624987cdd647c68bc7d" (Test simsettings).
         - name (str): The name of the simulation result.
           Defaults to "undefined".
 
         Returns:
         - str: The ID of the inserted dummy simulation.
         """
+        if simulation_id is None:
+            simulation_id = self.default_input_id
+        if simsettings_id is None:
+            simsettings_id = self.default_setting_id
+
         client, db = self.connect_db()
         collection = db.simulations_results
         dummy_simulation = {}
@@ -410,18 +419,21 @@ class Controller:
     async def post_simulation(
                 self,
                 simulation,
-                simulation_id: str = "65a4221b9019061ba0e12e28"):
+                simulation_id: str = None):
         """
         Posts a new simulation input to the database.
 
         Parameters:
         - simulation (dict): The new simulation input to be posted.
         - simulation_id (str, optional): The ID of the "basic" input
-          to be used as baseline. Defaults to "65a4221b9019061ba0e12e28".
+          to be used as baseline.
 
         Returns:
         - str: The ID of the inserted simulation input.
         """
+        if simulation_id is None:
+            simulation_id = self.default_input_id
+
         return await self.post_data(simulation, "simulations", simulation_id)
 
 # Manage simsettings in DB: ---------------------------------------------------
@@ -480,18 +492,21 @@ class Controller:
     async def post_simsettings(
                 self,
                 simsetting,
-                simsetting_id: str = "6599846eeb8f8c36cce8307a"):
+                simsetting_id: str = None):
         """
         Posts a new simulation setting to the database.
 
         Parameters:
         - simsetting (dict): The new simulation setting to be posted.
         - simsetting_id (str, optional): The ID of the "basic" simsetting
-          to be used as baseline. Defaults to "6599846eeb8f8c36cce8307a".
+          to be used as baseline.
 
         Returns:
         - str: The ID of the inserted simulation setting.
         """
+        if simsetting_id is None:
+            simsetting_id = self.default_setting_id
+
         return await self.post_data(simsetting, "simsettings", simsetting_id)
 
     # Return all stored simsettings of DB:
