@@ -1,4 +1,4 @@
-# This script is based on https://github.com/djgroen/FabFlee/blob/master/scripts/04_extract_conflicts_csv.py 
+# This script is partially based on https://github.com/djgroen/FabFlee/blob/master/scripts/04_extract_conflicts_csv.py 
 # but changed where necessary to work automatically with the data from the ACLED API and the population data
 import os
 import pandas as pd

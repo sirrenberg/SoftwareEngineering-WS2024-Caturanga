@@ -49,10 +49,8 @@ def extract_population_info_from_web(country, folder_name, threshold):
                 # find all rows in the table
                 for row in city_table.find_all('tr'):
                     columns = row.find_all(['td', 'th'])
-
                     # Check if it's a data row
                     if columns and 'itemscope' in row.attrs:
-
                         city_name = columns[1].find('span', {'itemprop': 'name'}).text.strip()
                         adm = columns[2].text.strip()
                         population_latest = row.find('td', {'class': 'rpop prio1'}).text.strip()
@@ -74,7 +72,6 @@ def extract_population_info_from_web(country, folder_name, threshold):
         print(f"Failed to retrieve the page. Status code: {response.status_code}")
 
     # create a csv in folder_name with the following structure: name, population
-
     with open(f'{folder_name}/population.csv', 'w', newline='') as csv_file:
         writer = csv.writer(csv_file)
         writer.writerow(['name', 'population'])

@@ -1,5 +1,6 @@
-# This script is based on https://github.com/djgroen/FabFlee/blob/master/scripts/02_extract_locations_csv.py 
-# but changed where necessary to work automatically with the data from the ACLED API and the population data
+# This script is partially based on https://github.com/djgroen/FabFlee/blob/master/scripts/02_extract_locations_csv.py 
+# but changed where necessary to work automatically with the data from the ACLED API and the population data. 
+# Additionally, I added the function keep_rows_by_population
 import os
 import numpy as np
 import pandas as pd
@@ -45,11 +46,12 @@ def filter_by_location(input_data_df, column_name):
         print("Invalid location type!")
 
     outputdata = pd.DataFrame()
+
+    # 
     for loc in location_list:
-        # keep admin 1 as they are 
-        tempdf = input_data_df.loc[input_data_df[column_name] == loc]
-        tempdf.sort_values(column_name, ascending=True)
-        outputdata = pd.concat([outputdata, tempdf.tail(1)])
+        tempdf = input_data_df.loc[input_data_df[column_name] == loc] # filter by location
+        tempdf.sort_values(column_name, ascending=True) # sort by location
+        outputdata = pd.concat([outputdata, tempdf.tail(1)]) # add the last row of each location to the outputdata
 
     outputdata = outputdata[['event_date', 'country', column_name, 'admin1', 'latitude', 'longitude', 'fatalities', 'conflict_date']]
 
@@ -65,7 +67,7 @@ def keep_rows_by_population(input_data_df, rows_shown):
             input_data (DataFrame): Input DataFrame
             rows_shown (int): Number of rows to keep
         Returns:
-            output_data (DataFrame): Filtered DataFrame
+            reduced_df (DataFrame): Filtered DataFrame
     '''
 
     # sort by population (descending)
@@ -78,8 +80,6 @@ def keep_rows_by_population(input_data_df, rows_shown):
 
 
 
-
-
 def extract_locations_csv(folder_name, start_date, location_type, fatalities_threshold, conflict_threshold, rows_shown):
     '''
     Main function to extract location data from ACLED data and write it to a CSV file.
@@ -89,6 +89,7 @@ def extract_locations_csv(folder_name, start_date, location_type, fatalities_thr
             location_type (str): The type of location to focus on
             fatalities_threshold (int): Minimum fatalities count for including a location
             conflict_threshold (int): Conflict period threshold for classifying locations
+            rows_shown (int): Number of rows to keep
     '''
     # Get the current directory
     current_dir = os.getcwd()

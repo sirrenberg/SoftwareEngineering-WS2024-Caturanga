@@ -40,7 +40,6 @@ def extract_conflict_info(country, folder_name, start_date, max_simulation_end_d
     acled_df['conflict_date'] = conflict_date
 
     # Group the locations by admin-level
-    # TODO: is the grouping necessary? 
     grouped = acled_df.groupby(location_type)
 
 
