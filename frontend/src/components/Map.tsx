@@ -144,10 +144,9 @@ function Map({
               }}
             >
               <Popup>
-                {location.name} ({location.location_type})
-                <ul>
-                  <li>pop.: {location.population}</li>
-                </ul>
+                <strong>{location.name}</strong> ({location.location_type})
+                <br />
+                Population: {location.population === 0 ? "N/A" : location.population}
               </Popup>
             </Circle>
           );
@@ -186,7 +185,7 @@ function Map({
               }}
             >
               <Popup>
-                {fromLocation.name} to {toLocation.name}: {route.distance} km
+                <strong>{fromLocation.name}</strong> to <strong>{toLocation.name}</strong>: {route.distance} km
               </Popup>
             </Polyline>
           );
