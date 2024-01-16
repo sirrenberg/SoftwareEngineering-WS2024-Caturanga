@@ -37,16 +37,18 @@
   font-family: "Cabin", sans-serif;
   font-weight: 600;
   font-size: 1.4rem;
+  margin-bottom: 20px;
 }
 
 .items-list {
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: center;
   width: 90%;
   height: 75%;
   overflow-y: scroll;
+  box-sizing: border-box;
 }
 
 .items-list .simple-button {
@@ -188,4 +190,11 @@ a .items-list-item-icons {
 .simple-button:disabled {
   cursor: not-allowed;
   opacity: 0.5;
+}
+
+.section-subtext {
+  font-size: 1.2rem;
+  margin-bottom: 2rem;
+  font-family: "Cabin", sans-serif;
+  text-align: center;
 }

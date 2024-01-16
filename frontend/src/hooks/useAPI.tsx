@@ -1,8 +1,13 @@
 export function useAPI() {
   const API_URL = "https://sj6mxvhnt8.execute-api.eu-west-1.amazonaws.com";
 
-  function sendRequest(route: string, method: string, body?: any) {
-    return fetch(API_URL + route, {
+  function sendRequest(route: string, 
+                       method: string, 
+                       body?: any) {
+    const url = new URL(API_URL + route);
+
+    console.log(body)
+    return fetch(url.toString(), {
       method,
       body: JSON.stringify(body),
       headers: {

@@ -84,6 +84,14 @@ a {
   color: var(--gray);
 }
 
+.page-subsubtitle {
+  font-size: 1.5rem;
+  font-weight: 400;
+  margin-bottom: 1rem;
+  font-family: "Cabin", sans-serif;
+  color: var(--gray);
+}
+
 @media (max-width: 1280px) {
   .simple-button {
     font-size: 0.8rem;
