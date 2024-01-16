@@ -27,7 +27,7 @@ class Controller:
         self.client, self.db = self.connect_db()
         self.csvTransformer = CsvTransformer(self.db)
 
-        self.default_input_id = "65a6a042619bb91dd9091165"
+        self.default_input_id = "65a6d3eb9ae2636fa2b3e3c6"
         self.default_setting_id = "6599846eeb8f8c36cce8307a"
 
 # Run simulations: ------------------------------------------------------------
@@ -419,10 +419,16 @@ class Controller:
     async def delete_simulation(self, simulation_id: str):
         """
         Deletes a simulation from the database.
+        ATTENTION: DELETES ALL SIMULATION RESULTS ASSOCIATED WITH THE SIMULATION!
 
         Parameters:
         - simulation_id (str): The ID of the simulation to be deleted.
         """
+        # Delete simulation results associated with the simulation:
+        client, db = self.connect_db()
+        simulations_results_collection = db.get_collection("simulations_results")
+        simulations_results_collection.delete_many({"simulation_id": simulation_id})
+        client.close()
         return self.delete_document("simulations", simulation_id)
 
     async def post_simulation(
