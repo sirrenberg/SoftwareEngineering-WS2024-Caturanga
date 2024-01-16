@@ -14,11 +14,13 @@
   background-color: var(--medium-blue);
 }
 
-#outputs-menu-container .simple-button {
+#outputs-menu-container .simple-button,
+.result-detail-container .simple-button {
   background-color: var(--dark-orange);
 }
 
-#outputs-menu-container .simple-button:hover {
+#outputs-menu-container .simple-button:hover,
+.result-detail-container .simple-button:hover {
   background-color: var(--medium-orange);
 }
 
@@ -123,13 +125,12 @@
 .item-preview-status {
   font-size: 0.9rem;
   margin-top: 0.2em;
-  color: var(--gray)
+  color: var(--gray);
 }
 
 #outputs-items-list .simple-button.selected-item .item-preview-status,
-#outputs-items-list .simple-button:hover .item-preview-status
-{
-  color: var(--light-gray)
+#outputs-items-list .simple-button:hover .item-preview-status {
+  color: var(--light-gray);
 }
 
 .items-list-item-icons {
@@ -183,7 +184,7 @@ a .items-list-item-icons {
 .selected-item-subtitle {
   margin-bottom: 1.5em;
   font-weight: 700;
-  color: var(--gray)
+  color: var(--gray);
 }
 
 .map-background {
