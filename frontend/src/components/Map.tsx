@@ -74,13 +74,13 @@ function Map({
     // get the color of the node based on the location type
     switch (location.location_type) {
       case LocationType.conflict_zone:
-        return "red";
+        return "#f15025";
       case LocationType.town:
-        return "blue";
+        return "#476c85";
       case LocationType.forwarding_hub:
         return "orange";
       case LocationType.camp:
-        return "green";
+        return "#46af93";
       default:
         return "black";
     }
