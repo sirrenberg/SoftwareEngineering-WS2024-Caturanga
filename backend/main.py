@@ -135,7 +135,7 @@ async def get_simulation(
     return await controller.get_simulation(simulation_id)
 
 @app.delete("/simulations/{simulation_id}")
-async def delete_simsetting(
+async def delete_simulation_and_associated_results(
         simulation_id: str = Path(),
 ):
     """
@@ -147,7 +147,7 @@ async def delete_simsetting(
     Returns:
     - The result of the deletion operation.
     """
-    return await controller.delete_simulation(simulation_id)
+    return await controller.delete_simulation_and_associated_results(simulation_id)
 
 
 @app.post("/simulations")

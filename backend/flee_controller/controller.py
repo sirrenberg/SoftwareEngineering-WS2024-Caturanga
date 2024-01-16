@@ -416,7 +416,7 @@ class Controller:
 
         return result
     
-    async def delete_simulation(self, simulation_id: str):
+    async def delete_simulation_and_associated_results(self, simulation_id: str):
         """
         Deletes a simulation from the database.
         ATTENTION: DELETES ALL SIMULATION RESULTS ASSOCIATED WITH THE SIMULATION!
