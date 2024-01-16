@@ -42,8 +42,6 @@ function Inputs() {
     }
   }, []);
 
-  console.log("inputs", inputs);
-
   return (
     <div className="menu-items-container content-page">
       <div className="items-list-container">
@@ -96,7 +94,7 @@ function Inputs() {
             ? inputs.length > 0
               ? selectedInputIndex === -1
                 ? "Choose an Input"
-                : inputs[selectedInputIndex].region
+                : inputs[selectedInputIndex].name
               : "Create a New Input"
             : ""}
         </h2>
