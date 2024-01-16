@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, Path, BackgroundTasks, Query
+from fastapi import FastAPI, HTTPException, Path, BackgroundTasks
 from flee_controller.controller import Controller
 from fastapi.middleware.cors import CORSMiddleware
 from typing import Any, Dict, AnyStr, List, Union
@@ -135,6 +135,25 @@ async def get_simulation(
     return await controller.get_simulation(simulation_id)
 
 
+@app.post("/simulations")
+async def post_simulation(
+        simulation: JSONStructure = None):
+    """
+    Posts the simulation input to the controller.
+
+    Parameters:
+    - simulation (JSONStructure, optional): The simulation input.
+
+    Returns:
+    - dict: A dictionary containing the posted simulation input.
+    """
+    try:
+        simulation_id = await controller.post_simulation(simulation)
+        return {"id": simulation_id}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 # Simulation results: -------------------------------------------------------
 
 
@@ -176,6 +195,22 @@ async def get_simulation_result(
     - dict: The data of the simulation result.
     """
     return await controller.get_simulation_result(simulation_result_id)
+
+
+@app.delete("/simulation_results/{simulation_result_id}")
+async def delete_simulation_results(
+        simulation_result_id: str = Path(),
+):
+    """
+    Delete the data of a simulation result based on its ID.
+
+    Parameters:
+    - simulation_result_id (str): The ID of the simulation result.
+
+    Returns:
+    - dict: The data of the simulation result.
+    """
+    return await controller.delete_simulation_results(simulation_result_id)
 
 
 # Simulation Settings: --------------------------------------------------------

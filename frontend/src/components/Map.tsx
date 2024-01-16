@@ -18,6 +18,7 @@ import { LatLngExpression } from "leaflet";
 import { useMap } from "react-leaflet/hooks";
 import { useEffect } from "react";
 import { v4 as uuidv4 } from "uuid";
+import { Colors } from "../helper/constants/DesignConstants";
 
 function Map({
   input,
@@ -74,13 +75,13 @@ function Map({
     // get the color of the node based on the location type
     switch (location.location_type) {
       case LocationType.conflict_zone:
-        return "#f15025";
+        return Colors.medium_orange;
       case LocationType.town:
-        return "#476c85";
+        return Colors.medium_blue;
       case LocationType.forwarding_hub:
-        return "orange";
+        return Colors.white;
       case LocationType.camp:
-        return "#46af93";
+        return Colors.medium_green;
       default:
         return "black";
     }
@@ -144,10 +145,9 @@ function Map({
               }}
             >
               <Popup>
-                {location.name} ({location.location_type})
-                <ul>
-                  <li>pop.: {location.population}</li>
-                </ul>
+                <strong>{location.name}</strong> ({location.location_type})
+                <br />
+                Population: {location.population === 0 ? "N/A" : location.population}
               </Popup>
             </Circle>
           );
@@ -186,7 +186,7 @@ function Map({
               }}
             >
               <Popup>
-                {fromLocation.name} to {toLocation.name}: {route.distance} km
+                <strong>{fromLocation.name}</strong> to <strong>{toLocation.name}</strong>: {route.distance} km
               </Popup>
             </Polyline>
           );

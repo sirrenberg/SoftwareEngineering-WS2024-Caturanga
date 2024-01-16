@@ -16,6 +16,12 @@ enum MapInputType {
   inputs = "Inputs",
 }
 
+enum SimulationStatus {
+  running = "running",
+  done = "done",
+  error = "error",
+}
+
 interface SimLocation {
   // can not be called Location as that conflicts with MongoDB
   name: string;
@@ -66,7 +72,19 @@ interface Input {
 }
 
 interface ResultPreview {
+  id: string;
+  name: string;
+  input: Input;
+  status: SimulationStatus;
+}
+
+interface Result {
   _id: string;
+  name: string;
+  simulation_id: string;
+  data: Array<{
+    [key: string]: number;
+  }>;
 }
 
 interface Result {
@@ -98,6 +116,7 @@ interface SimSettings {
     pop_power_for_loc_weight: number;
     conflict_movechance: number;
     camp_movechance: number;
+    idpcamp_movechance: number;
     default_movechance: number;
     awareness_level: number;
     capacity_scaling: number;
@@ -111,4 +130,4 @@ interface SimSettings {
 }
 
 export type { SimLocation, Route, Input, SimSettings, ResultPreview, Result };
-export { LocationType, MapOperatingMode, MapInputType };
+export { LocationType, MapOperatingMode, MapInputType, SimulationStatus };

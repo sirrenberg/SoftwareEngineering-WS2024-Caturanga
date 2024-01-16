@@ -6,31 +6,13 @@ import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useAPI } from "../hooks/useAPI";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPenToSquare, faTrash } from "@fortawesome/free-solid-svg-icons";
-import {
-  movementRulesText,
-  moveSpeedText,
-  walkSpeedText,
-  conflictWeightText,
-  campWeightText,
-  foreignWeightText,
-  usePopForLocWeightText,
-  popPowerForLocWeightText,
-  conflictMovechanceText,
-  campMovechanceText,
-  defaultMovechanceText,
-  awarenessLevelText,
-  startOnFootText,
-  hastenText,
-  optimisationsText,
-  awarenessLevelOptions,
-  spawnRulesText,
-  displacedPerConflictDayText,
-} from "../helper/constants";
-import {
-  CheckboxInputField,
-  NumberInputField,
-  SelectInputField,
-} from "../components/SimsettingField";
+import { movementRulesText, moveSpeedText, walkSpeedText, conflictWeightText,
+        campWeightText, foreignWeightText, usePopForLocWeightText,
+        popPowerForLocWeightText, conflictMovechanceText, idpcampMovechanceText,
+        defaultMovechanceText, awarenessLevelText, startOnFootText, hastenText,
+        optimisationsText, awarenessLevelOptions, spawnRulesText, displacedPerConflictDayText } 
+        from "../helper/constants/SimsettingConstants";
+import { CheckboxInputField, NumberInputField, SelectInputField } from "../components/SimsettingField";
 
 function Settings() {
   const { sendRequest } = useAPI();
@@ -274,15 +256,12 @@ function Settings() {
                   />
                 </div>
                 <div className="input-field-container">
-                  <NumberInputField
-                    label="Camp Movechance"
-                    infoText={campMovechanceText}
-                    name="camp_movechance"
-                    value={
-                      settings[selectedSettingIndex].move_rules.camp_movechance
-                    }
-                    disabled={true}
-                  />
+                    <NumberInputField 
+                      label="Camp Movechance"
+                      infoText={idpcampMovechanceText}
+                      name="idpcamp_movechance"
+                      value={settings[selectedSettingIndex].move_rules.idpcamp_movechance}
+                      disabled={true}/>
                 </div>
                 <div className="input-field-container">
                   <NumberInputField
