@@ -30,11 +30,16 @@ class Controller:
         Initializes the Controller object.
         """
         self.adapter = Adapter()
-        secret = self.get_secret("caturanga-db-user-and-pw")
-        self.username = secret["username"] # store username and password in environment variables, so that they don't have to be fetched from the AWS Secrets Manager every time, which is expensive
-        self.password = secret["password"]
+        MONGO_USER = os.environ.get('MONGO_USER')
+        MONGO_PASSWORD = os.environ.get('MONGO_PASSWORD')
+        print(MONGO_PASSWORD)
+        MONGO_CONNECTION_STRING_PREFIX = os.environ.get('MONGO_CONNECTION_STRING_PREFIX')
+        print(MONGO_CONNECTION_STRING_PREFIX)
+        MONGO_CONNECTION_STRING_SUFFIX = os.environ.get('MONGO_CONNECTION_STRING_SUFFIX')
+        print(MONGO_CONNECTION_STRING_SUFFIX)
+        self.MONGODB_URI = MONGO_CONNECTION_STRING_PREFIX + MONGO_USER + ":" + MONGO_PASSWORD + "@" + MONGO_CONNECTION_STRING_SUFFIX
 
-# Run simulations: ------------------------------------------------------------
+    # Run simulations: ------------------------------------------------------------
 
     async def initialize_simulation(
             self,
@@ -129,8 +134,7 @@ class Controller:
                    the database object.
         """
         load_dotenv()
-        MONGODB_URI = f"mongodb://{self.username}:{self.password}@caturanga-2023-12-08-16-18-00.cluster-cqhcnfxitkih.eu-west-1.docdb.amazonaws.com:27017/?tls=true&tlsCAFile=global-bundle.pem&replicaSet=rs0&readPreference=secondaryPreferred&retryWrites=false"
-        client = MongoClient(MONGODB_URI)
+        client = MongoClient(self.MONGODB_URI)
         db = client.Caturanga
         return client, db
 
@@ -519,49 +523,6 @@ class Controller:
         )
         client.close()
         return 
-    
-    def get_secret(self, secret_name):
-        """
-        Retrieves the secret value that contains the username and password for the documentDB database from the AWS Secrets Manager.
-        """
-        logging.basicConfig(level=logging.DEBUG)
-        region_name = "eu-west-1"
-
-        # Create a Secrets Manager client
-        logging.debug("Creating a boto3 session...")
-        session = boto3.session.Session()
-        logging.debug("Session created. Session is of type: " + str(type(session)))
-        logging.debug("Creating a boto3 client...")
-        client = session.client(service_name="secretsmanager", region_name=region_name)
-        logging.debug("Client created. Client is of type: " + str(type(client)))
-
-        try:
-            logging.debug("Trying to get secret value...")
-            get_secret_value_response = client.get_secret_value(SecretId=secret_name)
-            logging.debug(
-                "Secret value retrieved. Secret value is of type: "
-                + str(type(get_secret_value_response))
-            )
-        except ClientError as e:
-            # For a list of exceptions thrown, see
-            # https://docs.aws.amazon.com/secretsmanager/latest/apireference/API_GetSecretValue.html
-            return e
-
-        logging.debug("Trying to parse secret value...")
-        secret = get_secret_value_response["SecretString"]
-        logging.debug("Secret value parsed. Secret value is of type: " + str(type(secret)))
-
-        json_secret = json.loads(secret)
-        print("Type of json_secret:" + str(type(json_secret)))
-
-        logging.debug("Trying to parse secret value as JSON...")
-        username = json_secret["username"]
-        print("Username is " + str(username))
-        logging.debug(
-            "Secret value parsed as JSON. Username is of type: " + str(type(username))
-        )
-
-        return json.loads(secret)
 
 
 # Helper functions - Storing .csv-files for given data and path: --------------
