@@ -43,7 +43,7 @@ api_gateway = boto3.client('apigatewayv2')
 integrations = api_gateway.get_integrations(ApiId=API_GATEWAY_ID)["Items"]
 integration_id_and_uri = []
 for integration in integrations:
-    new_uri = "http://" + public_ip + "/" + integration["IntegrationUri"].split("http://")[1].split("/")[1]
+    new_uri = "http://" + public_ip + "/" + "/".join(integration["IntegrationUri"].split("http://")[1].split("/")[1:])
     integration_id_and_uri.append((integration["IntegrationId"],new_uri))
     logging.info("New uri: " + new_uri)
 
