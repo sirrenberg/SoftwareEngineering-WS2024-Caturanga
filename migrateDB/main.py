@@ -8,7 +8,7 @@ from bson.objectid import ObjectId as ObjectID
 from dotenv import load_dotenv
 from fastapi.middleware.cors import CORSMiddleware
 
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 app = FastAPI()
 
 origins = ["*"]
@@ -27,9 +27,9 @@ def read_root():
 
 @app.get("/username")
 def read_user():
-    logging.debug("Trying to invoke get_secret() from main.py...")
+    logging.info("Trying to invoke get_secret() from main.py...")
     username = get_secret("caturanga-db-user-and-pw")
-    logging.debug(
+    logging.info(
         "get_secret() invoked from main(). Username is of type: " + str(type(username))
     )
     return {"username": get_secret("caturanga-db-user-and-pw")["username"]}
@@ -79,21 +79,21 @@ def get_secret(secret_name):
     """
     Retrieves the secret value that contains the username and password for the documentDB database from the AWS Secrets Manager.
     """
-    logging.basicConfig(level=logging.DEBUG)
+    logging.basicConfig(level=logging.info)
     region_name = "eu-west-1"
 
     # Create a Secrets Manager client
-    logging.debug("Creating a boto3 session...")
+    logging.info("Creating a boto3 session...")
     session = boto3.session.Session()
-    logging.debug("Session created. Session is of type: " + str(type(session)))
-    logging.debug("Creating a boto3 client...")
+    logging.info("Session created. Session is of type: " + str(type(session)))
+    logging.info("Creating a boto3 client...")
     client = session.client(service_name="secretsmanager", region_name=region_name)
-    logging.debug("Client created. Client is of type: " + str(type(client)))
+    logging.info("Client created. Client is of type: " + str(type(client)))
 
     try:
-        logging.debug("Trying to get secret value...")
+        logging.info("Trying to get secret value...")
         get_secret_value_response = client.get_secret_value(SecretId=secret_name)
-        logging.debug(
+        logging.info(
             "Secret value retrieved. Secret value is of type: "
             + str(type(get_secret_value_response))
         )
@@ -102,17 +102,17 @@ def get_secret(secret_name):
         # https://docs.aws.amazon.com/secretsmanager/latest/apireference/API_GetSecretValue.html
         return e
 
-    logging.debug("Trying to parse secret value...")
+    logging.info("Trying to parse secret value...")
     secret = get_secret_value_response["SecretString"]
-    logging.debug("Secret value parsed. Secret value is of type: " + str(type(secret)))
+    logging.info("Secret value parsed. Secret value is of type: " + str(type(secret)))
 
     json_secret = json.loads(secret)
     print("Type of json_secret:" + str(type(json_secret)))
 
-    logging.debug("Trying to parse secret value as JSON...")
+    logging.info("Trying to parse secret value as JSON...")
     username = json_secret["username"]
     print("Username is " + str(username))
-    logging.debug(
+    logging.info(
         "Secret value parsed as JSON. Username is of type: " + str(type(username))
     )
 
@@ -158,15 +158,40 @@ def migrate_from_atlas():
     atlas_client, atlas_db = connect_atlas_db()
     atlas_collection_names = atlas_db.list_collection_names()
     for collection_name in atlas_collection_names:
+        logging.info("Migrating collection " + collection_name + "...")
         atlas_collection = atlas_db.get_collection(collection_name)
         atlas_documents = atlas_collection.find({})
         for document in atlas_documents:
+            document = remove_dots_in_field_names(document)
             aws_ddb_client, aws_ddb_db = connect_db()
-            aws_ddb_db.get_collection(collection_name).insert_one(document)
+            try:
+                aws_ddb_db.get_collection(collection_name).insert_one(document)
+            except Exception as e:
+                logging.info("Exception: " + str(e))
             aws_ddb_client.close()
 
     atlas_client.close()
     return "Migration successful."
+
+def remove_dots_in_field_names(document):
+    """
+    Removes dots in field names of a document.
+
+    Args:
+        document (dict): The document to be processed.
+
+    Returns:
+        dict: The processed document.
+    """
+    updated_document = {}
+    for key, value in document.items():
+        new_key = key.split('.')[0]  # Get the part before the first dot
+        if isinstance(value, dict):
+            # Recursively rename fields in nested dictionaries
+            updated_document[new_key] = remove_dots_in_field_names(value)
+        else:
+            updated_document[new_key] = value
+    return updated_document
 
 @app.get("/delete_all_in_document_db")
 def delete_all_in_document_db():
