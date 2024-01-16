@@ -5,10 +5,10 @@ import { useEffect } from "react";
 import { CheckboxInputField, NumberInputField, SelectInputField} from "../components/SimsettingField";
 import { movementRulesText, moveSpeedText, walkSpeedText, conflictWeightText,
   campWeightText, foreignWeightText, usePopForLocWeightText,
-  popPowerForLocWeightText, conflictMovechanceText, campMovechanceText,
+  popPowerForLocWeightText, conflictMovechanceText, idpcampMovechanceText,
   defaultMovechanceText, awarenessLevelText, startOnFootText, hastenText,
   optimisationsText, defaultValues, awarenessLevelOptions, spawnRulesText,
-  displacedPerConflictDayText, maxValues} from "../helper/constants";
+  displacedPerConflictDayText, maxValues} from "../helper/constants/SimsettingConstants";
 
 function AddSetting() {
   const { id } = useParams<{ id: string }>();
@@ -155,11 +155,11 @@ function AddSetting() {
                 <div className="input-field-container">
                     <NumberInputField 
                       label="Camp Movechance"
-                      infoText={campMovechanceText}
+                      infoText={idpcampMovechanceText}
                       min={0}
-                      max={maxValues.move_rules.camp_movechance}
-                      name="camp_movechance"
-                      value={values.move_rules.camp_movechance}
+                      max={maxValues.move_rules.idpcamp_movechance}
+                      name="idpcamp_movechance"
+                      value={values.move_rules.idpcamp_movechance}
                       disabled={false}
                       onChange={handleInputChange}/>
                 </div>

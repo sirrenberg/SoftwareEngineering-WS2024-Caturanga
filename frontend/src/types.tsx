@@ -2,13 +2,18 @@ enum LocationType {
   conflict_zone = "conflict_zone",
   town = "town",
   forwarding_hub = "forwarding_hub",
-  camp = "camp",
+  camp = "idpcamp",
 }
 
 enum MapOperatingMode {
   vizualizing = "Visualizing",
   adding_location = "Adding Location",
   adding_route = "Adding Route",
+}
+
+enum MapInputType {
+  results = "Results",
+  inputs = "Inputs",
 }
 
 interface SimLocation {
@@ -41,10 +46,22 @@ interface Input {
     date: string;
     length: number;
   };
+  conflicts: Array<{
+    [key: string]: number;
+  }>;
 }
 
 interface ResultPreview {
   _id: string;
+}
+
+interface Result {
+  _id: string;
+  name: string;
+  simulation_id: string;
+  data: Array<{
+    [key: string]: number;
+  }>;
 }
 
 interface SimSettings {
@@ -54,9 +71,9 @@ interface SimSettings {
     conflict_driven_spawning: {
       spawn_mode: string;
       displaced_per_conflict_day: number;
-    }
+    };
     insert_day0: boolean;
-  }
+  };
   move_rules: {
     max_move_speed: number;
     max_walk_speed: number;
@@ -67,6 +84,7 @@ interface SimSettings {
     pop_power_for_loc_weight: number;
     conflict_movechance: number;
     camp_movechance: number;
+    idpcamp_movechance: number;
     default_movechance: number;
     awareness_level: number;
     capacity_scaling: number;
@@ -79,5 +97,5 @@ interface SimSettings {
   };
 }
 
-export type { SimLocation, Route, Input, SimSettings, ResultPreview };
-export { LocationType, MapOperatingMode };
+export type { SimLocation, Route, Input, SimSettings, ResultPreview, Result };
+export { LocationType, MapOperatingMode, MapInputType };

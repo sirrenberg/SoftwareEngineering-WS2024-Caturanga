@@ -1,6 +1,7 @@
 import { FormEvent, useState } from "react";
 import { useAPI } from "../hooks/useAPI";
-import { maxValues } from "../helper/constants";
+import { maxValues } from "../helper/constants/SimsettingConstants";
+import { maxValues as inputMaxValues, minValues as inputMinValues } from "../helper/constants/InputConstants";
 
 export function useForm(initialFValues: any) {
   const [values, setValues] = useState(initialFValues);
@@ -40,19 +41,23 @@ export function useForm(initialFValues: any) {
     // convert string to boolean
     value = str2bool(value);
 
-    // if name is date or length, then we need to update the sim_period object
-    if (name === "date" || name === "length") {
+    // Input
+    if (name === "length") {
+      value = sanitiseInput(value,
+                            inputMaxValues.sim_period.length,
+                            inputMinValues.sim_period.length);
       setValues({
         ...values,
         sim_period: {
           ...values.sim_period,
-          [name]: value,
+          [name]: Number(value),
         },
       });
       return;
     }
 
-    // Move rules are nested in the sim_settings object
+    // Simsettings
+    // Move rules
     if (
       [
         "max_move_speed",
@@ -63,6 +68,7 @@ export function useForm(initialFValues: any) {
         "pop_power_for_loc_weight",
         "conflict_movechance",
         "camp_movechance",
+        "idpcamp_movechance",
         "default_movechance",
         "awareness_level",
         "capacity_scaling",
@@ -139,11 +145,13 @@ export function useForm(initialFValues: any) {
     });
   };
 
-  function sanitiseInput(value: string, max?: number) {
+  function sanitiseInput(value: string, max?: number, min?: number) {
     if (max && Number(value) > max) {
       value = max.toString();
     } else if (value.length > 10) {
       value = value.slice(0, 10);
+    } else if (min && Number(value) < min) {
+      value = min.toString();
     }
     return value;
   }
@@ -155,6 +163,7 @@ export function useForm(initialFValues: any) {
   function handleSubmit(e: FormEvent, url: string, method: string) {
     e.preventDefault();
     const { sendRequest } = useAPI();
+    
     sendRequest(url, method, values).then((data) => {
       console.log(data);
     });
