@@ -16,6 +16,12 @@ enum MapInputType {
   inputs = "Inputs",
 }
 
+enum SimulationStatus {
+  running = "running",
+  done = "done",
+  error = "error",
+}
+
 interface SimLocation {
   // can not be called Location as that conflicts with MongoDB
   name: string;
@@ -52,7 +58,19 @@ interface Input {
 }
 
 interface ResultPreview {
+  id: string;
+  name: string;
+  input: Input;
+  status: SimulationStatus;
+}
+
+interface Result {
   _id: string;
+  name: string;
+  simulation_id: string;
+  data: Array<{
+    [key: string]: number;
+  }>;
 }
 
 interface Result {
@@ -98,4 +116,4 @@ interface SimSettings {
 }
 
 export type { SimLocation, Route, Input, SimSettings, ResultPreview, Result };
-export { LocationType, MapOperatingMode, MapInputType };
+export { LocationType, MapOperatingMode, MapInputType, SimulationStatus };
