@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import {useEffect, useState} from 'react';
 import "../styles/Credits.css";
 import smallImage_netlight from '../../public/netlight-logo.png';
 import smallImage_FLEE from '../../public/flee.png';
