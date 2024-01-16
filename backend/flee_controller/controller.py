@@ -26,6 +26,8 @@ class Controller:
         self.client, self.db = self.connect_db()
         self.csvTransformer = CsvTransformer(self.db)
 
+        self.default_input_id = "65a6a042619bb91dd9091165"
+        self.default_setting_id = "6599846eeb8f8c36cce8307a"
 
 # Run simulations: ------------------------------------------------------------
 
@@ -131,8 +133,8 @@ class Controller:
             self,
             result,
             object_id: str,
-            simulation_id: str = "658dec24819bd1bc1ff738cd",
-            simsettings_id: str = "6570f624987cdd647c68bc7d",
+            simulation_id: str = None,
+            simsettings_id: str = None,
             name: str = "undefined"):
         """
         Stores a simulation result in the database.
@@ -141,12 +143,15 @@ class Controller:
         - result (dict): The result of the simulation.
         - object_id (str): The ID of the dummy simulation result.
         - simulation_id (str): The ID of the simulation input.
-          Defaults to "658dec24819bd1bc1ff738cd" (Burundi).
         - simsettings_id (str): The ID of the simulation settings.
-          Defaults to "6570f624987cdd647c68bc7d" (Test simsettings).
         - name (str): The name of the simulation result.
           Defaults to "undefined".
         """
+        if simulation_id is None:
+            simulation_id = self.default_input_id
+        if simsettings_id is None:
+            simsettings_id = self.default_setting_id
+
         client, db = self.connect_db()
         simulations_collection = db.simulations_results
         new_simulation = {}
@@ -168,8 +173,8 @@ class Controller:
 
     async def store_dummy_simulation(
                 self,
-                simulation_id: str = "658dec24819bd1bc1ff738cd",
-                simsettings_id: str = "6570f624987cdd647c68bc7d",
+                simulation_id: str = None,
+                simsettings_id: str = None,
                 name: str = "undefined"):
         """
         Stores a dummy simulation in the database so that the user can see
@@ -177,15 +182,18 @@ class Controller:
 
         Parameters:
         - simulation_id (str): The ID of the simulation input.
-          Defaults to "658dec24819bd1bc1ff738cd" (Burundi).
         - simsettings_id (str): The ID of the simulation settings.
-          Defaults to "6570f624987cdd647c68bc7d" (Test simsettings).
         - name (str): The name of the simulation result.
           Defaults to "undefined".
 
         Returns:
         - str: The ID of the inserted dummy simulation.
         """
+        if simulation_id is None:
+            simulation_id = self.default_input_id
+        if simsettings_id is None:
+            simsettings_id = self.default_setting_id
+
         client, db = self.connect_db()
         collection = db.simulations_results
         dummy_simulation = {}
@@ -415,56 +423,98 @@ class Controller:
 
         return result
 
+    async def post_simulation(
+                self,
+                simulation,
+                simulation_id: str = None):
+        """
+        Posts a new simulation input to the database.
+
+        Parameters:
+        - simulation (dict): The new simulation input to be posted.
+        - simulation_id (str, optional): The ID of the "basic" input
+          to be used as baseline.
+
+        Returns:
+        - str: The ID of the inserted simulation input.
+        """
+        if simulation_id is None:
+            simulation_id = self.default_input_id
+
+        return await self.post_data(simulation, "simulations", simulation_id)
 
 # Manage simsettings in DB: ---------------------------------------------------
 
-    async def post_simsettings(
+    async def post_data(
                 self,
-                simsetting,
-                simsetting_id: str = "6599846eeb8f8c36cce8307a"):
+                data,
+                collection_name,
+                data_id):
         """
-        Posts a new simulation setting to the database.
-        More precisely, this function retrieves the "basic" simsetting from the
-        database, uses it as a baseline, updates the part that has been
-        manipulated by the user and saves the newly created setting to the
-        database. This is because parts of the simsetting have implications on
+        Posts a new data (input or simsetting) to the database.
+        More precisely, this function retrieves the "basic" data (the default,
+        which is not modifiable) from the database, uses it as a baseline,
+        updates the part that has been manipulated by the user and
+        saves the newly created data to the database.
+        This is because parts of the data have implications on
         logging or the required files and format, thus are not relevant to the
         user or might break the simulation (with the current setup),
         and are therefore not shown to the user.
 
         Parameters:
-        - simsetting (dict): The new simulation setting to be posted.
-        - simsetting_id (str, optional): The ID of the "basic" simsetting
-          to be used as baseline. Defaults to "6599846eeb8f8c36cce8307a".
+        - data (dict): The new simulation data to be posted.
+        - data_id (str, optional): The ID of the "basic" data to be used as
+          baseline.
 
         Returns:
-        - str: The ID of the inserted simulation setting.
+        - str: The ID of the inserted simulation data.
         """
-        basic_simsetting = await self.get_simsetting(simsetting_id)
+        if collection_name == "simulations":
+            basic_data = await self.get_simulation(data_id)
+        else:
+            basic_data = await self.get_simsetting(data_id)
 
         client, db = self.connect_db()
 
-        # remove id to create a NEW simsetting
         try:
-            del basic_simsetting["_id"]
-            del simsetting["_id"]
+            del basic_data["_id"]
+            del data["_id"]
         except Exception as e:
-            return f"Exception while removing _id key from simsetting: {e}"
+            return f"Exception while removing _id key from data: {e}"
 
-        # Update parts of basic simsetting manipulated by the user
         try:
-            for key in simsetting:
-                basic_simsetting[key] = simsetting[key]
+            for key in data:
+                basic_data[key] = data[key]
         except Exception as e:
             return f"Exception while updating basic \
-                    simsetting with new simsetting: {e}"
+                    data with new data: {e}"
 
-        simsettings_collection = db.simsettings
-        result = simsettings_collection.insert_one(dict(basic_simsetting))
+        collection = db[collection_name]
+        result = collection.insert_one(dict(basic_data))
 
         client.close()
 
         return str(result.inserted_id)
+
+    async def post_simsettings(
+                self,
+                simsetting,
+                simsetting_id: str = None):
+        """
+        Posts a new simulation setting to the database.
+
+        Parameters:
+        - simsetting (dict): The new simulation setting to be posted.
+        - simsetting_id (str, optional): The ID of the "basic" simsetting
+          to be used as baseline.
+
+        Returns:
+        - str: The ID of the inserted simulation setting.
+        """
+        if simsetting_id is None:
+            simsetting_id = self.default_setting_id
+
+        return await self.post_data(simsetting, "simsettings", simsetting_id)
 
     # Return all stored simsettings of DB:
     async def get_all_simsettings(self):

@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, Path, BackgroundTasks, Query
+from fastapi import FastAPI, HTTPException, Path, BackgroundTasks
 from flee_controller.controller import Controller
 from fastapi.middleware.cors import CORSMiddleware
 from typing import Any, Dict, AnyStr, List, Union
@@ -133,6 +133,25 @@ async def get_simulation(
     - dict: The data of the simulation.
     """
     return await controller.get_simulation(simulation_id)
+
+
+@app.post("/simulations")
+async def post_simulation(
+        simulation: JSONStructure = None):
+    """
+    Posts the simulation input to the controller.
+
+    Parameters:
+    - simulation (JSONStructure, optional): The simulation input.
+
+    Returns:
+    - dict: A dictionary containing the posted simulation input.
+    """
+    try:
+        simulation_id = await controller.post_simulation(simulation)
+        return {"id": simulation_id}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 # Simulation results: -------------------------------------------------------
