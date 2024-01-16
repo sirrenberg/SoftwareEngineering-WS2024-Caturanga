@@ -1,4 +1,4 @@
-import { SimSettings } from "../types";
+import { SimSettings } from "../../types";
 
 export const defaultValues: SimSettings = {
     _id: "",

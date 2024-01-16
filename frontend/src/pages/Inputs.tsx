@@ -69,7 +69,7 @@ function Inputs() {
                   setInputName(inputs[index].name);
                 }}
               >
-                <p>{input.name}</p>
+                <p>{input.name.length < 10 ? input.name :  input.name.slice(0,10) + "..."}</p>
                 <span className="items-list-item-icons">
                   <NavLink to={"/inputs/" + input._id}>
                     <FontAwesomeIcon
@@ -125,7 +125,7 @@ function Inputs() {
             ? inputs.length > 0
               ? selectedInputIndex === -1
                 ? "Choose an Input"
-                : inputs[selectedInputIndex].region
+                : inputs[selectedInputIndex].name
               : "Create a New Input"
             : ""}
         </h2>

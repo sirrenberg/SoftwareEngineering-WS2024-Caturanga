@@ -1,12 +1,12 @@
-from datetime import datetime
 from pymongo import MongoClient
-from bson.objectid import ObjectId as ObjectID
 from dotenv import load_dotenv
 from flee_adapter.adapter import Adapter
-from pathlib import Path
+from flee_controller.csvtransformer import CsvTransformer
+
 import yaml
+from bson.objectid import ObjectId as ObjectID
+from pathlib import Path
 import os
-import csv
 
 
 class Controller:
@@ -21,14 +21,14 @@ class Controller:
         """
         Initializes the Controller object.
         """
+
         self.adapter = Adapter()
         self.backend_root_dir = Path(__file__).resolve().parent
-        load_dotenv()
-        self.MONGODB_URI = os.environ.get('MONGO_URI')
-        self.client = MongoClient(self.MONGODB_URI)
-        self.db = self.client.get_database("Caturanga")
-        self.default_setting_id = "6599846eeb8f8c36cce8307a"
+        self.client, self.db = self.connect_db()
+        self.csvTransformer = CsvTransformer(self.db)
+
         self.default_input_id = "65a6a042619bb91dd9091165"
+        self.default_setting_id = "6599846eeb8f8c36cce8307a"
 
 # Run simulations: ------------------------------------------------------------
 
@@ -134,8 +134,8 @@ class Controller:
             self,
             result,
             object_id: str,
-            simulation_id: str = "658dec24819bd1bc1ff738cd",
-            simsettings_id: str = "6570f624987cdd647c68bc7d",
+            simulation_id: str = None,
+            simsettings_id: str = None,
             name: str = "undefined"):
         """
         Stores a simulation result in the database.
@@ -144,12 +144,15 @@ class Controller:
         - result (dict): The result of the simulation.
         - object_id (str): The ID of the dummy simulation result.
         - simulation_id (str): The ID of the simulation input.
-          Defaults to "658dec24819bd1bc1ff738cd" (Burundi).
         - simsettings_id (str): The ID of the simulation settings.
-          Defaults to "6570f624987cdd647c68bc7d" (Test simsettings).
         - name (str): The name of the simulation result.
           Defaults to "undefined".
         """
+        if simulation_id is None:
+            simulation_id = self.default_input_id
+        if simsettings_id is None:
+            simsettings_id = self.default_setting_id
+
         client, db = self.connect_db()
         simulations_collection = db.simulations_results
         new_simulation = {}
@@ -171,8 +174,8 @@ class Controller:
 
     async def store_dummy_simulation(
                 self,
-                simulation_id: str = "658dec24819bd1bc1ff738cd",
-                simsettings_id: str = "6570f624987cdd647c68bc7d",
+                simulation_id: str = None,
+                simsettings_id: str = None,
                 name: str = "undefined"):
         """
         Stores a dummy simulation in the database so that the user can see
@@ -180,15 +183,18 @@ class Controller:
 
         Parameters:
         - simulation_id (str): The ID of the simulation input.
-          Defaults to "658dec24819bd1bc1ff738cd" (Burundi).
         - simsettings_id (str): The ID of the simulation settings.
-          Defaults to "6570f624987cdd647c68bc7d" (Test simsettings).
         - name (str): The name of the simulation result.
           Defaults to "undefined".
 
         Returns:
         - str: The ID of the inserted dummy simulation.
         """
+        if simulation_id is None:
+            simulation_id = self.default_input_id
+        if simsettings_id is None:
+            simsettings_id = self.default_setting_id
+
         client, db = self.connect_db()
         collection = db.simulations_results
         dummy_simulation = {}
@@ -241,7 +247,7 @@ class Controller:
             simulation_id: str):
 
         try:
-            await self.convert_simulations_to_csv(simulation_id)
+            await self.csvTransformer.convert_simulation_to_csv(simulation_id)
         except Exception as e:
             return f"No simulation with ID {simulation_id} stored in DB: {e}"
 
@@ -419,56 +425,98 @@ class Controller:
         """
         return self.delete_document("simulations", simulation_id)
 
+    async def post_simulation(
+                self,
+                simulation,
+                simulation_id: str = None):
+        """
+        Posts a new simulation input to the database.
+
+        Parameters:
+        - simulation (dict): The new simulation input to be posted.
+        - simulation_id (str, optional): The ID of the "basic" input
+          to be used as baseline.
+
+        Returns:
+        - str: The ID of the inserted simulation input.
+        """
+        if simulation_id is None:
+            simulation_id = self.default_input_id
+
+        return await self.post_data(simulation, "simulations", simulation_id)
 
 # Manage simsettings in DB: ---------------------------------------------------
 
-    async def post_simsettings(
+    async def post_data(
                 self,
-                simsetting,
-                simsetting_id: str = "6599846eeb8f8c36cce8307a"):
+                data,
+                collection_name,
+                data_id):
         """
-        Posts a new simulation setting to the database.
-        More precisely, this function retrieves the "basic" simsetting from the
-        database, uses it as a baseline, updates the part that has been
-        manipulated by the user and saves the newly created setting to the
-        database. This is because parts of the simsetting have implications on
+        Posts a new data (input or simsetting) to the database.
+        More precisely, this function retrieves the "basic" data (the default,
+        which is not modifiable) from the database, uses it as a baseline,
+        updates the part that has been manipulated by the user and
+        saves the newly created data to the database.
+        This is because parts of the data have implications on
         logging or the required files and format, thus are not relevant to the
         user or might break the simulation (with the current setup),
         and are therefore not shown to the user.
 
         Parameters:
-        - simsetting (dict): The new simulation setting to be posted.
-        - simsetting_id (str, optional): The ID of the "basic" simsetting
-          to be used as baseline. Defaults to "6599846eeb8f8c36cce8307a".
+        - data (dict): The new simulation data to be posted.
+        - data_id (str, optional): The ID of the "basic" data to be used as
+          baseline.
 
         Returns:
-        - str: The ID of the inserted simulation setting.
+        - str: The ID of the inserted simulation data.
         """
-        basic_simsetting = await self.get_simsetting(simsetting_id)
+        if collection_name == "simulations":
+            basic_data = await self.get_simulation(data_id)
+        else:
+            basic_data = await self.get_simsetting(data_id)
 
         client, db = self.connect_db()
 
-        # remove id to create a NEW simsetting
         try:
-            del basic_simsetting["_id"]
-            del simsetting["_id"]
+            del basic_data["_id"]
+            del data["_id"]
         except Exception as e:
-            return f"Exception while removing _id key from simsetting: {e}"
+            return f"Exception while removing _id key from data: {e}"
 
-        # Update parts of basic simsetting manipulated by the user
         try:
-            for key in simsetting:
-                basic_simsetting[key] = simsetting[key]
+            for key in data:
+                basic_data[key] = data[key]
         except Exception as e:
             return f"Exception while updating basic \
-                    simsetting with new simsetting: {e}"
+                    data with new data: {e}"
 
-        simsettings_collection = db.simsettings
-        result = simsettings_collection.insert_one(dict(basic_simsetting))
+        collection = db[collection_name]
+        result = collection.insert_one(dict(basic_data))
 
         client.close()
 
         return str(result.inserted_id)
+
+    async def post_simsettings(
+                self,
+                simsetting,
+                simsetting_id: str = None):
+        """
+        Posts a new simulation setting to the database.
+
+        Parameters:
+        - simsetting (dict): The new simulation setting to be posted.
+        - simsetting_id (str, optional): The ID of the "basic" simsetting
+          to be used as baseline.
+
+        Returns:
+        - str: The ID of the inserted simulation setting.
+        """
+        if simsetting_id is None:
+            simsetting_id = self.default_setting_id
+
+        return await self.post_data(simsetting, "simsettings", simsetting_id)
 
     # Return all stored simsettings of DB:
     async def get_all_simsettings(self):
@@ -539,300 +587,3 @@ class Controller:
         collection.delete_one({"_id": ObjectID(document_id)})
         client.close()
         return
-    
-# Helper functions - Storing .csv-files for given data and path: --------------
-
-    # Store simulation data from DB in csv files for FLEE execution:
-    async def convert_simulations_to_csv(self, simulation_id: str):
-
-        """
-        Convert location data into .csv files (for FLEE simulation execution) - Returns location of simulation-data dir:
-        Read all data from simulation-collection in DB
-        Convert Data into .csv files, which are required by FLEE (closures, conflicts, locations,
-        registration_corrections, routes, sim_period)
-
-        :param simulation_id:
-        :return:
-        """
-
-        # Fetch simulation data from DB by simulation_id:
-        try:
-            simulations_collection = self.db.get_collection("simulations")
-            simulation = simulations_collection.find_one({"_id": ObjectID(simulation_id)})
-
-            # Create all .csv files for simulation:
-            if simulation is not None:
-
-                # Create directory for simulation:
-                backend_root_dir = Path(__file__).resolve().parent
-                simulation_dir = backend_root_dir / "flee_stored_files" / "conflict_input" / simulation_id
-                os.makedirs(simulation_dir, exist_ok=True)
-
-                # Cretae csv files using helper function export-csv (filename, data, fieldnames):
-                # Closures.csv file:
-                self.export_closures_csv(os.path.join(simulation_dir, "closures.csv"), simulation["closures"])
-                
-                # conflicts.csv file:
-                self.export_csv(os.path.join(simulation_dir, "conflicts.csv"), simulation["conflicts"],
-                                simulation["conflicts"][
-                                    0].keys())  # In DB hinten null-objekt: :null -> Daher hier ein Komma hinten angehängt
-                self.remove_trailing_commas(os.path.join(simulation_dir, "conflicts.csv"))
-                
-                # locations.csv file:
-                self.export_locations_csv(os.path.join(simulation_dir, "locations.csv"), simulation["locations"],
-                                          ["name", "region", "country", "latitude", "longitude", "location_type",
-                                           "conflict_date",
-                                           "population"])
-                
-                # routes.csv file:
-                self.export_routes_csv(os.path.join(simulation_dir, "routes.csv"), simulation["routes"],
-                                       ["from", "to", "distance",
-                                        "forced_redirection"])  # null werte ignoriert -> Freie kommas hinten
-                
-                # sim_period.csv file (values are single data points, not directories themselves -> unnested function):
-                self.export_csv_sim_period(os.path.join(simulation_dir, "sim_period.csv"), simulation["sim_period"])
-                
-                return "All files written"
-
-            else:
-                raise SimulationNotFoundError(f"Simulation with ID {simulation_id} not found")
-
-        except Exception as e:
-            raise e
-
-
-    # Helper Function to create csv-file from filename, data and fieldnames:
-    def export_closures_csv(self, file_name, data):
-
-        """
-        :param file_name: New path of file incl. filename
-        :param data: Row data
-        :return: Returns nothin, only creates and stores files
-        """
-
-        try:
-            with open(file_name, mode='w', newline='') as csv_file:
-                fieldnames = ['#closure_type', 'name1', 'name2', 'closure_start', 'closure_end']
-                writer = csv.writer(csv_file)
-
-                # Write header:
-                writer.writerow(fieldnames)
-
-                # Write data & Skip rows with empty keys
-                for row in data:
-                    writer.writerow([
-                        int(value) if value and isinstance(value, (int, float)) else value
-                        for value in row.values()
-                    ])
-
-                return "File created succesfully"
-
-        except Exception as e:
-            return e
-
-    # Helper Function to create csv-file from filename, data and fieldnames:
-    def export_csv(self, file_name, data, fieldnames):
-
-        """
-        :param file_name: New path of file incl. filename
-        :param data: Row data
-        :param fieldnames: Name of columns in .csv files
-        :return: Returns nothin, only creates and stores files
-        """
-
-        try:
-            with open(file_name, mode='w', newline='') as csv_file:
-                writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
-
-                # Write header:
-                writer.writeheader()
-
-                # Write data & Skip rows with empty keys
-                for row in data:
-                    if any(value == '' for value in row.values()):
-                        continue
-                    writer.writerow(row)
-
-                return "File created succesfully"
-
-        except Exception as e:
-            return e
-
-    # Helper Function to create csv-file from filename, data and fieldnames:
-    def export_locations_csv(self, file_name, data, fieldnames):
-
-        """
-        :param file_name: New path of file incl. filename
-        :param data: Row data
-        :param fieldnames: Name of columns in .csv files
-        :return: Returns nothin, only creates and stores files
-        """
-
-        try:
-            with open(file_name, mode='w', newline='', encoding='utf-8') as csv_file:
-                writer = csv.writer(csv_file, quoting=csv.QUOTE_NONNUMERIC)
-
-                # Write header:
-                writer.writerow(['#' + field if field == 'name' else field for field in fieldnames])
-
-                # Write data & Skip rows with empty keys
-                for row in data:
-                    if any(value == '' for value in row.values()):
-                        continue
-                    writer.writerow(
-                        [str(value) if value and not isinstance(value, (int, float)) else value for value in
-                         row.values()])
-
-                return "File created successfully"
-
-        except Exception as e:
-            return e
-
-    # Helper Function to create csv-file from filename, data and fieldnames:
-    def export_routes_csv(self, file_name, data, fieldnames):
-
-        """
-        :param file_name: New path of file incl. filename
-        :param data: Row data
-        :param fieldnames: Name of columns in .csv files
-        :return: Returns nothin, only creates and stores files
-        """
-
-        try:
-            with open(file_name, mode='w', newline='') as csv_file:
-                fieldnames = ['#name1', 'name2', 'distance', 'forced_redirection']
-                writer = csv.writer(csv_file)
-
-                # Write header:
-                writer.writerow(fieldnames)
-
-                # Write data & Skip rows with empty keys
-                for row in data:
-                    writer.writerow([
-                        int(value) if value and isinstance(value, (int, float)) and value != '0.0'
-                        else value if not (value == 0.0 or value == '0.0')
-                        else None
-                        for value in row.values()
-                    ])
-
-        except Exception as e:
-            return e
-
-    # Helper function for single value pairs, where values don´t represent own dictionaries themselves (sim_period)
-    def export_csv_sim_period(self, file_name, data):
-
-        """
-        :param file_name: New path of file incl. filename
-        :param data: Row data
-        :param fieldnames: Name of columns in .csv files
-        :return: Returns nothin, only creates and stores files
-        """
-
-        print(data)
-
-        try:
-            with open(file_name, mode='w', newline='') as csv_file:
-                writer = csv.writer(csv_file)
-
-                # Write data:
-                for key, value in data.items():
-                    if isinstance(value, datetime):
-                        formatted_date = value.strftime('%Y-%m-%d')
-                        writer.writerow(["StartDate", formatted_date])
-                    else:
-                        writer.writerow([key, value])
-
-                return "File created successfully"
-
-        except Exception as e:
-            return str(e)
-
-    # Function to remove trailing commas from .csv file (conflicts.csv):
-    def remove_trailing_commas(self, file_name):
-
-        input_file_path = file_name
-        output_file_path = file_name
-
-        # Read data from the input file
-        with open(input_file_path, 'r') as input_file:
-            reader = csv.reader(input_file)
-            rows = list(reader)
-
-        # Remove trailing commas:
-        processed_rows = [row[:-1] if row[-1] == '' else row for row in rows]
-
-        # Write the processed data back to the same file
-        with open(output_file_path, 'w', newline='') as file:
-            # Write the processed rows back to the CSV file
-            writer = csv.writer(file)
-            writer.writerows(processed_rows)
-
-
-# Helper functions - reading files: ------------------------------------------------------------------------------------
-
-    # Read .yml file for given simsettings:
-    def testread_ss(self, simsettings_id: str):
-        """
-        Read a dummy simulation result from the database.
-        """
-
-        filename = simsettings_id + ".yml"
-        backend_root_dir = Path(__file__).resolve().parent
-        simsettings_dir = backend_root_dir / "flee_stored_files" / "simsettings"
-        simsettings_filename = simsettings_dir / filename
-
-        try:
-            with open(simsettings_filename, 'r') as f:
-                return f.read()
-        except Exception as e:
-                return "File nicht vorhanden"
-
-    # Read all .csv files for given simulation:
-    def testread_csv(self, simulation_id):
-
-        backend_root_dir = Path(__file__).resolve().parent
-        sim_dir = backend_root_dir / "flee_stored_files" / "conflict_input" / simulation_id
-        sim_filename1 = sim_dir / "closures.csv"
-        sim_filename2 = sim_dir / "conflicts.csv"
-        sim_filename3 = sim_dir / "locations.csv"
-        sim_filename4 = sim_dir / "registration_corrections.csv"
-        sim_filename5 = sim_dir / "routes.csv"
-        sim_filename6 = sim_dir / "sim_period.csv"
-
-        try:
-            with open(sim_filename1, 'r') as f:
-                f1 = f.read()
-        except Exception as e:
-            return "File1 nicht vorhanden"
-        try:
-            with open(sim_filename2, 'r') as f:
-                f2 = f.read()
-        except Exception as e:
-            return "File2 nicht vorhanden"
-        try:
-            with open(sim_filename3, 'r') as f:
-                f3 = f.read()
-        except Exception as e:
-            return "File3 nicht vorhanden"
-        try:
-            with open(sim_filename4, 'r') as f:
-                f4 = f.read()
-        except Exception as e:
-            return "File4 nicht vorhanden"
-        try:
-            with open(sim_filename5, 'r') as f:
-                f5 = f.read()
-        except Exception as e:
-            return "File5 nicht vorhanden"
-        try:
-            with open(sim_filename6, 'r') as f:
-                f6 = f.read()
-        except Exception as e:
-            return "File6 nicht vorhanden"
-        return f1, f2, f3, f4, f5, f6
-
-
-# Define a custom exception for simulation not found
-class SimulationNotFoundError(Exception):
-    pass
-
