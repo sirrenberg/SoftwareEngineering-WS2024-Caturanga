@@ -80,12 +80,12 @@
 
 #outputs-items-list .simple-button {
   background-color: var(--white);
-  color: var(--black)
+  color: var(--black);
 }
 
 #outputs-items-list .simple-button:hover {
   background-color: var(--coquelicot);
-  color: var(--white)
+  color: var(--white);
 }
 
 .simple-button.selected-item {
@@ -100,7 +100,7 @@
 
 #outputs-items-list .simple-button.selected-item {
   background-color: var(--light-charcoal);
-  color: var(--white)
+  color: var(--white);
 }
 
 .items-list-item-icons {
@@ -136,7 +136,7 @@ a .items-list-item-icons {
   color: var(--dark-green);
 }
 
-#outputs-list-container .item-icon:hover{
+#outputs-list-container .item-icon:hover {
   color: var(--charcoal);
 }
 
@@ -156,6 +156,10 @@ a .items-list-item-icons {
 }
 
 #outputs-menu-container .map-background {
+  background-color: var(--peach);
+}
+
+.result-detail-container .map-background {
   background-color: var(--peach);
 }
 
@@ -197,4 +201,41 @@ a .items-list-item-icons {
   margin-bottom: 2rem;
   font-family: "Cabin", sans-serif;
   text-align: center;
+}
+
+.result-detail-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.result-map-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.day-label {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  text-align: center;
+}
+
+.slider-container {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+}
+
+.play-button {
+  justify-self: flex-start;
+  background-color: var(--peach);
+}
+
+.play-button:hover {
+  background-color: var(--coquelicot);
 }
