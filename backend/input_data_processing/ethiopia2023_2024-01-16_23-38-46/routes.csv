@@ -1,0 +1,59 @@
+name1,name2,distance,forced_redirection
+Kobo,Sekota,83.94,0
+Kobo,Kemise,160.68,0
+Kobo,Ataye,202.84,0
+Sekota,Gonder,170.13,0
+Sekota,Kemise,230.47,0
+Kemise,Ataye,42.16,0
+Kemise,China Camp,126.86,0
+Gidole,Arba Minch,47.17,0
+Gidole,Gedeb,101.83,0
+Gidole,Elmahan,230.35,0
+Bako,Kombolcha,66.45,0
+Bako,Welkite,124.21,0
+Bako,Gimbi,133.62,0
+Ataye,China Camp,91.65,0
+Ataye,Jarso,199.6,0
+Gedeb,Arba Minch,78.49,0
+Gedeb,Elmahan,169.91,0
+Jarso,Debre Markos,67.62,0
+Jarso,Kombolcha,84.6,0
+Jarso,China Camp,150.18,0
+Degdegela,Sodo,32.81,0
+Degdegela,Welkite,112.42,0
+Degdegela,China Camp,153.82,0
+Dimma,Tepi,86.49,0
+Dimma,Gimbi,256.79,0
+Dimma,Bako,341.51,0
+Gonder,Injibara,187.71,0
+Gonder,Kobo,240.58,0
+Sodo,Welkite,81.38,0
+Sodo,Kombolcha,174.97,0
+Arba Minch,Elmahan,235.54,0
+Debre Markos,Kombolcha,94.34,0
+Debre Markos,Injibara,114.83,0
+Tepi,Gimbi,222.72,0
+Tepi,Arba Minch,265.76,0
+Gimbi,Kombolcha,187.35,0
+Moyale,Beledul Amin,5.15,0
+Moyale,Dati,72.93,0
+Moyale,Elmahan,136.88,0
+Injibara,Kombolcha,175.13,0
+Injibara,Jarso,182.19,0
+Qoliji 2,Qoliji,0.55,0
+Qoliji 2,Ataye,299.21,0
+Qoliji 2,China Camp,320.68,0
+Qoliji,Ataye,298.73,0
+Qoliji,China Camp,320.3,0
+Mustahil town,Bula Ad,284.88,0
+Mustahil town,Sadey,419.15,0
+Mustahil town,Abdi balay,495.46,0
+Elmahan,Dati,63.96,0
+Elmahan,Beledul Amin,131.93,0
+Abdi balay,Elmahan,228.41,0
+Abdi balay,Bula Ad,236.75,0
+Abdi balay,Gedeb,247.08,0
+Beledul Amin,Dati,68.01,0
+Bula Ad,Sadey,176.76,0
+Sadey,Dati,226.41,0
+Sadey,Elmahan,233.27,0
