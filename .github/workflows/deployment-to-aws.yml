@@ -74,7 +74,7 @@ jobs:
         id: build-backend-image
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}                     # uses the output from the `login-ecr` step
-          IMAGE_TAG: ${{ github.sha }}                                              # uses the github commit SHA as the image tag
+          IMAGE_TAG: latest
         run: |
           cd backend
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_BACKEND:$IMAGE_TAG .
