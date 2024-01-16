@@ -424,10 +424,19 @@ class Controller:
 
         collection = db.get_collection(collection_name)
         if collection_name == "simulations":
-            summaries = collection.find({}, {"_id": 1,
-                                             "name": 1,
-                                             "locations": 1,
-                                             "routes": 1})
+            summaries = collection.find({}, {
+                "_id": 1,
+                "name": 1,
+                "locations": 1,
+                "routes": 1
+            })
+        elif collection_name == "simulations_results":
+            summaries = collection.find({}, {
+                "_id": 1,
+                "name": 1,
+                "simulation_id": 1,
+                "status": 1
+            })
         else:
             summaries = collection.find({}, {"_id": 1, "name": 1})
 

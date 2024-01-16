@@ -1,16 +1,16 @@
 :root {
-  --tea-green: #d8ffd6;
-  --dark-green: #1d493d;
-  --light-green: #46af93;
-  --misty-rose: #efd3d7;
-  --charcoal: #2c4251;
-  --light-charcoal: #476c85;
-  --air-superiority-blue: #77a6b6;
-  --peach: #f3b391;
-  --gray: #7b7b7b;
-  --light-gray: #f5f5f5;
-  --coquelicot: #f15025;
+  --light-green: #D8FFD6;
+  --medium-green: #71A480;
+  --dark-green: #1D493D;
+  --light-blue: #AFCBD4;
+  --medium-blue: #476C85;
+  --dark-blue: #2C4251;
+  --light-orange: #F3B391;
+  --medium-orange: #EA7734;
+  --dark-orange: #95400F;
   --white: #ffffff;
+  --light-gray: #f5f5f5;
+  --gray: #7b7b7b;
   --black: #000000;
 }
 * {
@@ -62,7 +62,7 @@ a {
 
 .simple-button:hover {
   transform: scale(1.1);
-  background-color: var(--light-green);
+  background-color: var(--medium-green);
 }
 
 .simple-button:active {

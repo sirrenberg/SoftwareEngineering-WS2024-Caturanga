@@ -3,7 +3,7 @@
 }
 
 #lp-title-page {
-  background-color: var(--tea-green);
+  background-color: var(--light-green);
   min-height: 85vh;
 }
 
@@ -113,7 +113,7 @@
 }
 
 #lp-simulation-page {
-  background-color: var(--air-superiority-blue);
+  background-color: var(--light-blue);
   align-items: center;
 }
 
@@ -122,7 +122,7 @@
 }
 
 .map-background {
-  background-color: var(--charcoal);
+  background-color: var(--dark-blue);
 }
 
 @media (max-width: 1280px) {

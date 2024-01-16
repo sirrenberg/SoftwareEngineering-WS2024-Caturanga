@@ -13,6 +13,7 @@ import { LatLngExpression } from "leaflet";
 import Slider from "@mui/material/Slider";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlay, faPause } from "@fortawesome/free-solid-svg-icons";
+import { Colors } from "../helper/constants/DesignConstants";
 
 function ResultDetails() {
   const { sendRequest } = useAPI();
@@ -150,9 +151,9 @@ function ResultDetails() {
             sx={{
               width: "50%",
               marginTop: "20px",
-              color: "#f3b391", // Change the color here
+              color: Colors.light_orange,
               "& .MuiSlider-thumb": {
-                backgroundColor: "#f15025", // Change the thumb color here
+                backgroundColor: Colors.dark_orange
               },
             }}
           />
