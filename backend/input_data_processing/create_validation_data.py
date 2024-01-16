@@ -95,7 +95,7 @@ def create_camp_csv(folder_name, country_name, dtm_merged_df, round_data):
         #open country_name-camp_name.csv
         camp_name = row["name"]
         camp_names.append(camp_name)
-        file_name = f"{country_name}-{camp_name}.csv"
+        file_name = f"{country_name}-{camp_name}"
         location_files.append(file_name)
 
         #TODO: docker path
