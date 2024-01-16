@@ -105,7 +105,7 @@ function ResultDetails() {
       <div className="result-map-container">
         {result?.data && (
           <p className="day-label">
-            Day: {playSimulationIndex} -{" "}
+            Day {playSimulationIndex} :{" "}
             {result?.data[playSimulationIndex]["Date"]}
           </p>
         )}
