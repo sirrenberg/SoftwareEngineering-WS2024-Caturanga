@@ -7,7 +7,13 @@ import {
   Polyline,
 } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
-import { LocationType, SimLocation, Input, Route } from "../types";
+import {
+  LocationType,
+  SimLocation,
+  Input,
+  Route,
+  MapInputType,
+} from "../types";
 import { LatLngExpression } from "leaflet";
 import { useMap } from "react-leaflet/hooks";
 import { useEffect } from "react";
@@ -21,6 +27,7 @@ function Map({
   NodeDoubleClickHandler,
   RouteDoubleClickHandler,
   shouldRecenter,
+  mapMode,
 }: {
   input?: Input;
   center?: LatLngExpression;
@@ -29,6 +36,7 @@ function Map({
   NodeDoubleClickHandler?: (location: SimLocation) => void;
   RouteDoubleClickHandler?: (route: Route) => void;
   shouldRecenter?: boolean;
+  mapMode?: string;
 }) {
   const zoomLevel = 5;
 
@@ -50,17 +58,29 @@ function Map({
     return null;
   }
 
+  function calculateSize(input: number | undefined) {
+    if (!input) {
+      return 5000;
+    }
+
+    if (mapMode === MapInputType.results) {
+      return 5000 + input;
+    } else {
+      return 5000 + input / 10;
+    }
+  }
+
   function getNodeColor(location: SimLocation) {
     // get the color of the node based on the location type
     switch (location.location_type) {
       case LocationType.conflict_zone:
-        return "red";
+        return "#f15025";
       case LocationType.town:
-        return "blue";
+        return "#476c85";
       case LocationType.forwarding_hub:
         return "orange";
       case LocationType.camp:
-        return "green";
+        return "#46af93";
       default:
         return "black";
     }
@@ -108,7 +128,7 @@ function Map({
             <Circle
               key={uuidv4()}
               center={[location.latitude, location.longitude]}
-              radius={location.population ? location.population / 100 : 10000}
+              radius={calculateSize(location.population)}
               color={getNodeColor(location)}
               eventHandlers={{
                 click: () => {
