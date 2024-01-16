@@ -2,7 +2,13 @@ import { useParams } from "react-router-dom";
 import Map from "../components/Map";
 import { useEffect, useState } from "react";
 import { useAPI } from "../hooks/useAPI";
-import { Input, Result, SimLocation, MapInputType } from "../types";
+import {
+  Input,
+  Result,
+  SimLocation,
+  MapInputType,
+  LocationType,
+} from "../types";
 import { LatLngExpression } from "leaflet";
 import Slider from "@mui/material/Slider";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -25,8 +31,6 @@ function ResultDetails() {
         sendRequest(`/simulations/${resultData.simulation_id}`, "GET").then(
           (inputData: Input) => {
             setInput(inputData);
-            console.log(inputData);
-            console.log(resultData);
           }
         );
       }
@@ -42,6 +46,17 @@ function ResultDetails() {
       return undefined;
     }
 
+    function getLocationType(location: SimLocation): LocationType {
+      if (location.location_type === LocationType.conflict_zone) {
+        // check if conflict has started in input
+        return input?.conflicts[playSimulationIndex][location.name] === 1
+          ? LocationType.conflict_zone
+          : LocationType.town;
+      } else {
+        return location.location_type;
+      }
+    }
+
     const inputForMap: Input = {
       ...input,
       locations: input.locations.map((inputLocation) => {
@@ -51,6 +66,7 @@ function ResultDetails() {
               return {
                 ...inputLocation,
                 population: result?.data[playSimulationIndex][key],
+                location_type: getLocationType(inputLocation),
               } as SimLocation;
             }
           }
@@ -90,7 +106,7 @@ function ResultDetails() {
 
       <div className="result-map-container">
         {result?.data && (
-          <p>
+          <p className="day-label">
             Day: {playSimulationIndex} -{" "}
             {result?.data[playSimulationIndex]["Date"]}
           </p>

@@ -46,6 +46,9 @@ interface Input {
     date: string;
     length: number;
   };
+  conflicts: Array<{
+    [key: string]: number;
+  }>;
 }
 
 interface ResultPreview {
