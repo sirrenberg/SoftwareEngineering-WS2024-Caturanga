@@ -96,6 +96,7 @@ function Results() {
         </h2>
         {resultPreviews && resultPreviews.length > 0 && selectedResultIndex !== -1 &&
         <h3 className="selected-item-subtitle">{`Status: ${resultPreviews[selectedResultIndex].status}`}</h3>}
+        <h1>Used Input</h1>
 
         <Map
           input={!resultPreviews || selectedResultIndex === -1 ? undefined : resultPreviews[selectedResultIndex].input}
