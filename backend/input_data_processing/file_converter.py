@@ -4,6 +4,7 @@ from pymongo import MongoClient
 from bson.objectid import ObjectId as ObjectID
 from datetime import datetime
 from dotenv import load_dotenv
+from pathlib import Path
 
 
 def csv_to_list(file_path):
@@ -73,7 +74,7 @@ def csv_to_list_camps(file_path):
         rows = list(csv_reader)
     tranposed_data = []
     for row in rows:
-        tranposed_data.append({'date': row[0], 'refugee_numbers': row[1]})
+        tranposed_data.append({'date': row[0], 'refugee_numbers': int(row[1])})
     return tranposed_data
 
 
@@ -222,7 +223,7 @@ def transform_val_refugees_data(validation_refugee_data):
     for row in validation_refugee_data:
         transformed_data.append({
             'date': datetime.strptime(row['Date'], '%Y-%m-%d'),  # datetime object
-            'refugee_numbers': row['Refugee_numbers'],
+            'refugee_numbers': int(row['Refugee_numbers']),
         })
     return transformed_data
 
@@ -278,6 +279,9 @@ def insert_data_into_DB(country, current_dir, folder_name, acled_source_list=[],
     '''
 
     # Connect to the MongoDB
+    # root_dir = Path(__file__).resolve().parent
+    # env_path = os.path.join(root_dir, ".env")
+    # load_dotenv(env_path)
     load_dotenv()
     MONGODB_URI = os.environ.get('MONGO_URI')
     client = MongoClient(MONGODB_URI)
@@ -287,9 +291,9 @@ def insert_data_into_DB(country, current_dir, folder_name, acled_source_list=[],
     # Get the data directory and validation data directory
     folder_path = os.path.join(current_dir, folder_name)
     data_dir = folder_path
-    #TODO: docker path
-    # data_dir_validation = os.path.join(current_dir, "input_data_processing", "conflict_validation", folder_name)
-    data_dir_validation = os.path.join(current_dir, "conflict_validation", folder_name)
+    # docker path
+    data_dir_validation = os.path.join(current_dir, "input_data_processing", "conflict_validation", folder_name)
+    # data_dir_validation = os.path.join(current_dir, "conflict_validation", folder_name)
 
     # input data
     location_csv_path = os.path.join(data_dir, 'locations.csv')
@@ -328,7 +332,7 @@ def insert_data_into_DB(country, current_dir, folder_name, acled_source_list=[],
     sim_period = transform_sim_period_data(sim_period_data)
     validation_refugees = transform_val_refugees_data(validation_refugee_data)
     validation_data_layout = transform_val_data_layout_data(validation_data_layout_data)
-    validation_camps = [transform_val_camp_data(camp_data) for camp_data in validation_camps_data]
+
     # convert each camp_path to the camp_name
     for i in range(len(camps_csv_paths)):
         camp_path = camps_csv_paths[i]
@@ -352,11 +356,8 @@ def insert_data_into_DB(country, current_dir, folder_name, acled_source_list=[],
             'refugees': validation_refugees,
             'data_layout': validation_data_layout,
             # dict with filename (last component of path) as key and transformed data as value
-            #TODO: docker: check if stored correctly in DB -> NEIN
-            'camps': {camp_path: transform_val_camp_data(camp_data) for camp_path, camp_data in zip(camps_csv_paths, validation_camps_data)} #TODO: docker: check if stored correctly in DB
-
+            'camps': {camp_path: transform_val_camp_data(camp_data) for camp_path, camp_data in zip(camps_csv_paths, validation_camps_data)}
         },
-        # TODO: change to datetime object in the corresponding transfer functions
         'data_sources': {
             'acled': {
                 'url': acled_source_list[0],
@@ -392,8 +393,7 @@ def insert_data_into_DB(country, current_dir, folder_name, acled_source_list=[],
             }    
     }
 
-    # insert test data into the database
-    
+    # insert data into the database
     result = simulations_collection.insert_one(mongo_document)
 
     # check if successfull 

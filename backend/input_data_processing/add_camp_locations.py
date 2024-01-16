@@ -80,9 +80,9 @@ def extract_camp_locations(round_data, rows_shown):
     # get current directory
     current_dir = os.getcwd()
     # paths to files with camp information
-    # TODO: docker path
-    # paths_dtm = os.path.join(current_dir, "input_data_processing", "conflict_validation", "data_source")
-    paths_dtm = os.path.join(current_dir, "conflict_validation", "data_source")
+    # docker path
+    paths_dtm = os.path.join(current_dir, "input_data_processing", "conflict_validation", "data_source")
+    # paths_dtm = os.path.join(current_dir, "conflict_validation", "data_source")
 
     # get round numbers from dict
     round_numbers = []
@@ -260,6 +260,6 @@ def extract_camp_locations(round_data, rows_shown):
         dtm_merged_df = dtm_merged_df.rename(columns={"population": f"population_round_{round_number}"})
 
         print(f"round_number: {round_number}, total_IDP_conflict_number: {total_IDP_conflict_number}")
-    print(dtm_merged_df)
+    # print(dtm_merged_df)
 
     return dtm_merged_df, round_data, latest_survey_date

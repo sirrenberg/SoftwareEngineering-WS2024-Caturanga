@@ -1,4 +1,5 @@
 import os
+import sys
 from dotenv import load_dotenv
 import requests
 import pandas as pd
@@ -16,6 +17,7 @@ from create_sim_period_csv import create_sim_period_csv
 from file_converter import insert_data_into_DB
 from create_validation_data import create_validation_data
 from helper_functions import date_format
+from pathlib import Path
 
 
 # global variables (default values mostly from FLEE)
@@ -168,7 +170,6 @@ def run_extraction(country_name, start_date, end_date, max_simulation_end_date, 
     extract_locations_csv(folder_name, start_date, LOCATION_TYPE, FATALITIES_THRESHOLD, CONFLICT_THRESHOLD, NBR_SHOWN_ROWS)
     
     # 5. add camps to locations.csv 
-    #TODO: check if camps can already be in locations.csv because they are conflict zones   
     camp_data_df, camp_rounds_dict, camps_last_update_url, camps_retrieval_date, camps_last_update, camps_reformatted_start_date, camps_reformatted_end_date, camps_latest_survey_date = add_camp_locations(round_data, folder_name, NBR_SHOWN_ROWS, start_date, end_date)
 
     # 6. extract conflict data and create conflict_info.csv
@@ -180,11 +181,9 @@ def run_extraction(country_name, start_date, end_date, max_simulation_end_date, 
     # 9. extract routes from locations.csv and create routes.csv
     extract_routes_csv(folder_name)
     
-    #TODO: empty closures okay? What does this file do? -> Nico
     # 10. create empty closures.csv
     create_empty_closure_csv(folder_name)
     
-    # TODO: empty reg-corrections okay? What does this file do? -> Nico
     # 11. create empty registration_correction.csv
     create_empty_registration_corrections_csv(folder_name)
     
@@ -193,11 +192,12 @@ def run_extraction(country_name, start_date, end_date, max_simulation_end_date, 
 
     # 13. create validation data
     # create folder in conflict_validation 
-    #TODO: docker path
+    # docker path
     # os.mkdir(os.path.join('conflict_validation', folder_name))
     current_dir = os.getcwd()
     validation_folder_path = os.path.join(current_dir, "input_data_processing", 'conflict_validation', folder_name)
     os.mkdir(validation_folder_path)
+
     # create validation csv files
     val_retrieval_date, val_reformatted_start_date, val_reformatted_end_date, val_covered_from, val_covered_to, val_oldest_url, val_latest_url = create_validation_data(camp_data_df, camp_rounds_dict, folder_name, country_name, start_date, end_date)
 
@@ -214,9 +214,10 @@ def run_extraction(country_name, start_date, end_date, max_simulation_end_date, 
 
 # variables that can be passed as parameters
 # date format: dd-mm-yyyy
+
 country_name = "Ethiopia"
 start_date = "01-01-2023" # start date for the data fetching
-end_date =  "15-01-2024" # end date for the data fetching
+end_date =  "16-01-2024" # end date for the data fetching
 max_simulation_end_date = "31-12-2024" # this is the furthest date that can be used for the simulation
 
 # according to flee, date must have the format "yyyy-mm-dd"
@@ -228,6 +229,16 @@ round_data = [
 {"round": 33, "source": "https://dtm.iom.int/datasets/ethiopia-site-assessment-round-33", "covered_from": "2023-06-11", "covered_to": "2023-06-29"},
 {"round": 34, "source": "https://dtm.iom.int/datasets/ethiopia-site-assessment-round-34", "covered_from": "2023-08-01", "covered_to": "2023-09-02"},
 ]
+
+# take args & check if they are set
+if len(sys.argv) < 5:
+    print("Not enough arguments provided. Please provide the following arguments: country_name, start_date, end_date, max_simulation_end_date")
+    print(f"The default parameters were taken instead: country_name = {country_name}, start_date = {start_date}, end_date = {end_date}, max_simulation_end_date = {max_simulation_end_date}")
+else: 
+    country_name = sys.argv[1]
+    start_date = sys.argv[2]
+    end_date = sys.argv[3]
+    max_simulation_end_date = sys.argv[4]
 
 # start the script
 run_extraction(country_name, start_date, end_date, max_simulation_end_date, round_data)

@@ -39,7 +39,7 @@ def create_validation_data(dtm_merged_df, round_data, folder_name, country_name,
     latest_url = round_data[0]["source"]
     oldest_url = round_data[-1]["source"]
 
-
+    # create csv files and extract data
     create_refugee_csv(folder_name, round_data)
     location_files, camp_names = create_camp_csv(folder_name, country_name, dtm_merged_df, round_data)
     create_data_layout_csv(folder_name, location_files, camp_names)
@@ -59,7 +59,7 @@ def create_refugee_csv(folder_name, round_data):
     current_dir = os.getcwd()
     #open refugees.csv
 
-    #TODO: docker path
+    # docker path
     locations_file = os.path.join(current_dir, "input_data_processing", "conflict_validation", folder_name, "refugees.csv")
     # locations_file = os.path.join(current_dir, "conflict_validation", folder_name, "refugees.csv")
 
@@ -84,6 +84,9 @@ def create_camp_csv(folder_name, country_name, dtm_merged_df, round_data):
             country_name (str): Name of the country
             dtm_merged_df (DataFrame): DataFrame containing the camp information
             round_data (list): List of dictionaries with the round number, the total number of IDPs and the date
+        Returns:
+            location_files (list): List of the names of the location files
+            camp_names (list): List of the names of the camps
     """
     # create a csv file for each camp with the title: countryname-campname.csv
     # write the following information into the csv file: date, population
@@ -92,13 +95,13 @@ def create_camp_csv(folder_name, country_name, dtm_merged_df, round_data):
     for index, row in dtm_merged_df.iterrows():
         # Get the current directory
         current_dir = os.getcwd()
-        #open country_name-camp_name.csv
+        #open country_name-camp_name
         camp_name = row["name"]
         camp_names.append(camp_name)
-        file_name = f"{country_name}-{camp_name}"
+        file_name = f"{country_name}-{camp_name}.csv"
         location_files.append(file_name)
 
-        #TODO: docker path
+        # docker path
         # locations_file = os.path.join(current_dir, "conflict_validation", folder_name, file_name)
         locations_file = os.path.join(current_dir, "input_data_processing", "conflict_validation", folder_name, file_name)
 
@@ -130,7 +133,7 @@ def create_data_layout_csv(folder_name, location_files, camp_names):
     current_dir = os.getcwd()
     #open data_layout.csv
 
-    #TODO: docker path
+    # docker path
     data_layout_file = os.path.join(current_dir, "input_data_processing", "conflict_validation", folder_name, "data_layout.csv")
     # data_layout_file = os.path.join(current_dir, "conflict_validation", folder_name, "data_layout.csv")
     

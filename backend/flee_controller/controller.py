@@ -22,6 +22,7 @@ class Controller:
         Initializes the Controller object.
         """
         self.adapter = Adapter()
+        self.backend_root_dir = Path(__file__).resolve().parent
         load_dotenv()
         self.MONGODB_URI = os.environ.get('MONGO_URI')
         self.client = MongoClient(self.MONGODB_URI)
@@ -697,11 +698,17 @@ class Controller:
             return "File6 nicht vorhanden"
         return f1, f2, f3, f4, f5, f6
 
-    def run_data_extraction(self):
+
+    def run_data_extraction(self, country_name, start_date, end_date, max_simulation_end_date):
         try:
             # Command to execute the run_data_extraction.py script
             script_path = "input_data_processing/run_data_extraction.py"
-            result = subprocess.run(["python", script_path], capture_output=True, text=True, check=True)
+            result = subprocess.run(
+                ["python", script_path, country_name, start_date, end_date, max_simulation_end_date],
+                capture_output=True,
+                text=True,
+                check=True
+            )
 
             # If the script runs successfully, return the output
             return {"success": True, "output": result.stdout}
@@ -715,4 +722,3 @@ class Controller:
 # Define a custom exception for simulation not found
 class SimulationNotFoundError(Exception):
     pass
-

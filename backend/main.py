@@ -309,8 +309,20 @@ def testread_csv(
     return controller.testread_csv(simulation_id)
 
 
-# I want to excecute run_data_extraction.py from the subfolder input_data_processing
+
 @app.get("/run_data_extraction")
-def run_data_extraction():
-    #TODO: docstring
-    return controller.run_data_extraction()
+def run_data_extraction(
+    country_name: str = Query(..., description="Country name"),
+    start_date: str = Query(..., description="Start date"),
+    end_date: str = Query(..., description="End date"),
+    max_simulation_end_date: str = Query(..., description="Max simulation end date"),
+):
+    # Call the run_data_extraction method with the provided parameters
+    result = controller.run_data_extraction(
+        country_name=country_name,
+        start_date=start_date,
+        end_date=end_date,
+        max_simulation_end_date=max_simulation_end_date,
+    )
+
+    return result
