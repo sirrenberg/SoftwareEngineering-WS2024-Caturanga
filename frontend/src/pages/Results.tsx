@@ -108,9 +108,7 @@ function Results() {
                     <FontAwesomeIcon
                       icon={faTrash}
                       className="item-icon"
-                      onClick={() =>
-                        handleDeleteClick(resultPreview._id, index)
-                      }
+                      onClick={() => handleDeleteClick(resultPreview.id, index)}
                     />
                   </span>
                 </button>
