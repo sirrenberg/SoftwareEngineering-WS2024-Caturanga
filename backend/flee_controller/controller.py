@@ -393,7 +393,8 @@ class Controller:
             summaries = collection.find({}, {"_id": 1,
                                              "name": 1,
                                              "locations": 1,
-                                             "routes": 1})
+                                             "routes": 1,
+                                             "data_sources": 1})
         else:
             summaries = collection.find({}, {"_id": 1, "name": 1})
 
