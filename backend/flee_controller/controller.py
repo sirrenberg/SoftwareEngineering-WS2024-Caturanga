@@ -15,7 +15,7 @@ class Controller:
     execution of simulations.
     """
 
-# Setup of MongoDB DB Connection: ---------------------------------------------
+    # Setup of MongoDB DB Connection: ---------------------------------------------
 
     def __init__(self):
         """
@@ -30,7 +30,7 @@ class Controller:
         self.default_input_id = "65a6d3eb9ae2636fa2b3e3c6"
         self.default_setting_id = "6599846eeb8f8c36cce8307a"
 
-# Run simulations: ------------------------------------------------------------
+    # Run simulations: ------------------------------------------------------------
 
     async def initialize_simulation(
             self,
@@ -114,7 +114,7 @@ class Controller:
             simsettings_id=simsettings_id,
             name=name)
 
-# Store results in database: ----------------------------------------------
+    # Store results in database: ----------------------------------------------
 
     def connect_db(self):
         """
@@ -173,10 +173,10 @@ class Controller:
         client.close()
 
     async def store_dummy_simulation(
-                self,
-                simulation_id: str = None,
-                simsettings_id: str = None,
-                name: str = "undefined"):
+            self,
+            simulation_id: str = None,
+            simsettings_id: str = None,
+            name: str = "undefined"):
         """
         Stores a dummy simulation in the database so that the user can see
         that the simulation is started.
@@ -209,7 +209,7 @@ class Controller:
 
         return result.inserted_id
 
-# Store results in file system: -------------------------------------------
+    # Store results in file system: -------------------------------------------
 
     async def store_simsettings_to_filesystem(
             self,
@@ -279,8 +279,7 @@ class Controller:
 
         return validation_dir
 
-
-# Simulations and Simulation Results: -----------------------------------------
+    # Simulations and Simulation Results: -----------------------------------------
 
     async def get_all_simulation_results(self):
         """
@@ -330,6 +329,33 @@ class Controller:
         else:
             client.close()
             return None
+
+    # Deletes a specific set of simulation_results by simulation_results_id
+    async def delete_simulation_results(self, simulation_result_id: str):
+        """
+                Deletes siulation results from the database based on its ID.
+
+                Args:
+                    simulation_result_id (str): The ID of the simulation results.
+
+                """
+
+        client, db = self.connect_db()
+        simulations_results_collection = db.get_collection("simulations_results")
+
+        try:
+            result = simulations_results_collection.delete_one(
+                {"_id": ObjectID(simulation_result_id)}
+            )
+
+            if result.deleted_count == 1:
+                return "Deletion successful"
+            else:
+                return "No document found with the given ID"
+        except Exception as e:
+            return f"Error deleting document: {e}"
+        finally:
+            client.close()
 
     async def get_all_simulations(self):
         """

@@ -84,6 +84,7 @@ interface SimSettings {
     pop_power_for_loc_weight: number;
     conflict_movechance: number;
     camp_movechance: number;
+    idpcamp_movechance: number;
     default_movechance: number;
     awareness_level: number;
     capacity_scaling: number;
