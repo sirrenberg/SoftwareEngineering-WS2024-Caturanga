@@ -7,7 +7,7 @@ import Map from "../components/Map";
 import { calcMapCenter } from "../helper/misc";
 import { useAPI } from "../hooks/useAPI";
 import "../styles/Menu.css";
-import { ResultPreview } from "../types";
+import { ResultPreview, SimulationStatus } from "../types";
 import { Link } from "react-router-dom";
 
 function Results() {
@@ -54,25 +54,29 @@ function Results() {
           {resultPreviews && resultPreviews.length === 0 && <h3>Empty</h3>}
 
           {resultPreviews && resultPreviews.length > 0 &&
-          resultPreviews.map((resultPreview, index) => {
-            return (
-              <button
-                key={resultPreview.id}
-                className={
-                  "simple-button" +
-                  (index === selectedResultIndex ? " selected-item" : "")
-                }
-                onClick={() => {
-                  setSelectedResultIndex(index);
-                }}
-              >
-                <p>{resultPreview.id}</p>
-                <span className="items-list-item-icons">
-                  <FontAwesomeIcon icon={faTrash} className="item-icon" />
-                </span>
-              </button>
-            );
-          })}
+            resultPreviews.map((resultPreview, index) => {
+              return (
+                <button
+                  key={resultPreview.id}
+                  className={
+                    "simple-button" +
+                    (index === selectedResultIndex ? " selected-item" : "")
+                  }
+                  onClick={() => {
+                    setSelectedResultIndex(index);
+                    setMapCenter(calcMapCenter(resultPreviews[index].input.locations));
+                  }}
+                >
+                  <div className="items-list-item-text">
+                    <p className="item-preview-name">{`${resultPreview.name.slice(0, 15)}...`}</p>
+                    <p className="item-preview-status">{`Status: ${resultPreview.status}`}</p>
+                  </div>
+                  <span className="items-list-item-icons">
+                    <FontAwesomeIcon icon={faTrash} className="item-icon" />
+                  </span>
+                </button>
+              );
+            })}
         </div>
 
         <NavLink to="/">
@@ -86,10 +90,12 @@ function Results() {
             ? resultPreviews.length > 0
               ? selectedResultIndex === -1
                 ? "Choose a Simulation Result"
-                : resultPreviews[selectedResultIndex].id
+                : `${resultPreviews[selectedResultIndex].name}`
               : "Run a New Simulation"
             : ""}
         </h2>
+        {resultPreviews && resultPreviews.length > 0 && selectedResultIndex !== -1 &&
+        <h3 className="selected-item-subtitle">{`Status: ${resultPreviews[selectedResultIndex].status}`}</h3>}
 
         <Map
           input={!resultPreviews || selectedResultIndex === -1 ? undefined : resultPreviews[selectedResultIndex].input}
@@ -103,10 +109,19 @@ function Results() {
               selectedResultIndex === -1
                 ? "/results/"
                 : "/results/" +
-                  (resultPreviews?.[selectedResultIndex]?._id ?? "")
+                  (resultPreviews?.[selectedResultIndex]?.id ?? "")
             }
           >
-            <button className="simple-button">Show Details</button>
+            <button 
+              className="simple-button"
+              disabled={
+                !resultPreviews 
+                || selectedResultIndex === -1 
+                || resultPreviews[selectedResultIndex].status !== SimulationStatus.done
+              }
+            >
+              Show Details
+            </button>
           </Link>
         </div>
       </div>

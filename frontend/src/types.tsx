@@ -115,4 +115,4 @@ interface SimSettings {
 }
 
 export type { SimLocation, Route, Input, SimSettings, ResultPreview, Result };
-export { LocationType, MapOperatingMode, MapInputType };
+export { LocationType, MapOperatingMode, MapInputType, SimulationStatus };
