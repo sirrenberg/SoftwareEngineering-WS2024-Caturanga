@@ -40,6 +40,28 @@ function Results() {
     });
   }, []);
 
+  /* Function to delete Simulation_results from DB by clicking on trash-icon in item-List: */
+  const handleDeleteClick = async (simulationId: string, index: number) => {  // Call handleDeleteClick with both ID (for backend API call) and index (for updating ResultsPreview)
+    try {
+      await sendRequest(`/simulation_results/${simulationId}`, "DELETE");    // Call the backend API to delete the simulation result
+
+      // Update state to trigger a re-render
+      setResultPreviews((prevResults) => {  // prevResults: previous state value of resultPreviews (Given by React)
+          if (prevResults) { // Check if prevResults is defined    // Check, if prevResults is undefined
+            const newResults = [...prevResults];    // Copy, but don´t modify original ResultsPreviews array
+            newResults.splice(index, 1);
+            return newResults;
+        }
+        return prevResults;
+      });
+
+      // Reset the selected index after deletion
+      setSelectedResultIndex(-1);
+    } catch (error) {
+      console.error("Error deleting simulation:", error);
+    }
+  };
+
   return (
     <div
       className="menu-items-container content-page"
@@ -72,7 +94,11 @@ function Results() {
                     <p className="item-preview-status">{`Status: ${resultPreview.status}`}</p>
                   </div>
                   <span className="items-list-item-icons">
-                    <FontAwesomeIcon icon={faTrash} className="item-icon" />
+                    <FontAwesomeIcon
+                        icon={faTrash}
+                        className="item-icon"
+                        onClick={() => handleDeleteClick(resultPreview._id, index)}
+                    />
                   </span>
                 </button>
               );
