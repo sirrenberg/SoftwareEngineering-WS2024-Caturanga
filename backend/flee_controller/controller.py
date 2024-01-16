@@ -406,6 +406,15 @@ class Controller:
         client.close()
 
         return result
+    
+    async def delete_simulation(self, simulation_id: str):
+        """
+        Deletes a simulation from the database.
+
+        Parameters:
+        - simulation_id (str): The ID of the simulation to be deleted.
+        """
+        return self.delete_document("simulations", simulation_id)
 
 
 # Manage simsettings in DB: ---------------------------------------------------
@@ -505,16 +514,28 @@ class Controller:
             simsetting_dict["_id"] = str(simsetting_dict["_id"])
             return simsetting_dict
 
-    # Delete specfici simsettings by simsetting_id:
+    # Delete specific simsettings by simsetting_id:
     async def delete_simsetting(self, simsetting_id: str):
+        return self.delete_document("simsettings", simsetting_id)
+
+
+# Helper functions - Database: ------------------------------------------------
+
+
+    def delete_document(self, collection_name: str, document_id: str):
+        """
+        Deletes a document from the specified collection in the database.
+
+        Parameters:
+        - collection_name (str): The name of the collection.
+        - document_id (str): The ID of the document to be deleted.
+        """
         client, db = self.connect_db()
-        db.get_collection("simsettings").delete_one(
-            {"_id": ObjectID(simsetting_id)}
-        )
+        collection = db.get_collection(collection_name)
+        collection.delete_one({"_id": ObjectID(document_id)})
         client.close()
         return
-
-
+    
 # Helper functions - Storing .csv-files for given data and path: --------------
 
     # Store simulation data from DB in csv files for FLEE execution:
