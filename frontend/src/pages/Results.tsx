@@ -28,9 +28,12 @@ function Results() {
 
       // Update state to trigger a re-render
       setResultPreviews((prevResults) => {  // prevResults: previous state value of resultPreviews (Given by React)
-        const newResults = [...prevResults];      // Copy, but don´t modify original ResultsPreviews array
-        newResults.splice(index, 1);                  // Remove the deleted result from the array
-        return newResults;
+          if (prevResults) { // Check if prevResults is defined    // Check, if prevResults is undefined
+            const newResults = [...prevResults];    // Copy, but don´t modify original ResultsPreviews array
+            newResults.splice(index, 1);
+            return newResults;
+        }
+        return prevResults;
       });
 
       // Reset the selected index after deletion
@@ -55,7 +58,7 @@ function Results() {
           <h3>Empty</h3>}
 
           {resultPreviews && resultPreviews.length > 0 &&
-                        resultPreviews.map((resultPreview, index) => {
+              resultPreviews.map((resultPreview, index) => {
                 return (
                     <button
                         key={resultPreview._id}
