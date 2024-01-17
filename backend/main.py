@@ -305,7 +305,7 @@ async def post_simsettings(
         basic_setting = await database_handler.get(
             "simsettings",
             default_setting_id)
-        simsetting_id = database_handler.post(
+        simsetting_id = await database_handler.post(
             simsetting,
             "simsettings",
             basic_setting)
