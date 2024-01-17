@@ -13,12 +13,14 @@ import {
   Input,
   Route,
   MapInputType,
+  validationData,
 } from "../types";
 import { LatLngExpression } from "leaflet";
 import { useMap } from "react-leaflet/hooks";
 import { useEffect } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { Colors } from "../helper/constants/DesignConstants";
+import { pretifyLocationName } from "../helper/misc";
 
 function Map({
   input,
@@ -29,6 +31,7 @@ function Map({
   RouteDoubleClickHandler,
   shouldRecenter,
   mapMode,
+  validationData,
 }: {
   input?: Input;
   center?: LatLngExpression;
@@ -38,6 +41,7 @@ function Map({
   RouteDoubleClickHandler?: (route: Route) => void;
   shouldRecenter?: boolean;
   mapMode?: string;
+  validationData?: validationData[];
 }) {
   const zoomLevel = 5;
 
@@ -129,7 +133,11 @@ function Map({
             <Circle
               key={uuidv4()}
               center={[location.latitude, location.longitude]}
-              radius={calculateSize(location.population)}
+              radius={calculateSize(
+                mapMode === MapInputType.results
+                  ? location.idp_population
+                  : location.population
+              )}
               color={getNodeColor(location)}
               eventHandlers={{
                 click: () => {
@@ -145,9 +153,33 @@ function Map({
               }}
             >
               <Popup>
-                <strong>{location.name}</strong> ({location.location_type})
+                <strong>{location.name}</strong>
                 <br />
-                Population: {location.population === 0 ? "N/A" : location.population}
+                Type: {pretifyLocationName(location.location_type)}
+                <br />
+                Initial Population:{" "}
+                {location.population === 0 ? "N/A" : location.population}
+                <br />
+                {mapMode === MapInputType.results ? (
+                  <>
+                    Simulated IDP Count:{" "}
+                    {location.idp_population === 0
+                      ? "N/A"
+                      : location.idp_population}
+                  </>
+                ) : null}
+                {validationData &&
+                  location.location_type === LocationType.camp && (
+                    <>
+                      <br />
+                      Validation Data:{" "}
+                      {
+                        validationData.find(
+                          (data) => data.camp_name === location.name
+                        )?.refugee_numbers
+                      }
+                    </>
+                  )}
               </Popup>
             </Circle>
           );
@@ -186,7 +218,8 @@ function Map({
               }}
             >
               <Popup>
-                <strong>{fromLocation.name}</strong> to <strong>{toLocation.name}</strong>: {route.distance} km
+                <strong>{fromLocation.name}</strong> to{" "}
+                <strong>{toLocation.name}</strong>: {route.distance} km
               </Popup>
             </Polyline>
           );

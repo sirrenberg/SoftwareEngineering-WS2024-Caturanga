@@ -8,9 +8,10 @@ import {
   SimLocation,
   MapInputType,
   LocationType,
+  validationDataByDate,
 } from "../types";
 import { LatLngExpression } from "leaflet";
-import Slider from "@mui/material/Slider";
+import Slider, { SliderMark } from "@mui/material/Slider";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlay, faPause, faInfo } from "@fortawesome/free-solid-svg-icons";
 import { Colors } from "../helper/constants/DesignConstants";
@@ -25,6 +26,15 @@ function ResultDetails() {
   const [playSimulationIndex, setPlaySimulationIndex] = useState<number>(0);
   const [playingSimulation, setPlayingSimulation] = useState(false);
   const [isDataSourceModal, setDataSourceModal] = useState(false);
+  const [validationMarks, setValidationMarks] = useState<
+    {
+      value: number;
+      label: string;
+    }[]
+  >([]);
+  const [validationData, setValidationData] = useState<validationDataByDate>(
+    {}
+  );
 
   // fetch result and corresponding input
   useEffect(() => {
@@ -34,11 +44,85 @@ function ResultDetails() {
         sendRequest(`/simulations/${resultData.simulation_id}`, "GET").then(
           (inputData: Input) => {
             setInput(inputData);
+
+            formatValidationData(inputData);
           }
         );
       }
     );
   }, []);
+
+  function formatValidationData(input: Input) {
+    // organize data by date
+    const dataByDate = organizeDataByDate(input);
+
+    // get validation dates
+    const validationDates = Object.keys(dataByDate);
+
+    // get index of validation date (comparing with start date)
+    const validationDateIndexes = validationDates.map((date) => {
+      return getDifferenceBetweenDates(date, input.sim_period.date);
+    });
+
+    // create marks
+    const marks = validationDates.map((date, index) => {
+      return {
+        value: validationDateIndexes[index],
+        label: date.slice(0, 10),
+      };
+    });
+
+    // set marks
+    setValidationMarks(marks);
+
+    // create validationData
+    setValidationData(dataByDate);
+  }
+
+  function organizeDataByDate(input: Input) {
+    let organizedData: validationDataByDate = {};
+
+    for (let campFileName in input.validation.camps) {
+      let campRecords = input.validation.camps[campFileName];
+      let campName = campFileName.replace(".csv", "").split("-")[1];
+
+      campRecords.forEach((record) => {
+        let date = record.date.slice(0, 10);
+        let refugeeNumbers = record.refugee_numbers;
+
+        if (!organizedData[date]) {
+          organizedData[date] = [];
+        }
+
+        organizedData[date].push({
+          camp_name: campName,
+          refugee_numbers: refugeeNumbers,
+        });
+      });
+    }
+
+    return organizedData;
+  }
+
+  function getDifferenceBetweenDates(date1: string, date2: string) {
+    const dateDiff = new Date(date1).getTime() - new Date(date2).getTime();
+    const dayDiff = Math.floor(dateDiff / (1000 * 3600 * 24));
+
+    // add 1 to dayDiff because the first day is 0
+    return dayDiff + 1;
+  }
+
+  function getValidationDataForMap() {
+    // get validation data if in correct date
+    // get date from playSimulationIndex and
+    const currentDate = result?.data[playSimulationIndex]["Date"] as unknown;
+
+    // get validation data for currentDate
+    const validationDataForCurrentDate = validationData[currentDate as string];
+
+    // return validation data
+    return validationDataForCurrentDate;
+  }
 
   function handleSliderChange(_: any, newValue: number | number[]) {
     setPlaySimulationIndex(newValue as number);
@@ -68,7 +152,7 @@ function ResultDetails() {
             if (key.includes(inputLocation.name)) {
               return {
                 ...inputLocation,
-                population: result?.data[playSimulationIndex][key],
+                idp_population: result?.data[playSimulationIndex][key],
                 location_type: getLocationType(inputLocation),
               } as SimLocation;
             }
@@ -118,6 +202,7 @@ function ResultDetails() {
           shouldRecenter={false}
           input={formatMapInput()}
           mapMode={MapInputType.results}
+          validationData={getValidationDataForMap()}
         />
         <div className="slider-container">
           <button
@@ -149,6 +234,7 @@ function ResultDetails() {
             value={playSimulationIndex}
             onChange={handleSliderChange}
             min={0}
+            marks={validationMarks}
             max={result?.data?.length ? result?.data.length - 1 : 0}
             sx={{
               width: "50%",

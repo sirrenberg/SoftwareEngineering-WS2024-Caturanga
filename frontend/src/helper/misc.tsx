@@ -1,4 +1,4 @@
-import { SimLocation } from "../types";
+import { SimLocation, LocationType } from "../types";
 import { LatLngExpression } from "leaflet";
 
 function calcMapCenter(locations: SimLocation[]): LatLngExpression {
@@ -32,4 +32,17 @@ function formatDate(dateToFormat: string): string {
   return dateToFormat.slice(0, 10);
 }
 
-export { calcMapCenter, formatDate };
+function pretifyLocationName(locationName: string): string {
+  switch (locationName) {
+    case LocationType.camp:
+      return "Camp";
+    case LocationType.town:
+      return "Town";
+    case LocationType.conflict_zone:
+      return "Conflict Zone";
+    default:
+      return locationName;
+  }
+}
+
+export { calcMapCenter, formatDate, pretifyLocationName };
