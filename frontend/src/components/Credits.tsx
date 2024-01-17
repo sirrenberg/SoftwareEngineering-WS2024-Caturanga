@@ -117,7 +117,7 @@ function Credits() {
                     {/* Add FLEE literature as small cards by mapping over FLEE_LITERATURE*/}
                     <div className="row" style={{marginTop: '20px'}}>
                         {FLEE_LITERATURE.map((paper, index) => (
-                            <div key={index} className="half-width-card" style={{marginRight: '20px'}}>
+                            <div key={index} className="sub-card" style={{marginRight: '20px'}}>
                                 <a key={index} target="_blank" href={paper.link}>
                                     <div className="card-content">
                                         <h1 className="reference-heading">{paper.title}</h1>

@@ -29,6 +29,20 @@
   box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
 }
 
+.sub-card {
+  width: calc(50% - 0.5em); /* Subtract margin to ensure cards fit within the row */
+  padding: 1em;
+  border-radius: 0.5em;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease-in;
+  background-color: var(--light-gray);
+}
+
+.sub-card:hover {
+  background-color: var(--medium-orange);
+  transform: scale(1.1);
+}
+
 .card-content {
   display: flex;
   justify-content: space-between;
@@ -52,7 +66,15 @@
   font-size: 1.2em; /* Adjust the font size as needed */
 }
 
+.sub-card:hover .reference-heading {
+  color: var(--white);
+}
+
 .card-text {
   color: var(--black); /* Adjust the text color as needed */
   font-size: 1em; /* Adjust the font size as needed */
+}
+
+.sub-card:hover .card-text {
+  color: var(--white);
 }
