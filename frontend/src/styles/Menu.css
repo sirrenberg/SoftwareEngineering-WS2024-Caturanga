@@ -83,21 +83,6 @@
   color: var(--black);
 }
 
-#settings-items-list .simple-button:hover {
-  background-color: var(--medium-blue);
-  color: var(--white);
-}
-
-#outputs-items-list .simple-button {
-  background-color: var(--white);
-  color: var(--black);
-}
-
-#outputs-items-list .simple-button:hover {
-  background-color: var(--medium-orange);
-  color: var(--white);
-}
-
 .simple-button.selected-item {
   background-color: var(--dark-green);
   color: var(--white);
@@ -110,6 +95,21 @@
 
 #outputs-items-list .simple-button.selected-item {
   background-color: var(--dark-orange);
+  color: var(--white);
+}
+
+#settings-items-list .simple-button:hover {
+  background-color: var(--medium-blue);
+  color: var(--white);
+}
+
+#outputs-items-list .simple-button {
+  background-color: var(--white);
+  color: var(--black);
+}
+
+#outputs-items-list .simple-button:hover {
+  background-color: var(--medium-orange);
   color: var(--white);
 }
 
