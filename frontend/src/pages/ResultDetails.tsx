@@ -8,14 +8,23 @@ import {
   SimLocation,
   MapInputType,
   LocationType,
+  validationDataByDate,
+  validationData,
 } from "../types";
 import { LatLngExpression } from "leaflet";
 import Slider from "@mui/material/Slider";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPlay, faPause, faInfo } from "@fortawesome/free-solid-svg-icons";
+import {
+  faPlay,
+  faPause,
+  faInfo,
+  faMapLocationDot,
+} from "@fortawesome/free-solid-svg-icons";
 import { Colors } from "../helper/constants/DesignConstants";
 import DataSourceModal from "../components/DataSourceModal";
+import MapLegendModal from "../components/MapLegendModal";
 
+// Page for showing details of a result
 function ResultDetails() {
   const { sendRequest } = useAPI();
   const { id } = useParams<{ id: string }>();
@@ -25,6 +34,16 @@ function ResultDetails() {
   const [playSimulationIndex, setPlaySimulationIndex] = useState<number>(0);
   const [playingSimulation, setPlayingSimulation] = useState(false);
   const [isDataSourceModal, setDataSourceModal] = useState(false);
+  const [isMapLegendModal, setMapLegendModal] = useState(false);
+  const [validationMarks, setValidationMarks] = useState<
+    {
+      value: number;
+      label: string;
+    }[]
+  >([]);
+  const [validationData, setValidationData] = useState<validationDataByDate>(
+    {}
+  );
 
   // fetch result and corresponding input
   useEffect(() => {
@@ -34,21 +53,100 @@ function ResultDetails() {
         sendRequest(`/simulations/${resultData.simulation_id}`, "GET").then(
           (inputData: Input) => {
             setInput(inputData);
+
+            formatValidationData(inputData);
           }
         );
       }
     );
   }, []);
 
+  function formatValidationData(input: Input) {
+    // organize data by date
+    const dataByDate = organizeDataByDate(input);
+
+    // get validation dates
+    const validationDates = Object.keys(dataByDate);
+
+    // get index of validation date (comparing with start date)
+    const validationDateIndexes = validationDates.map((date) => {
+      return getDifferenceBetweenDates(date, input.sim_period.date);
+    });
+
+    // create marks
+    const marks = validationDates.map((date, index) => {
+      return {
+        value: validationDateIndexes[index],
+        label: date.slice(0, 10),
+      };
+    });
+
+    // set marks
+    setValidationMarks(marks);
+
+    // create validationData
+    setValidationData(dataByDate);
+  }
+
+  function organizeDataByDate(input: Input) {
+    let organizedData: validationDataByDate = {};
+
+    for (let campFileName in input.validation.camps) {
+      let campRecords = input.validation.camps[campFileName];
+      let campName = campFileName.replace(".csv", "").split("-")[1];
+
+      campRecords.forEach((record) => {
+        let date = record.date.slice(0, 10);
+        let refugeeNumbers = record.refugee_numbers;
+
+        if (!organizedData[date]) {
+          organizedData[date] = [];
+        }
+
+        organizedData[date].push({
+          camp_name: campName,
+          refugee_numbers: refugeeNumbers,
+        });
+      });
+    }
+
+    return organizedData;
+  }
+
+  // get difference between two dates in days
+  function getDifferenceBetweenDates(date1: string, date2: string): number {
+    // get difference in milliseconds
+    const dateDiff = new Date(date1).getTime() - new Date(date2).getTime();
+
+    // get difference in days
+    const dayDiff = Math.floor(dateDiff / (1000 * 3600 * 24));
+
+    // add 1 to dayDiff because the first day is 0
+    return dayDiff + 1;
+  }
+
+  // return validation data for map if available for current date (otherwise undefined)
+  function getValidationDataForMap(): validationData[] | undefined {
+    const currentDate = result?.data[playSimulationIndex]["Date"] as unknown;
+
+    // get validation data for currentDate
+    const validationDataForCurrentDate = validationData[currentDate as string];
+
+    return validationDataForCurrentDate;
+  }
+
   function handleSliderChange(_: any, newValue: number | number[]) {
     setPlaySimulationIndex(newValue as number);
   }
 
+  // format input for map
+  // (add idp_population to locations and change location_type if conflict has started)
   function formatMapInput(): Input | undefined {
     if (!input || !result || !result?.data) {
       return undefined;
     }
 
+    // get location type based on whether conflict has started in input
     function getLocationType(location: SimLocation): LocationType {
       if (location.location_type === LocationType.conflict_zone) {
         // check if conflict has started in input
@@ -60,6 +158,7 @@ function ResultDetails() {
       }
     }
 
+    // Add idp_population to locations and change location_type if conflict has started
     const inputForMap: Input = {
       ...input,
       locations: input.locations.map((inputLocation) => {
@@ -68,7 +167,7 @@ function ResultDetails() {
             if (key.includes(inputLocation.name)) {
               return {
                 ...inputLocation,
-                population: result?.data[playSimulationIndex][key],
+                idp_population: result?.data[playSimulationIndex][key],
                 location_type: getLocationType(inputLocation),
               } as SimLocation;
             }
@@ -103,10 +202,12 @@ function ResultDetails() {
 
   return (
     <div className="content-page result-detail-container">
-      <h1 className="page-title">{result ? result.name : "Loading..."}</h1>
+      <h1 className="page-title">
+        {result && input ? result.name : "Loading..."}
+      </h1>
 
       <div className="result-map-container">
-        {result?.data && (
+        {result?.data && input && (
           <p className="day-label">
             Day {playSimulationIndex}:{" "}
             {result?.data[playSimulationIndex]["Date"]}
@@ -118,6 +219,7 @@ function ResultDetails() {
           shouldRecenter={false}
           input={formatMapInput()}
           mapMode={MapInputType.results}
+          validationData={getValidationDataForMap()}
         />
         <div className="slider-container">
           <button
@@ -149,6 +251,7 @@ function ResultDetails() {
             value={playSimulationIndex}
             onChange={handleSliderChange}
             min={0}
+            marks={validationMarks}
             max={result?.data?.length ? result?.data.length - 1 : 0}
             sx={{
               width: "50%",
@@ -163,14 +266,36 @@ function ResultDetails() {
       </div>
 
       {input && (
-        <div
-          className="simple-button sources-button"
-          onClick={() => {
-            setDataSourceModal(true);
-          }}
-        >
-          <FontAwesomeIcon icon={faInfo} className="sources-icon" />
-        </div>
+        <>
+          <div
+            className="simple-button info-button"
+            id="sources-button"
+            onClick={() => {
+              setDataSourceModal(true);
+            }}
+          >
+            <FontAwesomeIcon icon={faInfo} className="sources-icon" />
+          </div>
+          <div
+            className="simple-button info-button"
+            id="map-legend-button"
+            onClick={() => {
+              setMapLegendModal(true);
+            }}
+          >
+            <FontAwesomeIcon
+              icon={faMapLocationDot}
+              className="map-legend-icon"
+            />
+          </div>
+        </>
+      )}
+
+      {isMapLegendModal && (
+        <MapLegendModal
+          setMapLegendModalOpen={setMapLegendModal}
+          mapInputType={MapInputType.results}
+        />
       )}
 
       {isDataSourceModal && input && (

@@ -10,6 +10,7 @@ export function useAPI() {
       delete body["routes"];
       delete body["conflicts"];
       delete body["data_sources"];
+      delete body["validation"];
     }
 
     return fetch(url.toString(), {

@@ -83,21 +83,6 @@
   color: var(--black);
 }
 
-#settings-items-list .simple-button:hover {
-  background-color: var(--medium-blue);
-  color: var(--white);
-}
-
-#outputs-items-list .simple-button {
-  background-color: var(--white);
-  color: var(--black);
-}
-
-#outputs-items-list .simple-button:hover {
-  background-color: var(--medium-orange);
-  color: var(--white);
-}
-
 .simple-button.selected-item {
   background-color: var(--dark-green);
   color: var(--white);
@@ -110,6 +95,21 @@
 
 #outputs-items-list .simple-button.selected-item {
   background-color: var(--dark-orange);
+  color: var(--white);
+}
+
+#settings-items-list .simple-button:hover {
+  background-color: var(--medium-blue);
+  color: var(--white);
+}
+
+#outputs-items-list .simple-button {
+  background-color: var(--white);
+  color: var(--black);
+}
+
+#outputs-items-list .simple-button:hover {
+  background-color: var(--medium-orange);
   color: var(--white);
 }
 
@@ -166,8 +166,12 @@ a .items-list-item-icons {
   color: var(--dark-green);
 }
 
+#settings-list-container .item-icon:hover {
+  color: var(--dark-blue);
+}
+
 #outputs-list-container .item-icon:hover {
-  color: var(--medium-orange);
+  color: var(--dark-orange);
 }
 
 .content-section {
@@ -185,18 +189,6 @@ a .items-list-item-icons {
   margin-bottom: 1.5em;
   font-weight: 700;
   color: var(--gray);
-}
-
-.map-background {
-  background-color: var(--dark-green);
-}
-
-#outputs-menu-container .map-background {
-  background-color: var(--light-orange);
-}
-
-.result-detail-container .map-background {
-  background-color: var(--light-orange);
 }
 
 .leaflet-container {
@@ -276,10 +268,9 @@ a .items-list-item-icons {
   background-color: var(--medium-orange);
 }
 
-.sources-button {
+.info-button {
   position: absolute;
-  bottom: 20px;
-  right: 20px;
+  right: 0px;
   border-radius: 50%;
   height: 50px;
   width: 50px;
@@ -287,4 +278,12 @@ a .items-list-item-icons {
   justify-content: center;
   align-items: center;
   padding: 1.3em;
+}
+
+#sources-button {
+  bottom: 0px;
+}
+
+#map-legend-button {
+  bottom: 80px;
 }
