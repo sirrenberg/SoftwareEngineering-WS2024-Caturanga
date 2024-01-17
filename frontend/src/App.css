@@ -1,6 +1,16 @@
 :root {
-  --main-green: #3bb732;
+  --light-green: #D8FFD6;
+  --medium-green: #71A480;
+  --dark-green: #1D493D;
+  --light-blue: #AFCBD4;
+  --medium-blue: #476C85;
+  --dark-blue: #2C4251;
+  --light-orange: #F3B391;
+  --medium-orange: #EA7734;
+  --dark-orange: #95400F;
   --white: #ffffff;
+  --light-gray: #f5f5f5;
+  --gray: #7b7b7b;
   --black: #000000;
 }
 * {
@@ -9,8 +19,14 @@
 }
 
 body {
-  font-family: "Roboto", sans-serif;
+  font-family: "Questrial", sans-serif;
   color: var(--black);
+  overflow-x: hidden;
+}
+
+a {
+  text-decoration: none;
+  color: var(--white);
 }
 
 .App {
@@ -20,28 +36,77 @@ body {
 }
 
 .content-page {
+  min-height: 100vh;
+  width: 100vw;
+
   display: flex;
   flex-direction: column;
-  align-items: center;
-  background-color: var(--white);
-  padding-top: 12vh;
-  min-height: 100vh;
+
+  padding: 2rem 4rem;
+
+  background-color: var(--white)
 }
 
-.nav-link {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  text-decoration: none;
-}
-
-a {
-  text-decoration: none;
+.simple-button {
+  font-family: "Cabin", sans-serif;
+  font-weight: 600;
+  font-size: 1.5rem;
+  border: none;
+  padding: 1rem 2rem;
+  margin: 2rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+  cursor: pointer;
   transition: all 0.3s ease-in-out;
+  background-color: var(--dark-green);
+  color: var(--white);
 }
 
-@media screen and (min-width: 992px) {
-  .content-page {
-    min-height: 100vh;
+.simple-button:hover {
+  transform: scale(1.1);
+  background-color: var(--medium-green);
+}
+
+.simple-button:active {
+  transform: scale(0.9);
+}
+
+.page-title {
+  font-size: 3rem;
+  font-weight: 700;
+  margin-bottom: 2rem;
+  font-family: "Cabin", sans-serif;
+  text-align: center;
+}
+
+.page-subtitle {
+  font-size: 2rem;
+  font-weight: 600;
+  margin-bottom: 2rem;
+  font-family: "Cabin", sans-serif;
+  color: var(--gray);
+}
+
+.page-subsubtitle {
+  font-size: 1.5rem;
+  font-weight: 400;
+  margin-bottom: 1rem;
+  font-family: "Cabin", sans-serif;
+  color: var(--gray);
+}
+
+@media (max-width: 1280px) {
+  .simple-button {
+    font-size: 0.8rem;
+    padding: 0.5rem 1rem;
+    margin: 1rem;
+  }
+
+  .page-title {
+    font-size: 1.5rem;
+  }
+
+  .page-subtitle {
+    font-size: 1.2rem;
   }
 }

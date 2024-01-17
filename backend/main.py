@@ -1,19 +1,16 @@
-from fastapi import FastAPI, Path, BackgroundTasks, HTTPException
+from fastapi import FastAPI, HTTPException, Path, BackgroundTasks
 from flee_controller.controller import Controller
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
 from typing import Any, Dict, AnyStr, List, Union
 
 app = FastAPI()
 controller = Controller()
-expected_simsettings = ["_id", "name", "log_levels", "spawn_rules",
-                        "move_rules", "optimisations"]
 
-# allow CORS (Cross Origin Resource Sharing) - allows us to access the API
-# from a different origin
-# e.g. if we have a frontend on localhost:3000 and the API on localhost:8000,
-# we need to allow the frontend to access the API
+JSONObject = Dict[AnyStr, Any]
+JSONArray = List[Any]
+JSONStructure = Union[JSONArray, JSONObject]
 
+# TODO: adjust this for production as allowing all origins is not secure
 origins = ["*"]
 app.add_middleware(
     CORSMiddleware,
@@ -24,40 +21,163 @@ app.add_middleware(
 )
 
 
+# General: --------------------------------------------------------------------
+
+
 @app.get("/")
 def read_root():
-    return {"data": "Welcome to the Caturanga API!"}
-
-
-# this runs the Burundi simulation and returns the result
-# TODO - should take a simulation ID as parameter and run that simulation
-@app.get("/run_simulation")
-async def run_simulation(background_tasks: BackgroundTasks):
     """
-    Runs the simulation using the controller module.
+    Root of the Caturanga API.
+
+    :return: A dictionary containing the welcome message.
+    """
+    return {"data": "Welcome to the Caturanga API!!"}
+
+
+# Simulation Execution: -------------------------------------------------------
+
+
+@app.post("/run_simulation/config")
+async def run_simulation_config(
+        background_tasks: BackgroundTasks,
+        simulation_config: JSONStructure = None
+):
+    """
+    Run simulation with specified simulation input and settings.
+
+    Parameters:
+    - background_tasks (BackgroundTasks): The background tasks object used to
+      run the simulation asynchronously.
+    - simulation_config (JSONStructure, optional) containing:
+        - input_id (str): The ID of the simulation input.
+        - input_name (str): The name of the simulation input.
+        - simsettings_id (str): The ID of the simulation settings.
+        - simsettings_name (str): The name of the simulation settings.
 
     Returns:
-        The object id of the dummy simulation result.
+        dict: A dictionary containing the object ID of the dummy simulation.
 
-    Background Tasks:
-        The simulation is run in the background using FastAPI's
-        BackgroundTasks.
-        This allows the user to continue using the application without waiting
-        for the simulation to complete.
+    Example:
+        To query this endpoint, use the following URL format:
+        /run_simulation/config/
 
-    References:
-        - FastAPI Background Tasks:
-            https://fastapi.tiangolo.com/tutorial/background-tasks/
-        - Celery:
-            https://docs.celeryproject.org/en/stable/
-            Celery is an alternative to FastAPI's BackgroundTasks that
-            provides more complex setup but can be used for
-            heavy background computation.
+        The body has to have following format:
+
+        {
+            input: {
+                input_id: <input_id>,
+                input_name: <input_name>
+            },
+            settings: {
+                simsettings_id: <simsettings_id>,
+                simsettings_name: <simsettings_name>
+            }
+        }
 
     """
-    object_id = await controller.store_dummy_simulation()
-    background_tasks.add_task(controller.run_simulation, object_id)
-    return {"dummy simulation": str(object_id)}
+    data = await controller.initialize_simulation(
+        simulation_config=simulation_config
+    )
+
+    background_tasks.add_task(
+        controller.run_simulation_config,
+        data["name"],
+        data["simulation_id"],
+        data["simsettings_id"],
+        data["objectid"],
+        data["simsettings_filename"],
+        data["simulation_dir"],
+        data["validation_dir"])
+
+    return {"dummy simulation": str(data["objectid"])}
+
+
+# Simulations: ---------------------------------------------------------------
+
+
+@app.get("/simulations")
+async def get_all_simulations():
+    """
+    Return the data of all simulations.
+
+    Returns:
+    - list: The data of the all simulations.
+    """
+    return await controller.get_all_simulations()
+
+
+@app.get("/simulations/summary")
+async def get_all_simulation_summaries():
+    """
+    Retrieves all simulation summaries.
+    A simulation summary contains the simulation ID and the simulation name.
+
+    Returns:
+    - list of simulation summaries.
+    """
+    return await controller.get_all_simulation_summaries()
+
+
+@app.get("/simulations/{simulation_id}")
+async def get_simulation(
+        simulation_id: str = Path(),
+):
+    """
+    Return the data of a simulation based on its ID.
+
+    Parameters:
+    - simulation_id (str): The ID of the simulation.
+
+    Returns:
+    - dict: The data of the simulation.
+    """
+    return await controller.get_simulation(simulation_id)
+
+
+@app.delete("/simulations/{simulation_id}")
+async def delete_simulation_and_associated_results(
+        simulation_id: str = Path(),
+):
+    """
+    Deletes a simulation (called "input" in the GUI) with the given ID.
+
+    Parameters:
+    - simulation_id (str): The ID of the simulation to delete.
+
+    Returns:
+    - The result of the deletion operation.
+    """
+    result = \
+        await controller.delete_simulation_and_associated_results(
+            simulation_id)
+
+    if result["status"] == "error":
+        raise HTTPException(status_code=404,
+                            detail="Simulation input not found.")
+    else:
+        return result
+
+
+@app.post("/simulations")
+async def post_simulation(
+        simulation: JSONStructure = None):
+    """
+    Posts the simulation input to the controller.
+
+    Parameters:
+    - simulation (JSONStructure, optional): The simulation input.
+
+    Returns:
+    - dict: A dictionary containing the posted simulation input.
+    """
+    try:
+        simulation_id = await controller.post_simulation(simulation)
+        return {"id": simulation_id}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# Simulation results: -------------------------------------------------------
 
 
 @app.get("/simulation_results")
@@ -66,119 +186,140 @@ async def get_all_simulation_results():
     Retrieves all simulation results.
 
     Returns:
-        A list of simulation results.
+    - list: A list of all simulation results.
     """
     return await controller.get_all_simulation_results()
 
 
+@app.get("/simulation_results/summary")
+async def get_all_simulation_result_summaries():
+    """
+    Retrieves all simulation result summaries.
+    A simulation result summary contains the
+    simulation result ID and the simulation result name.
+
+    Returns:
+    - list of simulation result summaries.
+    """
+    return await controller.get_all_simulation_result_summaries()
+
+
 @app.get("/simulation_results/{simulation_result_id}")
 async def get_simulation_result(
-    simulation_result_id: str = Path(
-        description="The ID of the simulation whose data you want to view."
-    ),
+        simulation_result_id: str = Path(),
 ):
     """
     Retrieve the data of a simulation result based on its ID.
 
-    Args:
-        simulation_result_id (str): The ID of the simulation result.
+    Parameters:
+    - simulation_result_id (str): The ID of the simulation result.
 
     Returns:
-        The data of the simulation result.
+    - dict: The data of the simulation result.
     """
-    result = await controller.get_simulation_result(simulation_result_id)
-    if result is None:
-        raise HTTPException(status_code=404,
-                            detail="Simulation result not found")
-    return result
+    return await controller.get_simulation_result(simulation_result_id)
 
 
-@app.get("/simulations")
-async def get_all_simulations():
-    """
-    Return the data of all simulations.
-    """
-    return await controller.get_all_simulations()
-
-
-@app.get("/simulations/{simulation_id}")
-async def get_simulation(
-    simulation_id: str = Path(
-        description="The ID of the simulation whose data you want to view."
-    ),
+@app.delete("/simulation_results/{simulation_result_id}")
+async def delete_simulation_results(
+        simulation_result_id: str = Path(),
 ):
     """
-    Return the data of a simulation based on its ID.
+    Delete the data of a simulation result based on its ID.
 
     Parameters:
-        simulation_id (str): The ID of the simulation.
+    - simulation_result_id (str): The ID of the simulation result.
 
     Returns:
-        dict: The data of the simulation.
+    - dict: The data of the simulation result.
     """
-    result = await controller.get_simulation(simulation_id)
-    if result is None:
+    result = await controller.delete_simulation_results(simulation_result_id)
+
+    if result["status"] == "error":
         raise HTTPException(status_code=404,
-                            detail="Simulation input not found")
-    return result
+                            detail="Simulation setting not found.")
+    else:
+        return result
 
 
-class SimulationSetting(BaseModel):
-    log_levels: str
-    spawn_rules: str
-    move_rules: str
-    optimizations: str
-
-
-JSONObject = Dict[AnyStr, Any]
-JSONArray = List[Any]
-JSONStructure = Union[JSONArray, JSONObject]
+# Simulation Settings: --------------------------------------------------------
 
 
 @app.get("/simsettings")
 async def get_all_simsettings():
     """
-    Return the data of all simsettings.
+    Return all simsettings.
+
+    Returns:
+    - list: A list of all simulation settings.
     """
     return await controller.get_all_simsettings()
 
 
+@app.get("/simsettings/summary")
+async def get_all_simsetting_summaries():
+    """
+    Retrieves all simsetting summaries.
+    A simsetting summary contains the simsetting ID and the simsetting name.
+
+    Returns:
+    - list of simsetting summaries.
+    """
+    return await controller.get_all_simsetting_summaries()
+
+
 @app.get("/simsettings/{simsetting_id}")
 async def get_simsetting(
-    simsetting_id: str = Path(
-        description="The ID of the simsetting whose data you want to view."
-    ),
+        simsetting_id: str = Path(),
 ):
-    result = await controller.get_simsetting(simsetting_id)
-    if result is None:
-        raise HTTPException(status_code=404,
-                            detail="Simulation settings not found")
-    return result
+    """
+    Retrieve the data of a simulation setting based on its ID.
+
+    Parameters:
+    - simsetting_id (str): The ID of the simulation setting.
+
+    Returns:
+    - dict: The data of the simulation setting.
+    """
+    return await controller.get_simsetting(simsetting_id)
 
 
 @app.post("/simsettings")
-async def post_simsetting(simsetting: JSONStructure = None):
+async def post_simsettings(
+        simsetting: JSONStructure = None):
     """
-    Example:
-        # curl -X POST "http://127.0.0.1:8080/simsettings"
-        -H  "accept: application/json"
-        -H  "Content-Type: application/json" -d "{\"test_key\":\"test_val\"}"
+    Posts the simulation settings to the database.
+
+    Parameters:
+    - simsetting (JSONStructure, optional): The simulation settings.
+
+    Returns:
+    - dict: A dictionary containing the posted simulation settings id.
     """
-    if not all(key in expected_simsettings for key in simsetting.keys()):
-        raise HTTPException(status_code=400,
-                            detail="Invalid simsetting structure")
-    result = await controller.post_simsettings(simsetting)
-    return {"ID": str(result.inserted_id), "data": simsetting}
+    try:
+        simsetting_id = await controller.post_simsettings(simsetting)
+        return {"id": simsetting_id}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @app.delete("/simsettings/{simsetting_id}")
 async def delete_simsetting(
-    simsetting_id: str = Path(
-        description="The ID of the simsetting you want to delete."
-    ),
+        simsetting_id: str = Path(),
 ):
+    """
+    Deletes a simulation setting with the given ID.
+
+    Parameters:
+    - simsetting_id (str): The ID of the simulation setting to delete.
+
+    Returns:
+    - The result of the deletion operation.
+    """
     result = await controller.delete_simsetting(simsetting_id)
-    if not result["deleted"]:
+
+    if result["status"] == "error":
         raise HTTPException(status_code=404,
-                            detail="Simulation settings not found")
-    return result
+                            detail="Simulation setting not found.")
+    else:
+        return result

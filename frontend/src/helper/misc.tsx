@@ -21,4 +21,15 @@ function calcMapCenter(locations: SimLocation[]): LatLngExpression {
   return [maxLocation.latitude, maxLocation.longitude];
 }
 
-export { calcMapCenter };
+function formatDate(dateToFormat: string): string {
+  if (!dateToFormat) {
+    return "";
+  }
+  if (dateToFormat.length < 10) {
+    return dateToFormat;
+  }
+
+  return dateToFormat.slice(0, 10);
+}
+
+export { calcMapCenter, formatDate };

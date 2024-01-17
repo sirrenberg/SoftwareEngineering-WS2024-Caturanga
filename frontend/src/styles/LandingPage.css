@@ -1,95 +1,177 @@
 .lp-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  font-family: "Cabin", sans-serif;
 }
 
-.title-container {
+#lp-title-page {
+  background-color: var(--light-green);
+  min-height: 85vh;
+}
+
+.logo-container {
+  width: 5%;
+}
+
+.logo {
+  width: 100%;
+}
+
+.lp-title-page-content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  width: 100%;
+  height: 60vh;
+}
+
+.lp-title-content-section {
+  width: 50%;
+  height: 100%;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  width: 100%;
-  padding: 20px 30px;
+  justify-content: center;
+}
+
+.lp-title-container {
+  display: flex;
+  flex-direction: column;
 }
 
 .main-title {
-  font-size: 2em;
-  font-weight: bold;
-  margin: 0.5em 0;
-  text-align: center;
+  font-size: 5rem;
+  font-weight: 700;
+  color: var(--black);
+  margin-bottom: 1rem;
 }
 
-.map-container {
+.sub-title {
+  font-size: 2.5rem;
+  color: var(--black);
+}
+
+.lp-title-description {
+  font-size: 1.5rem;
+  font-weight: 500;
+  max-width: 80%;
+  color: var(--gray);
+}
+
+.lp-title-buttons-container {
   display: flex;
-  justify-content: center;
+  justify-content: space-around;
+  align-items: center;
+  margin-top: 4rem;
+  max-width: 80%;
+}
+
+.lp-title-map-container {
   align-items: center;
 }
 
-.bayern-map {
+.lp-title-map {
   width: 100%;
+}
+
+.lp-sources {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  padding: 1rem;
+  height: 15vh;
+  background-color: var(--white);
+}
+
+.sources-description {
+  font-size: 1.2rem;
+  font-weight: 500;
+  color: var(--gray);
+}
+
+.sources-logos-container {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  width: 50%;
   height: 100%;
+  gap: 7rem;
 }
 
-.info-container {
+.img-container {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: space-evenly;
-  width: 100%;
-  min-height: 88vh;
-  background-color: var(--bayern-blue);
-}
-
-.charts-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: space-evenly;
-  width: 90%;
-  padding: 50px;
-}
-
-.chart-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
   justify-content: center;
-  width: 90%;
-  height: 90%;
+  align-items: center;
+  width: 300px;
 }
 
-@media screen and (min-width: 992px) {
-  .title-container {
-    padding: 20px 50px;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-    min-height: 88vh;
+.source-logo {
+  width: 200px;
+}
+
+#wfp-logo {
+  width: 80px;
+}
+
+#lp-simulation-page {
+  background-color: var(--light-blue);
+  align-items: center;
+}
+
+#lp-simulation-title {
+  color: var(--white);
+}
+
+.map-background {
+  background-color: var(--dark-blue);
+}
+
+#lp-credits-page {
+  background-color: var(--white);
+  align-items: center;
+}
+
+.credits-background {
+  background-color: var(--white);
+}
+
+#lp-simulation-title {
+  color: black;
+}
+
+@media (max-width: 1280px) {
+  .lp-title-content-section {
+    height: 50vh;
   }
 
   .main-title {
-    font-size: 4em;
-    margin: 0.5em 0;
-    text-align: left;
-    max-width: 500px;
-    position: relative;
-    left: 150px;
+    font-size: 2rem;
   }
 
-  .map-container {
-    width: 50%;
+  .sub-title {
+    font-size: 1.2rem;
   }
 
-  .bayern-map {
-    width: 60%;
-    height: 60%;
+  .lp-title-description {
+    font-size: 1rem;
+  }
+  .lp-title-buttons-container {
+    margin-top: 1rem;
   }
 
-  .info-container {
-    flex-direction: row;
+  .lp-title-map-container {
+    align-items: center;
   }
 
-  .charts-container {
-    flex-direction: row;
+  .lp-title-credits-container {
+    align-items: center;
+  }
+
+  .source-logo {
+    width: 150px;
+  }
+
+  #wf-logo {
+    width: 40px;
   }
 }
