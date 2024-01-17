@@ -1,3 +1,5 @@
+export const CATURANGA_LOGO : string = "./logo.png";
+
 export enum Colors {
     light_green = "#D8FFD6",
     medium_green = "#71A480",

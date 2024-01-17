@@ -13,3 +13,19 @@
   height: 100%;
   border-radius: 1em;
 }
+
+.map-background {
+  background-color: var(--dark-green);
+}
+
+#lp-simulation-page .map-background {
+  background-color: var(--dark-blue);
+}
+
+#outputs-menu-container .map-background {
+  background-color: var(--light-orange);
+}
+
+.result-detail-container .map-background {
+  background-color: var(--light-orange);
+}

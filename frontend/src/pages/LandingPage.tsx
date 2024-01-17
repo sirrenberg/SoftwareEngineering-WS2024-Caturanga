@@ -2,25 +2,24 @@ import Map from "../components/Map";
 import "../styles/LandingPage.css";
 import { NavLink } from "react-router-dom";
 import Credits from "../components/Credits.tsx";
+import { ACLED_LOGO, FLEE_LOGO, NETLIGHT_LOGO, WFP_LOGO } from "../helper/constants/CreditsConstants.tsx";
+import { CATURANGA_LOGO } from "../helper/constants/DesignConstants.tsx";
 
 function LandingPage() {
   return (
     <div className="lp-container">
       <div id="lp-title-page" className="content-page">
         <div className="logo-container">
-          <img className="logo" src="./generic-logo.png" alt="logo" />
+          <img className="logo" src={CATURANGA_LOGO} alt="logo" />
         </div>
         <div className="lp-title-page-content">
           <div className="lp-title-container lp-title-content-section">
             <h1 className="main-title">
               Caturanga
             </h1>
-            <h2 className="sub-title">A Humanitarian Logistics Tool</h2>
+            <h2 className="sub-title">Simplifying Aid while Amplifying Impact</h2>
 
-            <p className="lp-title-description">
-              Experience the power of Compassion in Crisis through Interactive
-              Refugee Movement Mapping
-            </p>
+            <p className="lp-title-description">A Simulation Framework for Conflict-Driven Displacement</p>
 
             <div className="lp-title-buttons-container">
               <NavLink to="/inputs">
@@ -54,7 +53,7 @@ function LandingPage() {
             <a href="https://flee.readthedocs.io/en/master/" target="_blank">
               <img
                   className="source-logo"
-                  src="./flee.png"
+                  src={FLEE_LOGO}
                   alt="flee-logo"
               />
             </a>
@@ -65,7 +64,7 @@ function LandingPage() {
             <a href="https://acleddata.com/" target="_blank">
               <img
                   className="source-logo"
-                  src="./acled-logo.png"
+                  src={ACLED_LOGO}
                   alt="acled-logo"
               />
             </a>
@@ -77,7 +76,7 @@ function LandingPage() {
               <img
                   id="wfp-logo"
                   className="source-logo"
-                  src="./wfp-logo.png"
+                  src={WFP_LOGO}
                   alt="wfp-logo"
               />
             </a>
@@ -88,7 +87,7 @@ function LandingPage() {
             <a href="https://www.netlight.com/" target="_blank">
               <img
                   className="source-logo"
-                  src="../../public/netlight-logo.png"
+                  src={NETLIGHT_LOGO}
                   alt="netlight-logo"
               />
             </a>

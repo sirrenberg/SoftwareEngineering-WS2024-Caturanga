@@ -13,15 +13,18 @@ import { movementRulesText, moveSpeedText, walkSpeedText, conflictWeightText,
         optimisationsText, awarenessLevelOptions, spawnRulesText, displacedPerConflictDayText } 
         from "../helper/constants/SimsettingConstants";
 import { CheckboxInputField, NumberInputField, SelectInputField } from "../components/SimsettingField";
+import { sliceName } from "../helper/misc";
+
+const settingNameCutOff : number = 10;
 
 function Settings() {
   const { sendRequest } = useAPI();
   const navigate = useNavigate();
 
-  const [settings, setSettings] = useState<SimSettings[] | undefined>(
-    undefined
-  );
+  const [submitted, setSubmitted] = useState<boolean>(false);
+  const [settings, setSettings] = useState<SimSettings[] | undefined>();
   const [selectedSettingIndex, setSelectedSettingIndex] = useState<number>(-1);
+  const [indexForDeletion, setIndexForDeletion] = useState<number | undefined>(undefined);
   const [protectedSimSettingIDs, setProtectedSimSettingIDs] = useState<string[]>([]);
 
   const context = useContext(StartSimContext);
@@ -63,13 +66,14 @@ function Settings() {
                     "simple-button" +
                     (index === selectedSettingIndex ? " selected-item" : "")
                   }
+                  disabled={index === indexForDeletion}
                   onClick={() => {
                     setSelectedSettingIndex(index);
                     setSettingsId(settings[index]._id);
                     setSettingsName(settings[index].name);
                   }}
                 >
-                  <p>{setting.name}</p>
+                  <p>{sliceName(setting.name, settingNameCutOff)}</p>
                   <span className="items-list-item-icons">
                     <NavLink to={"/settings/" + setting._id}>
                       <FontAwesomeIcon
@@ -81,33 +85,17 @@ function Settings() {
                       <FontAwesomeIcon
                         icon={faTrash}
                         className="item-icon"
-                        //style={{ border: "none" , backgroundColor: "transparent" , padding : 0, color: "inherit"}}
                         onClick={(event) => {
                           event.stopPropagation();
-                          // if the setting to be deleted is the one that is currently selected, deselect it
-                          if (selectedSettingIndex === index) {
-                            setSelectedSettingIndex(-1);
-                          }
-                          sendRequest("/simsettings/" + setting._id, "DELETE")
-                            .then((_) => {
-                              // if the setting to be deleted is before the currently selected one, decrement the selected index
-                              const indexOfDeleted = settings.findIndex(
-                                (s) => s._id === setting._id
-                              );
-                              if (indexOfDeleted < selectedSettingIndex) {
-                                setSelectedSettingIndex(
-                                  selectedSettingIndex - 1
-                                );
-                              }
-                              setSettings(
-                                settings.filter(
-                                  (simsetting) => simsetting._id !== setting._id
-                                )
-                              );
+                          setSelectedSettingIndex(-1);
+                          setIndexForDeletion(index);
+                          const idForDeletion : string = setting._id;
+                          sendRequest(`/simsettings/${idForDeletion}`, "DELETE")
+                            .then(() => {
+                              setSettings(settings.filter((s) => s._id !== idForDeletion));
+                              setIndexForDeletion(undefined);
                             })
-                            .catch((err) => {
-                              console.error(err);
-                            });
+                            .catch((err) => {console.error(err);});
                         }}
                       />
                     )}
@@ -356,7 +344,8 @@ function Settings() {
               disabled={
                 selectedSettingIndex === -1 ||
                 context.settingsId === "" ||
-                context.inputId === ""
+                context.inputId === "" ||
+                submitted
               }
               onClick={() => {
                 sendRequest("/run_simulation/config", "POST", {
@@ -368,9 +357,10 @@ function Settings() {
                     simsettings_id: context.settingsId,
                     simsettings_name: context.settingsName,
                   },
+                }).then(() => {
+                  setSubmitted(true);
+                  navigate("/results");
                 });
-
-                navigate("/results");
               }}
             >
               Start Simulation

@@ -32,4 +32,14 @@ function formatDate(dateToFormat: string): string {
   return dateToFormat.slice(0, 10);
 }
 
-export { calcMapCenter, formatDate };
+function sliceName(name: string, cutOff: number) : string {
+  // if the name is short enough, we do not have to slice it
+  // we cut off if it is at least two characters too much
+  if (name.length <= cutOff + 1) {
+    return name;
+  } else {
+    return `${name.slice(0, cutOff)}...`
+  }
+}
+
+export { calcMapCenter, formatDate, sliceName};
