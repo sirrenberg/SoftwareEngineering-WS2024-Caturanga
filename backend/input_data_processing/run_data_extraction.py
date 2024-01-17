@@ -195,19 +195,19 @@ def run_extraction(country_name, start_date, fetching_end_date, simulation_end_d
     # 7. extract conflict information from conflict_info.csv, modify data and create conflict.csv
     extract_conflicts_csv(folder_name, start_date, simulation_end_date)
 
-    # 9. extract routes from locations.csv and create routes.csv
+    # 8. extract routes from locations.csv and create routes.csv
     extract_routes_csv(folder_name)
     
-    # 10. create empty closures.csv
+    # 9. create empty closures.csv
     create_empty_closure_csv(folder_name)
     
-    # 11. create empty registration_correction.csv
+    # 10. create empty registration_correction.csv
     create_empty_registration_corrections_csv(folder_name)
     
-    # 12. create sim_period.csv
+    # 11. create sim_period.csv
     create_sim_period_csv(folder_name, start_date, fetching_end_date)
 
-    # 13. create validation data
+    # 12. create validation data
     # create folder in conflict_validation 
     # docker path
     # os.mkdir(os.path.join('conflict_validation', folder_name))
@@ -219,7 +219,7 @@ def run_extraction(country_name, start_date, fetching_end_date, simulation_end_d
     val_retrieval_date, val_reformatted_start_date, val_reformatted_end_date, val_covered_from, val_covered_to, val_oldest_url, val_latest_url = create_validation_data(camp_data_df, camp_rounds_dict, folder_name, country_name, start_date, fetching_end_date)
 
 
-    # 14. insert data into DB
+    # 13. insert data into DB
     current_dir = os.getcwd()
     acled_source_list=[acled_url, acled_retrieval_date, acled_last_update, acled_reformatted_start_date, acled_reformatted_end_date, acled_oldest_event_date, acled_latest_event_date]
     population_source_list = [population_url, population_retrieval_date, population_date]
