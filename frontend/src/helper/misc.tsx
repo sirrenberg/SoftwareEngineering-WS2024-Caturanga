@@ -33,7 +33,7 @@ function formatDate(dateToFormat: string): string {
   return dateToFormat.slice(0, 10);
 }
 
-function prettifyLocationName(locationName: string): string {
+function prettifyLocationTypeName(locationName: string): string {
   switch (locationName) {
     case LocationType.camp:
       return "Camp";
@@ -41,6 +41,8 @@ function prettifyLocationName(locationName: string): string {
       return "Town";
     case LocationType.conflict_zone:
       return "Conflict Zone";
+    case LocationType.forwarding_hub:
+      return "Forwarding Hub";
     default:
       return locationName;
   }
@@ -62,4 +64,9 @@ function getLocationColor(locationType: LocationType) {
   }
 }
 
-export { calcMapCenter, formatDate, prettifyLocationName, getLocationColor };
+export {
+  calcMapCenter,
+  formatDate,
+  prettifyLocationTypeName,
+  getLocationColor,
+};

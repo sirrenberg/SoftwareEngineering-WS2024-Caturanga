@@ -19,7 +19,7 @@ import { LatLngExpression } from "leaflet";
 import { useMap } from "react-leaflet/hooks";
 import { useEffect } from "react";
 import { v4 as uuidv4 } from "uuid";
-import { prettifyLocationName, getLocationColor } from "../helper/misc";
+import { prettifyLocationTypeName, getLocationColor } from "../helper/misc";
 
 function Map({
   input,
@@ -126,7 +126,7 @@ function Map({
               <Popup>
                 <strong>{location.name}</strong>
                 <br />
-                Type: {prettifyLocationName(location.location_type)}
+                Type: {prettifyLocationTypeName(location.location_type)}
                 <br />
                 Initial Population:{" "}
                 {location.population === 0 ? "N/A" : location.population}
