@@ -187,18 +187,6 @@ a .items-list-item-icons {
   color: var(--gray);
 }
 
-.map-background {
-  background-color: var(--dark-green);
-}
-
-#outputs-menu-container .map-background {
-  background-color: var(--light-orange);
-}
-
-.result-detail-container .map-background {
-  background-color: var(--light-orange);
-}
-
 .leaflet-container {
   min-height: 50vh;
   min-width: 50vw;

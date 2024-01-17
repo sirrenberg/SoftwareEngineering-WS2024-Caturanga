@@ -122,10 +122,6 @@
   color: var(--white);
 }
 
-.map-background {
-  background-color: var(--dark-blue);
-}
-
 #lp-credits-page {
   background-color: var(--light-orange);
   align-items: center;
