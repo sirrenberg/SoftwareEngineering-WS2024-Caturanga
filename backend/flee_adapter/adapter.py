@@ -1,4 +1,4 @@
-from runscripts.runner import Simulation  # noqa: E402
+from runscripts.runner import Simulation
 
 
 class Adapter:
