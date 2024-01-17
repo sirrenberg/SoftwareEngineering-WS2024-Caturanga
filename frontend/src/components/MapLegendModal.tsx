@@ -51,8 +51,8 @@ function MapLegendModal({
 
             <div className="modal-section-content">
               {mapInputType === MapInputType.results
-                ? "The size of the location is proportional to the simulated number of IDPs"
-                : "The size of the location is proportional to the initial population"}
+                ? "The size of the location is proportional to the simulated number of IDPs."
+                : "The size of the location is proportional to the initial population."}
             </div>
           </div>
 
