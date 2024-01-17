@@ -21,6 +21,7 @@ function Settings() {
   const { sendRequest } = useAPI();
   const navigate = useNavigate();
 
+  const [submitted, setSubmitted] = useState<boolean>(false);
   const [settings, setSettings] = useState<SimSettings[] | undefined>(
     undefined
   );
@@ -359,7 +360,8 @@ function Settings() {
               disabled={
                 selectedSettingIndex === -1 ||
                 context.settingsId === "" ||
-                context.inputId === ""
+                context.inputId === "" ||
+                submitted
               }
               onClick={() => {
                 sendRequest("/run_simulation/config", "POST", {
@@ -371,9 +373,10 @@ function Settings() {
                     simsettings_id: context.settingsId,
                     simsettings_name: context.settingsName,
                   },
+                }).then(() => {
+                  setSubmitted(true);
+                  navigate("/results");
                 });
-
-                navigate("/results");
               }}
             >
               Start Simulation
