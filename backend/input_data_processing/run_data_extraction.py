@@ -29,15 +29,15 @@ ADDED_CONFLICT_DAYS = 7
 NBR_SHOWN_ROWS = 10
 
 
-def acled_data_to_csv(country, folder_name, start_date, end_date):
+def acled_data_to_csv(country, folder_name, start_date, fetching_end_date):
     '''
     Extracts the ACLED data for the given country and time period and saves it to a CSV file.
 
         Parameters:
             country (str): Country name
             folder_name (str): Folder name for the CSV file
-            start_year (int): Start year of the time period
-            end_year (int): End year of the time period	
+            start_date (str): Start date of the time period
+            fetching_end_date (str): End date of the time period for fetching data
         Returns:
             acled_url (str): URL of the ACLED data source
             retrieval_date (str): Date of retrieval. When the script is executed.
@@ -54,11 +54,11 @@ def acled_data_to_csv(country, folder_name, start_date, end_date):
     
     # reformat the given date from DD-MM-YYYY to YYYY-MM-DD in order to have the same format as in the ACLED-API
     reformatted_start_date = date_format(start_date)
-    reformatted_end_date = date_format(end_date)
+    reformatted_end_date = date_format(fetching_end_date)
 
     # extract start_year and end_year for API call
     split_start_date = start_date.split("-")
-    split_end_date = end_date.split("-")
+    split_end_date = fetching_end_date.split("-")
     start_year = int(split_start_date[2])
     end_year = int(split_end_date[2])
 
@@ -117,7 +117,7 @@ def acled_data_to_csv(country, folder_name, start_date, end_date):
         acled_df = acled_df[(acled_df['event_date'] >= reformatted_start_date) & (acled_df['event_date'] <= reformatted_end_date)]
         acled_df = acled_df.reset_index(drop=True)
 
-        # extract latest event date (this is not always the same as the end_date). We want to store the event date in the DB
+        # extract latest event date (this is not always the same as the fetching_end_date). We want to store the event date in the DB
         # the extracted format of the date is 'YYYY-MM-DD' - we also want to store it in this format 
         # from API doc: ACLED data is returned in date order DESC (starting with the latest). 
         # get latest entry for event_date 
@@ -143,34 +143,42 @@ def acled_data_to_csv(country, folder_name, start_date, end_date):
     return acled_url, retrieval_date, last_update_str, reformatted_start_date, reformatted_end_date, oldest_event_date, latest_event_date
 
 
-def run_extraction(country_name, start_date, end_date, max_simulation_end_date, round_data):
+def run_extraction(country_name, start_date, fetching_end_date, simulation_end_date, round_data):
     '''
     Runs the data extraction process for the given country and time period.
             Parameters:
                 country_name (str): Country name
                 start_date (str): Start date of the time period
-                end_date (str): End date of the time period
-                max_simulation_end_date (str): Maximum end date of the simulation
+                fetching_end_date (str): End date of the time period for fetching data
+                simulation_end_date (str): (Maximum) end date of the simulation
                 round_data (list): List of dictionaries with the round number, the source and the covered time period
     '''
     print(100*"-")
     print("Extract the information for:")
     print(f"Country: {country_name}")
     print(f"Start date: {start_date}")
-    print(f"End date: {end_date}")
-    print(f"Max simulation end date: {max_simulation_end_date}")
+    print(f"Fetching end date: {fetching_end_date}")
+    print(f"Simulation end_date: {simulation_end_date}")
     print(f"Round data: {round_data}")
     print(100*"-")
 
+    # check invalid dates
+    if date_format(start_date) > date_format(fetching_end_date):
+        print("Error: Start date is after fetching end date.")
+        return
+    elif date_format(start_date) > date_format(simulation_end_date):
+        print("Error: Start date is after simulation end date.")
+        return
+    
     start_year = int(start_date.split('-')[2])
-    end_year = int(end_date.split('-')[2])
+    end_year = int(fetching_end_date.split('-')[2])
 
     # 1. create folder for country with start_year and time (for uniqueness)
     folder_name = country_name.lower() + str(start_year) + "_" + datetime.today().strftime('%Y-%m-%d_%H-%M-%S')
     os.mkdir(folder_name)
     
     # 2. get acled data and create acled.csv
-    acled_url, acled_retrieval_date, acled_last_update, acled_reformatted_start_date, acled_reformatted_end_date, acled_oldest_event_date, acled_latest_event_date = acled_data_to_csv(country_name, folder_name, start_date, end_date)
+    acled_url, acled_retrieval_date, acled_last_update, acled_reformatted_start_date, acled_reformatted_end_date, acled_oldest_event_date, acled_latest_event_date = acled_data_to_csv(country_name, folder_name, start_date, fetching_end_date)
 
     # 3. get population data and create population.csv.  population date in format YYYY-MM-DD
     population_url, population_retrieval_date, population_date = extract_population_info_from_web(country_name, folder_name, POPULATION_THRESHOLD) 
@@ -179,13 +187,13 @@ def run_extraction(country_name, start_date, end_date, max_simulation_end_date, 
     extract_locations_csv(folder_name, start_date, LOCATION_TYPE, FATALITIES_THRESHOLD, CONFLICT_THRESHOLD, NBR_SHOWN_ROWS)
     
     # 5. add camps to locations.csv 
-    camp_data_df, camp_rounds_dict, camps_last_update_url, camps_retrieval_date, camps_last_update, camps_reformatted_start_date, camps_reformatted_end_date, camps_latest_survey_date = add_camp_locations(round_data, folder_name, NBR_SHOWN_ROWS, start_date, end_date)
+    camp_data_df, camp_rounds_dict, camps_last_update_url, camps_retrieval_date, camps_last_update, camps_reformatted_start_date, camps_reformatted_end_date, camps_latest_survey_date = add_camp_locations(round_data, folder_name, NBR_SHOWN_ROWS, start_date, fetching_end_date)
 
     # 6. extract conflict data and create conflict_info.csv
-    extract_conflict_info(country_name, folder_name, start_date, max_simulation_end_date, LOCATION_TYPE, ADDED_CONFLICT_DAYS)
+    extract_conflict_info(country_name, folder_name, start_date, simulation_end_date, LOCATION_TYPE, ADDED_CONFLICT_DAYS)
 
     # 7. extract conflict information from conflict_info.csv, modify data and create conflict.csv
-    extract_conflicts_csv(folder_name, start_date, max_simulation_end_date)
+    extract_conflicts_csv(folder_name, start_date, simulation_end_date)
 
     # 9. extract routes from locations.csv and create routes.csv
     extract_routes_csv(folder_name)
@@ -197,7 +205,7 @@ def run_extraction(country_name, start_date, end_date, max_simulation_end_date, 
     create_empty_registration_corrections_csv(folder_name)
     
     # 12. create sim_period.csv
-    create_sim_period_csv(folder_name, start_date, end_date)
+    create_sim_period_csv(folder_name, start_date, fetching_end_date)
 
     # 13. create validation data
     # create folder in conflict_validation 
@@ -208,7 +216,7 @@ def run_extraction(country_name, start_date, end_date, max_simulation_end_date, 
     # os.mkdir(validation_folder_path)
 
     # create validation csv files
-    val_retrieval_date, val_reformatted_start_date, val_reformatted_end_date, val_covered_from, val_covered_to, val_oldest_url, val_latest_url = create_validation_data(camp_data_df, camp_rounds_dict, folder_name, country_name, start_date, end_date)
+    val_retrieval_date, val_reformatted_start_date, val_reformatted_end_date, val_covered_from, val_covered_to, val_oldest_url, val_latest_url = create_validation_data(camp_data_df, camp_rounds_dict, folder_name, country_name, start_date, fetching_end_date)
 
 
     # 14. insert data into DB
@@ -226,8 +234,8 @@ def run_extraction(country_name, start_date, end_date, max_simulation_end_date, 
 
 country_name = "Ethiopia"
 start_date = "01-01-2023" # start date for the data fetching
-end_date =  "16-01-2024" # end date for the data fetching
-max_simulation_end_date = "31-12-2024" # this is the furthest date that can be used for the simulation
+fetching_end_date =  "16-01-2024" # end date for the data fetching
+simulation_end_date = "31-12-2024" # this is the furthest date that can be used for the simulation
 
 # according to flee, date must have the format "yyyy-mm-dd"
 # this is necessary for the validation data.
@@ -241,13 +249,13 @@ round_data = [
 
 # take args & check if they are set
 if len(sys.argv) < 5:
-    print("Not enough arguments provided. Please provide the following arguments: country_name, start_date, end_date, max_simulation_end_date")
-    print(f"The default parameters were taken instead: country_name = {country_name}, start_date = {start_date}, end_date = {end_date}, max_simulation_end_date = {max_simulation_end_date}")
+    print("Not enough arguments provided. Please provide the following arguments: country_name, start_date, end_date, simulation_end_date")
+    print(f"The default parameters were taken instead: country_name = {country_name}, start_date = {start_date}, fetching end_date = {fetching_end_date}, simulation_end_date = {simulation_end_date}")
 else: 
     country_name = sys.argv[1]
     start_date = sys.argv[2]
-    end_date = sys.argv[3]
-    max_simulation_end_date = sys.argv[4]
+    fetching_end_date = sys.argv[3]
+    simulation_end_date = sys.argv[4]
 
 # start the script
-run_extraction(country_name, start_date, end_date, max_simulation_end_date, round_data)
+run_extraction(country_name, start_date, fetching_end_date, simulation_end_date, round_data)
