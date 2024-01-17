@@ -1,30 +1,31 @@
-# React + TypeScript + Vite
+# Caturanga - Enhanced React Application Documentation
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Introduction
 
-Currently, two official plugins are available:
+**Caturanga GUI** is a React-based Graphical User Interface designed to interact seamlessly with the [Flee Framework](https://flee.readthedocs.io/en/master/). This GUI empowers users to efficiently manage and manipulate Inputs and Settings, facilitating the start of IDP (Internally Displaced Persons) movement simulations. The simulation results are displayed on an interactive regional map, implemented using the [Leaflet library](https://leafletjs.com/reference.html).
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Codebase Overview
 
-## Expanding the ESLint configuration
+### Directory Structure
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+- `index.html`: The primary gateway to the application, setting the stage for user interaction.
+- `main.tsx`: The uppermost React component, orchestrating the overall application behavior.
+- `App.tsx`: A React component that encapsulates the entire application's functionality.
+- `src/components`: A collection of reusable components, designed for efficiency and modularity.
+- `src/contexts`: Contexts crafted to facilitate the flow of information across the application.
+- `src/helper`: A repository of constants and utility functions, serving as the backbone for the application’s operations.
+- `src/hooks`: Custom hooks, tailored to extend the application's capabilities.
+- `src/pages`: Full-fledged page components corresponding to various navigational routes within the application.
+- `src/styles`: CSS styles, enhancing the aesthetic appeal of components and pages.
 
-- Configure the top-level `parserOptions` property like this:
+### Routing
 
-```js
-export default {
-  // other rules...
-  parserOptions: {
-    ecmaVersion: 'latest',
-    sourceType: 'module',
-    project: ['./tsconfig.json', './tsconfig.node.json'],
-    tsconfigRootDir: __dirname,
-  },
-}
-```
+The application leverages React Router for navigational excellence:
 
-- Replace `plugin:@typescript-eslint/recommended` to `plugin:@typescript-eslint/recommended-type-checked` or `plugin:@typescript-eslint/strict-type-checked`
-- Optionally add `plugin:@typescript-eslint/stylistic-type-checked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and add `plugin:react/recommended` & `plugin:react/jsx-runtime` to the `extends` list
+- `/`: The Landing Page, welcoming users with its engaging interface.
+- `/inputs`: The Inputs Menu, a hub for managing simulation inputs.
+- `/inputs/{id}`: A specialized interface for Adding or Editing an individual Input.
+- `/settings`: The Settings Menu, where users choose simulation parameters.
+- `/settings/{id}`: An interface dedicated to Adding or Editing a specific Setting.
+- `/results`: The Results Menu, showcasing simulation outcomes.
+- `/results/{id}`: A detailed Results Page, offering an in-depth view of specific simulation results.
