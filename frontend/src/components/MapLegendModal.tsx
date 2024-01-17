@@ -29,52 +29,23 @@ function MapLegendModal({
             <h3 className="modal-section-title">Location Colors</h3>
 
             <div className="modal-section-content">
-              <div className="legend-item">
-                <div
-                  className="legend-item-color"
-                  style={{
-                    backgroundColor: getLocationColor(LocationType.camp),
-                  }}
-                ></div>
-                <div className="legend-item-text">Camp</div>
-              </div>
-
-              <div className="legend-item">
-                <div
-                  className="legend-item-color"
-                  style={{
-                    backgroundColor: getLocationColor(LocationType.town),
-                  }}
-                ></div>
-                <div className="legend-item-text">Town</div>
-              </div>
-
-              <div className="legend-item">
-                <div
-                  className="legend-item-color"
-                  style={{
-                    backgroundColor: getLocationColor(
-                      LocationType.conflict_zone
-                    ),
-                  }}
-                ></div>
-                <div className="legend-item-text">Conflict Zone</div>
-              </div>
-
-              <div className="legend-item">
-                <div
-                  className="legend-item-color"
-                  style={{
-                    backgroundColor: getLocationColor(
-                      LocationType.forwarding_hub
-                    ),
-                  }}
-                ></div>
-                <div className="legend-item-text">Forwarding Hub</div>
-              </div>
+              {Object.keys(LocationType).map((key) => {
+                const locationType =
+                  LocationType[key as keyof typeof LocationType];
+                return (
+                  <div className="legend-item">
+                    <div
+                      className="legend-item-color"
+                      style={{
+                        backgroundColor: getLocationColor(locationType),
+                      }}
+                    ></div>
+                    <div className="legend-item-text">{locationType}</div>
+                  </div>
+                );
+              })}
             </div>
           </div>
-
           <div className="modal-section">
             <h3 className="modal-section-title">Location Size</h3>
 
