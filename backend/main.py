@@ -314,7 +314,7 @@ def testread_csv(
 def run_data_extraction(
     country_name: str = Query(..., description="Country name"),
     start_date: str = Query(..., description="Start date"),
-    end_date: str = Query(..., description="End date"),
+    end_date: str = Query(..., description="End date of data fetching"),
     max_simulation_end_date: str = Query(..., description="Max simulation end date"),
 ):
     # Call the run_data_extraction method with the provided parameters
