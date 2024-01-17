@@ -2,7 +2,7 @@ import "../styles/Modal.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faX } from "@fortawesome/free-solid-svg-icons";
 import { MapInputType, LocationType } from "../types";
-import { getLocationTypeColor } from "../helper/misc";
+import { getLocationTypeColor, prettifyLocationTypeName } from "../helper/misc";
 
 // Modal Window for showing map legend
 function MapLegendModal({
@@ -40,7 +40,9 @@ function MapLegendModal({
                         backgroundColor: getLocationTypeColor(locationType),
                       }}
                     ></div>
-                    <div className="legend-item-text">{locationType}</div>
+                    <div className="legend-item-text">
+                      {prettifyLocationTypeName(locationType)}
+                    </div>
                   </div>
                 );
               })}
@@ -49,7 +51,7 @@ function MapLegendModal({
           <div className="modal-section">
             <h3 className="modal-section-title">Location Size</h3>
 
-            <div className="modal-section-content">
+            <div className="modal-section-content legend-item-text">
               {mapInputType === MapInputType.results
                 ? "The size of the location is proportional to the simulated number of IDPs."
                 : "The size of the location is proportional to the initial population."}
@@ -59,8 +61,10 @@ function MapLegendModal({
           {mapInputType === MapInputType.results && (
             <div className="modal-section">
               <h3 className="modal-section-title">Play Bar Marks</h3>
-              The play bar marks show dates at which validation data is
-              available.
+              <div className="legend-item-text">
+                The play bar marks show dates at which validation data is
+                available.
+              </div>
             </div>
           )}
         </div>

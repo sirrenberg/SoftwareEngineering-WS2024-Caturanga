@@ -9,6 +9,7 @@ import {
   MapInputType,
   LocationType,
   validationDataByDate,
+  validationData,
 } from "../types";
 import { LatLngExpression } from "leaflet";
 import Slider from "@mui/material/Slider";
@@ -112,7 +113,8 @@ function ResultDetails() {
     return organizedData;
   }
 
-  function getDifferenceBetweenDates(date1: string, date2: string) {
+  // get difference between two dates in days
+  function getDifferenceBetweenDates(date1: string, date2: string): number {
     const dateDiff = new Date(date1).getTime() - new Date(date2).getTime();
     const dayDiff = Math.floor(dateDiff / (1000 * 3600 * 24));
 
@@ -120,15 +122,13 @@ function ResultDetails() {
     return dayDiff + 1;
   }
 
-  function getValidationDataForMap() {
-    // get validation data if in correct date
-    // get date from playSimulationIndex and
+  // return validation data for map if available for current date (otherwise undefined)
+  function getValidationDataForMap(): validationData[] | undefined {
     const currentDate = result?.data[playSimulationIndex]["Date"] as unknown;
 
     // get validation data for currentDate
     const validationDataForCurrentDate = validationData[currentDate as string];
 
-    // return validation data
     return validationDataForCurrentDate;
   }
 
@@ -136,11 +136,14 @@ function ResultDetails() {
     setPlaySimulationIndex(newValue as number);
   }
 
+  // format input for map
+  // (add idp_population to locations and change location_type if conflict has started)
   function formatMapInput(): Input | undefined {
     if (!input || !result || !result?.data) {
       return undefined;
     }
 
+    // get location type based on whether conflict has started in input
     function getLocationType(location: SimLocation): LocationType {
       if (location.location_type === LocationType.conflict_zone) {
         // check if conflict has started in input
@@ -152,6 +155,7 @@ function ResultDetails() {
       }
     }
 
+    // Add idp_population to locations and change location_type if conflict has started
     const inputForMap: Input = {
       ...input,
       locations: input.locations.map((inputLocation) => {
