@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, Path, BackgroundTasks
+from fastapi import FastAPI, HTTPException, Path, BackgroundTasks, Query
 from flee_controller.controller import Controller
 from fastapi.middleware.cors import CORSMiddleware
 from typing import Any, Dict, AnyStr, List, Union
@@ -323,3 +323,22 @@ async def delete_simsetting(
                             detail="Simulation setting not found.")
     else:
         return result
+
+
+
+@app.get("/run_data_extraction")
+def run_data_extraction(
+    country_name: str = Query(..., description="Country name"),
+    start_date: str = Query(..., description="Start date of data fetching"),
+    end_date: str = Query(..., description="End date of data fetching"),
+    max_simulation_end_date: str = Query(..., description="Max simulation end date"),
+):
+    # Call the run_data_extraction method with the provided parameters
+    result = controller.run_data_extraction(
+        country_name=country_name,
+        start_date=start_date,
+        end_date=end_date,
+        max_simulation_end_date=max_simulation_end_date,
+    )
+
+    return result
