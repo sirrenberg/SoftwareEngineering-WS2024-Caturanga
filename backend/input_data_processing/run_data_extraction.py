@@ -153,6 +153,15 @@ def run_extraction(country_name, start_date, end_date, max_simulation_end_date, 
                 max_simulation_end_date (str): Maximum end date of the simulation
                 round_data (list): List of dictionaries with the round number, the source and the covered time period
     '''
+    print(100*"-")
+    print("Extract the information for:")
+    print(f"Country: {country_name}")
+    print(f"Start date: {start_date}")
+    print(f"End date: {end_date}")
+    print(f"Max simulation end date: {max_simulation_end_date}")
+    print(f"Round data: {round_data}")
+    print(100*"-")
+
     start_year = int(start_date.split('-')[2])
     end_year = int(end_date.split('-')[2])
 
@@ -193,10 +202,10 @@ def run_extraction(country_name, start_date, end_date, max_simulation_end_date, 
     # 13. create validation data
     # create folder in conflict_validation 
     # docker path
-    # os.mkdir(os.path.join('conflict_validation', folder_name))
-    current_dir = os.getcwd()
-    validation_folder_path = os.path.join(current_dir, "input_data_processing", 'conflict_validation', folder_name)
-    os.mkdir(validation_folder_path)
+    os.mkdir(os.path.join('conflict_validation', folder_name))
+    # current_dir = os.getcwd()
+    # validation_folder_path = os.path.join(current_dir, "input_data_processing", 'conflict_validation', folder_name)
+    # os.mkdir(validation_folder_path)
 
     # create validation csv files
     val_retrieval_date, val_reformatted_start_date, val_reformatted_end_date, val_covered_from, val_covered_to, val_oldest_url, val_latest_url = create_validation_data(camp_data_df, camp_rounds_dict, folder_name, country_name, start_date, end_date)

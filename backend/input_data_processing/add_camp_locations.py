@@ -8,7 +8,7 @@ import openpyxl
 
 def add_camp_locations(round_data, folder_name, rows_shown, start_date, end_date):
     """
-    The function adds the latest camp information to the locations.csv file.
+    The function adds the oldest (in time frame given by user) camp information to the locations.csv file.
     Parameters:
         round_data (list): List of dictionaries with information about the rounds
         folder_name (str): Name of the folder containing the CSV files
@@ -52,6 +52,7 @@ def add_camp_locations(round_data, folder_name, rows_shown, start_date, end_date
     last_update = modified_round_data[0]["covered_to"]
     last_update_url = modified_round_data[0]["source"]
     latest_round = modified_round_data[0]["round"]
+    oldest_round = modified_round_data[-1]["round"]
     # date of retrieval, which is the date when the script is executed. Format: YYYY-MM-DD HH:MM:SS
     retrieval_date = datetime.today().strftime('%Y-%m-%d %H:%M:%S')
 
@@ -64,17 +65,16 @@ def add_camp_locations(round_data, folder_name, rows_shown, start_date, end_date
 
     # get latest survey date
     latest_survey_date = dtm_merged_df[f"survey_date_round_{latest_round}"].tolist()
-    latest_survey_date.sort(reverse=True)
+    latest_survey_date.sort(reverse=False) # sort in ascending order
     latest_survey_date = latest_survey_date[0]
 
-
-    # get the key for population for the latest round 
-    latest_round_population_key = f"population_round_{latest_round}"
-    latest_dtm_df = dtm_merged_df[["name", "region", "country", "latitude", "longitude", "location_type", "conflict_date", latest_round_population_key]]
-    latest_dtm_df = latest_dtm_df.rename(columns={"name":"#name", latest_round_population_key: "population"})
-
-    # append the locations.csv with the latest camp information
-    latest_dtm_df.to_csv(os.path.join(folder_name, "locations.csv"), mode='a', header=False, index=False)
+    # get the key for population for the oldest round
+    oldest_round_population_key = f"population_round_{oldest_round}"
+    oldest_dtm_df = dtm_merged_df[["name", "region", "country", "latitude", "longitude", "location_type", "conflict_date", oldest_round_population_key]]
+    # oldest_dtm_df = oldest_dtm_df.rename(columns={"name":"#name", oldest_round_population_key: "population"})
+    print(f"oldest_round_population_key: {oldest_round_population_key}")
+    # append the locations.csv with the oldest (but within time frame) camp information
+    oldest_dtm_df.to_csv(os.path.join(folder_name, "locations.csv"), mode='a', header=False, index=False)
 
     print("Successfully added camp locations to locations.csv")
 
@@ -82,15 +82,6 @@ def add_camp_locations(round_data, folder_name, rows_shown, start_date, end_date
     for round_number in rounds_in_time_period:
         if round_number != latest_round:
             dtm_merged_df = dtm_merged_df.drop(columns=[f"survey_date_round_{round_number}"])
-
-    print("modified round data")
-    print(modified_round_data)
-    print("latest_dtm_df")
-    print(latest_dtm_df)
-    print("dtm_merged_df: ")
-    print(dtm_merged_df)
-    print("dtm_mgerged_df columns: ")
-    print(dtm_merged_df.columns)
 
     return dtm_merged_df, modified_round_data, last_update_url, retrieval_date, last_update, reformatted_start_date, reformatted_end_date, latest_survey_date
 
@@ -263,6 +254,6 @@ def extract_camp_locations(round_data):
         dtm_merged_df = dtm_merged_df.rename(columns={"population": f"population_round_{round_number}", "survey_date": f"survey_date_round_{round_number}"})
 
         print(f"round_number: {round_number}, total_IDP_conflict_number: {total_IDP_conflict_number}")
-    print(dtm_merged_df.sort_values(by="site_id"))
+    # print(dtm_merged_df.sort_values(by="site_id"))
 
     return dtm_merged_df, round_data
