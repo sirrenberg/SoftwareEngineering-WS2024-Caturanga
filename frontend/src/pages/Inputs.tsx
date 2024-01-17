@@ -160,16 +160,15 @@ function Inputs() {
             }
             setInputDeletionConfirmation(false);
             const idForDeletion : string = inputs![indexForDeletion!]._id;
-            sendRequest("/simulations/" + idForDeletion, "DELETE")
+            sendRequest(`/simulations/${idForDeletion}`, "DELETE")
               .then(() => {
                 // if the input to be deleted is above the currently selected one,
                 // decrement the selected index so that the same index stays selected
                 if (indexForDeletion! < selectedInputIndex) {
                   setSelectedInputIndex(selectedInputIndex - 1);
                 }
+                setInputs(inputs!.filter((i) => i._id !== idForDeletion));
                 setIndexForDeletion(undefined);
-                const newInputs : Input[] = inputs!.filter((i) => i._id !== idForDeletion);
-                setInputs(newInputs);
               })
               .catch((err) => {console.error(err);});
           }}

@@ -21,6 +21,7 @@ function Results() {
   >(undefined);
   const [selectedResultIndex, setSelectedResultIndex] = useState<number>(-1);
   const [mapCenter, setMapCenter] = useState<LatLngExpression>([0, 0]); // [lat, lng]
+  const [indexForDeletion, setIndexForDeletion] = useState<number | undefined>(undefined);
   const [isDataSourceModal, setDataSourceModal] = useState(false);
 
   useEffect(() => {
@@ -43,31 +44,6 @@ function Results() {
       });
     });
   }, []);
-
-  /* Function to delete Simulation_results from DB by clicking on trash-icon in item-List: */
-  const handleDeleteClick = async (simulationId: string, index: number) => {
-    // Call handleDeleteClick with both ID (for backend API call) and index (for updating ResultsPreview)
-    try {
-      await sendRequest(`/simulation_results/${simulationId}`, "DELETE"); // Call the backend API to delete the simulation result
-
-      // Update state to trigger a re-render
-      setResultPreviews((prevResults) => {
-        // prevResults: previous state value of resultPreviews (Given by React)
-        if (prevResults) {
-          // Check if prevResults is defined    // Check, if prevResults is undefined
-          const newResults = [...prevResults]; // Copy, but don´t modify original ResultsPreviews array
-          newResults.splice(index, 1);
-          return newResults;
-        }
-        return prevResults;
-      });
-
-      // Reset the selected index after deletion
-      setSelectedResultIndex(-1);
-    } catch (error) {
-      console.error("Error deleting simulation:", error);
-    }
-  };
 
   return (
     <div
@@ -92,6 +68,7 @@ function Results() {
                     "simple-button" +
                     (index === selectedResultIndex ? " selected-item" : "")
                   }
+                  disabled={index === indexForDeletion}
                   onClick={() => {
                     setSelectedResultIndex(index);
                     setMapCenter(
@@ -107,7 +84,18 @@ function Results() {
                     <FontAwesomeIcon
                       icon={faTrash}
                       className="item-icon"
-                      onClick={() => handleDeleteClick(resultPreview.id, index)}
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        setSelectedResultIndex(-1);
+                        setIndexForDeletion(index);
+                        const idForDeletion : string = resultPreview.id;
+                        sendRequest(`/simulation_results/${idForDeletion}`, "DELETE")
+                          .then(() => {
+                            setResultPreviews(resultPreviews.filter((r) => r.id !== idForDeletion));
+                            setIndexForDeletion(undefined);
+                          })
+                          .catch((err) => {console.error(err);});
+                      }}
                     />
                   </span>
                 </button>
