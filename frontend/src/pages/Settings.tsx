@@ -54,10 +54,7 @@ function Settings() {
   useEffect(() => {
     sendRequest("/simsettings", "GET").then((response) => {
       const { data, protectedIDs } = response;
-      console.log("Response: ", response);
-      console.log("Protected IDs: ", protectedIDs);
       setProtectedSimSettingIDs(protectedIDs);
-      console.log("Data: ", data);
       setSettings(data);
     });
   }, []);
