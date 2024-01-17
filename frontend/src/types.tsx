@@ -57,7 +57,6 @@ interface Input {
   locations: SimLocation[];
   routes: Route[];
   name: string;
-  // TODO: Remove Array (only one sim_period)
   sim_period: {
     date: string;
     length: number;
