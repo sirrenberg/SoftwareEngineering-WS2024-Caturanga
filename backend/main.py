@@ -10,7 +10,6 @@ JSONObject = Dict[AnyStr, Any]
 JSONArray = List[Any]
 JSONStructure = Union[JSONArray, JSONObject]
 
-
 # TODO: adjust this for production as allowing all origins is not secure
 origins = ["*"]
 app.add_middleware(
@@ -134,6 +133,7 @@ async def get_simulation(
     """
     return await controller.get_simulation(simulation_id)
 
+
 @app.delete("/simulations/{simulation_id}")
 async def delete_simulation_and_associated_results(
         simulation_id: str = Path(),
@@ -147,7 +147,15 @@ async def delete_simulation_and_associated_results(
     Returns:
     - The result of the deletion operation.
     """
-    return await controller.delete_simulation_and_associated_results(simulation_id)
+    result = \
+        await controller.delete_simulation_and_associated_results(
+            simulation_id)
+
+    if result["status"] == "error":
+        raise HTTPException(status_code=404,
+                            detail="Simulation input not found.")
+    else:
+        return result
 
 
 @app.post("/simulations")
@@ -225,7 +233,13 @@ async def delete_simulation_results(
     Returns:
     - dict: The data of the simulation result.
     """
-    return await controller.delete_simulation_results(simulation_result_id)
+    result = await controller.delete_simulation_results(simulation_result_id)
+
+    if result["status"] == "error":
+        raise HTTPException(status_code=404,
+                            detail="Simulation setting not found.")
+    else:
+        return result
 
 
 # Simulation Settings: --------------------------------------------------------
@@ -302,4 +316,10 @@ async def delete_simsetting(
     Returns:
     - The result of the deletion operation.
     """
-    return await controller.delete_simsetting(simsetting_id)
+    result = await controller.delete_simsetting(simsetting_id)
+
+    if result["status"] == "error":
+        raise HTTPException(status_code=404,
+                            detail="Simulation setting not found.")
+    else:
+        return result
