@@ -15,6 +15,7 @@ import {
   faInfo,
 } from "@fortawesome/free-solid-svg-icons";
 import DataSourceModal from "../components/DataSourceModal";
+import InputDeletionConfirmation from "../components/InputDeletionConfirmation";
 
 const inputNameCutOff : number = 10;
 
@@ -23,8 +24,10 @@ function Inputs() {
 
   const [inputs, setInputs] = useState<Input[] | undefined>(undefined);
   const [selectedInputIndex, setSelectedInputIndex] = useState<number>(-1);
+  const [indexForDeletion, setIndexForDeletion] = useState<number | undefined>(undefined);
   const [mapCenter, setMapCenter] = useState<LatLngExpression>([0, 0]); // [lat, lng]
   const [isDataSourceModal, setDataSourceModal] = useState(false);
+  const [isInputDeletionConfirmationActive, setInputDeletionConfirmationActive] = useState(false);
   const [protectedInputIDs, setProtectedInputIDs] = useState<string[]>([]);
 
   const context = useContext(StartSimContext);
@@ -85,48 +88,9 @@ function Inputs() {
                       <FontAwesomeIcon
                         icon={faTrash}
                         className="item-icon"
-                        title="ATTENTION! This will delete the input and all simulation results that were generated with this input!"
-                        //style={{ border: "none" , backgroundColor: "transparent" , padding : 0, color: "inherit"}}
-                        onClick={(event) => {
-                          event.stopPropagation();
-                          console.log("Deleting " + input._id + " ...");
-                          // if the input to be deleted is the one that is currently selected, deselect it
-                          if (selectedInputIndex === index) {
-                            console.log(
-                              "Entered the branch where selectedInputIndex === index",
-                              selectedInputIndex,
-                              index
-                            );
-                            setSelectedInputIndex(-1);
-                            console.log(
-                              "selectedInputIndex is now",
-                              selectedInputIndex
-                            );
-                          }
-                          sendRequest("/simulations/" + input._id, "DELETE")
-                            .then((_) => {
-                              // if the input to be deleted is before the currently selected one, decrement the selected index
-                              const indexOfDeleted = inputs.findIndex(
-                                (i) => i._id === input._id
-                              );
-                              if (indexOfDeleted < selectedInputIndex) {
-                                setSelectedInputIndex(selectedInputIndex - 1);
-                              }
-                              console.log(
-                                "Deleted simulation with id " + input._id
-                              );
-                              setInputs(
-                                inputs.filter((i) => i._id !== input._id)
-                              );
-                            })
-                            .catch((err) => {
-                              console.log(
-                                "Deleting simulation with id " +
-                                  input._id +
-                                  " lead to an error."
-                              );
-                              console.log(err);
-                            });
+                        onClick={() => {
+                          setIndexForDeletion(index);
+                          setInputDeletionConfirmationActive(true);
                         }}
                       />
                     )}
@@ -183,6 +147,27 @@ function Inputs() {
         >
           <FontAwesomeIcon icon={faInfo} className="sources-icon" />
         </div>
+      )}
+
+      {isInputDeletionConfirmationActive && (
+        <InputDeletionConfirmation
+          setInputDeletionConfirmationActive={setInputDeletionConfirmationActive}
+          performInputDeletion={() => {
+            // if the input to be deleted is currently selected, deselect it
+            if (selectedInputIndex === indexForDeletion) {
+              setSelectedInputIndex(-1);
+            }
+            // if the input to be deleted is above the currently selected one,
+            // decrement the selected index so that the same index stays selected
+            if (indexForDeletion! < selectedInputIndex) {
+              setSelectedInputIndex(selectedInputIndex - 1);
+            }
+            setInputs(
+              inputs!.filter((i) => i._id !== inputs![indexForDeletion!]._id)
+            );
+            sendRequest("/simulations/" + inputs![indexForDeletion!], "DELETE").catch((err) => {console.error(err);});
+          }}
+        />
       )}
 
       {isDataSourceModal && (
