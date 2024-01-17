@@ -2,35 +2,33 @@ import { faX } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 function InputDeletionConfirmation({
-  setInputDeletionConfirmationActive,
   performInputDeletion,
+  abortInputDeletion,
 } : {
-  setInputDeletionConfirmationActive : React.Dispatch<React.SetStateAction<boolean>>,
-  performInputDeletion : () => void
+  performInputDeletion : () => void,
+  abortInputDeletion : () => void,
 }) {
 
   return (
     <div className="modal-overlay">
       <div className="modal-container">
+        <h2 className="modal-title">Attention!</h2>
         <FontAwesomeIcon
           className="modal-close-icon"
           icon={faX}
-          onClick={() => {setInputDeletionConfirmationActive(false);}}
+          onClick={() => {abortInputDeletion();}}
         />
 
-        <div className="modal-content">
+        <div className="model-content">
           <div className="modal-section">
             <p>
-              <strong>Attention! </strong>
               Deleting this input will also delete all simulation results that were generated based on this input.
-              Are you sure you want to delete the input along with all results generated based on it?
+              <br/><br/>
+              Are you sure?
             </p>
             <button
               className="simple-button"
-              onClick={() => {
-                performInputDeletion();
-                setInputDeletionConfirmationActive(false);
-              }}
+              onClick={() => {performInputDeletion();}}
             >
               <p>I am sure</p>
             </button>

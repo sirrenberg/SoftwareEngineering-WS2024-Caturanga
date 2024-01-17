@@ -24,11 +24,11 @@ function Inputs() {
 
   const [inputs, setInputs] = useState<Input[] | undefined>(undefined);
   const [selectedInputIndex, setSelectedInputIndex] = useState<number>(-1);
-  const [indexForDeletion, setIndexForDeletion] = useState<number | undefined>(undefined);
   const [mapCenter, setMapCenter] = useState<LatLngExpression>([0, 0]); // [lat, lng]
   const [isDataSourceModal, setDataSourceModal] = useState(false);
-  const [isInputDeletionConfirmationActive, setInputDeletionConfirmationActive] = useState(false);
   const [protectedInputIDs, setProtectedInputIDs] = useState<string[]>([]);
+  const [indexForDeletion, setIndexForDeletion] = useState<number | undefined>(undefined);
+  const [isInputDeletionConfirmationActive, setInputDeletionConfirmation] = useState(false);
 
   const context = useContext(StartSimContext);
   if (!context) {
@@ -69,6 +69,7 @@ function Inputs() {
                     "simple-button" +
                     (index === selectedInputIndex ? " selected-item" : "")
                   }
+                  disabled={index === indexForDeletion}
                   onClick={() => {
                     setSelectedInputIndex(index);
                     setMapCenter(calcMapCenter(input.locations));
@@ -88,9 +89,10 @@ function Inputs() {
                       <FontAwesomeIcon
                         icon={faTrash}
                         className="item-icon"
-                        onClick={() => {
+                        onClick={(event) => {
+                          event.stopPropagation();
                           setIndexForDeletion(index);
-                          setInputDeletionConfirmationActive(true);
+                          setInputDeletionConfirmation(true);
                         }}
                       />
                     )}
@@ -151,21 +153,29 @@ function Inputs() {
 
       {isInputDeletionConfirmationActive && (
         <InputDeletionConfirmation
-          setInputDeletionConfirmationActive={setInputDeletionConfirmationActive}
           performInputDeletion={() => {
             // if the input to be deleted is currently selected, deselect it
             if (selectedInputIndex === indexForDeletion) {
               setSelectedInputIndex(-1);
             }
-            // if the input to be deleted is above the currently selected one,
-            // decrement the selected index so that the same index stays selected
-            if (indexForDeletion! < selectedInputIndex) {
-              setSelectedInputIndex(selectedInputIndex - 1);
-            }
-            setInputs(
-              inputs!.filter((i) => i._id !== inputs![indexForDeletion!]._id)
-            );
-            sendRequest("/simulations/" + inputs![indexForDeletion!], "DELETE").catch((err) => {console.error(err);});
+            setInputDeletionConfirmation(false);
+            const idForDeletion : string = inputs![indexForDeletion!]._id;
+            sendRequest("/simulations/" + idForDeletion, "DELETE")
+              .then(() => {
+                // if the input to be deleted is above the currently selected one,
+                // decrement the selected index so that the same index stays selected
+                if (indexForDeletion! < selectedInputIndex) {
+                  setSelectedInputIndex(selectedInputIndex - 1);
+                }
+                setIndexForDeletion(undefined);
+                const newInputs : Input[] = inputs!.filter((i) => i._id !== idForDeletion);
+                setInputs(newInputs);
+              })
+              .catch((err) => {console.error(err);});
+          }}
+          abortInputDeletion={() => {
+            setIndexForDeletion(undefined);
+            setInputDeletionConfirmation(false);
           }}
         />
       )}
