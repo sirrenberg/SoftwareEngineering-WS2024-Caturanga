@@ -13,6 +13,9 @@ import { movementRulesText, moveSpeedText, walkSpeedText, conflictWeightText,
         optimisationsText, awarenessLevelOptions, spawnRulesText, displacedPerConflictDayText } 
         from "../helper/constants/SimsettingConstants";
 import { CheckboxInputField, NumberInputField, SelectInputField } from "../components/SimsettingField";
+import { sliceName } from "../helper/misc";
+
+const settingNameCutOff : number = 10;
 
 function Settings() {
   const { sendRequest } = useAPI();
@@ -69,7 +72,7 @@ function Settings() {
                     setSettingsName(settings[index].name);
                   }}
                 >
-                  <p>{setting.name}</p>
+                  <p>{sliceName(setting.name, settingNameCutOff)}</p>
                   <span className="items-list-item-icons">
                     <NavLink to={"/settings/" + setting._id}>
                       <FontAwesomeIcon

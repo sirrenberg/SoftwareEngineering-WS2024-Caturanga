@@ -6,7 +6,7 @@ import Map from "../components/Map";
 import { LatLngExpression } from "leaflet";
 import { Link } from "react-router-dom";
 import { useAPI } from "../hooks/useAPI";
-import { calcMapCenter } from "../helper/misc";
+import { calcMapCenter, sliceName } from "../helper/misc";
 import { NavLink } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -15,6 +15,8 @@ import {
   faInfo,
 } from "@fortawesome/free-solid-svg-icons";
 import DataSourceModal from "../components/DataSourceModal";
+
+const inputNameCutOff : number = 10;
 
 function Inputs() {
   const { sendRequest } = useAPI();
@@ -71,11 +73,7 @@ function Inputs() {
                     setInputName(inputs[index].name);
                   }}
                 >
-                  <p>
-                    {input.name.length < 10
-                      ? input.name
-                      : input.name.slice(0, 10) + "..."}
-                  </p>
+                  <p>{sliceName(input.name, inputNameCutOff)}</p>
                   <span className="items-list-item-icons">
                     <NavLink to={"/inputs/" + input._id}>
                       <FontAwesomeIcon

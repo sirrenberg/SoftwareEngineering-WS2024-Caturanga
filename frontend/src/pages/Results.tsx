@@ -4,12 +4,14 @@ import { LatLngExpression } from "leaflet";
 import { useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
 import Map from "../components/Map";
-import { calcMapCenter } from "../helper/misc";
+import { calcMapCenter, sliceName } from "../helper/misc";
 import { useAPI } from "../hooks/useAPI";
 import "../styles/Menu.css";
 import { ResultPreview, SimulationStatus } from "../types";
 import { Link } from "react-router-dom";
 import DataSourceModal from "../components/DataSourceModal";
+
+const resultNameCutOff : number = 15;
 
 function Results() {
   const { sendRequest } = useAPI();
@@ -98,10 +100,7 @@ function Results() {
                   }}
                 >
                   <div className="items-list-item-text">
-                    <p className="item-preview-name">{`${resultPreview.name.slice(
-                      0,
-                      15
-                    )}...`}</p>
+                    <p className="item-preview-name">{sliceName(resultPreview.name, resultNameCutOff)}</p>
                     <p className="item-preview-status">{`Status: ${resultPreview.status}`}</p>
                   </div>
                   <span className="items-list-item-icons">
