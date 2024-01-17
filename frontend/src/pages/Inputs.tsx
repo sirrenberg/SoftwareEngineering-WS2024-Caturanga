@@ -9,7 +9,12 @@ import { useAPI } from "../hooks/useAPI";
 import { calcMapCenter } from "../helper/misc";
 import { NavLink } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPenToSquare, faTrash } from "@fortawesome/free-solid-svg-icons";
+import {
+  faPenToSquare,
+  faTrash,
+  faInfo,
+} from "@fortawesome/free-solid-svg-icons";
+import DataSourceModal from "../components/DataSourceModal";
 
 function Inputs() {
   const { sendRequest } = useAPI();
@@ -17,6 +22,7 @@ function Inputs() {
   const [inputs, setInputs] = useState<Input[] | undefined>(undefined);
   const [selectedInputIndex, setSelectedInputIndex] = useState<number>(-1);
   const [mapCenter, setMapCenter] = useState<LatLngExpression>([0, 0]); // [lat, lng]
+  const [isDataSourceModal, setDataSourceModal] = useState(false);
   const [protectedInputIDs, setProtectedInputIDs] = useState<string[]>([]);
 
   const context = useContext(StartSimContext);
@@ -45,74 +51,91 @@ function Inputs() {
         <h2 className="items-list-title">Saved Inputs</h2>
 
         <div className="items-list">
+          {!inputs && <h3>Loading...</h3>}
 
-          {!inputs && 
-          <h3>Loading...</h3>
-          }
-
-          {inputs && inputs.length === 0 &&
-          <h3>Empty</h3>}
+          {inputs && inputs.length === 0 && <h3>Empty</h3>}
 
           {inputs &&
-          inputs.map((input, index) => {
-            return (
-              <button
-                key={input._id}
-                className={
-                  "simple-button" +
-                  (index === selectedInputIndex ? " selected-item" : "")
-                }
-                onClick={() => {
-                  setSelectedInputIndex(index);
-                  setMapCenter(calcMapCenter(input.locations));
-                  setInputId(inputs[index]._id);
-                  setInputName(inputs[index].name);
-                }}
-              >
-                <p>{input.name.length < 10 ? input.name :  input.name.slice(0,10) + "..."}</p>
-                <span className="items-list-item-icons">
-                  <NavLink to={"/inputs/" + input._id}>
-                    <FontAwesomeIcon
-                      icon={faPenToSquare}
-                      className="item-icon"
-                    />
-                  </NavLink>
-                  {!protectedInputIDs.includes(input._id) && (
-                    <FontAwesomeIcon
-                      icon={faTrash}
-                      className="item-icon"
-                      title="ATTENTION! This will delete the input and all simulation results that were generated with this input!"
-                      //style={{ border: "none" , backgroundColor: "transparent" , padding : 0, color: "inherit"}}
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        console.log("Deleting " + input._id + " ...");
-                        // if the input to be deleted is the one that is currently selected, deselect it
-                        if (selectedInputIndex === index){
-                          console.log("Entered the branch where selectedInputIndex === index", selectedInputIndex, index);
-                          setSelectedInputIndex(-1);
-                          console.log("selectedInputIndex is now", selectedInputIndex);
-                        }
-                        sendRequest("/simulations/" + input._id, "DELETE")
-                        .then(_ => {
-                          // if the input to be deleted is before the currently selected one, decrement the selected index
-                          const indexOfDeleted = inputs.findIndex(i => i._id === input._id);
-                          if (indexOfDeleted < selectedInputIndex){
-                            setSelectedInputIndex(selectedInputIndex - 1);
+            inputs.map((input, index) => {
+              return (
+                <button
+                  key={input._id}
+                  className={
+                    "simple-button" +
+                    (index === selectedInputIndex ? " selected-item" : "")
+                  }
+                  onClick={() => {
+                    setSelectedInputIndex(index);
+                    setMapCenter(calcMapCenter(input.locations));
+                    setInputId(inputs[index]._id);
+                    setInputName(inputs[index].name);
+                  }}
+                >
+                  <p>
+                    {input.name.length < 10
+                      ? input.name
+                      : input.name.slice(0, 10) + "..."}
+                  </p>
+                  <span className="items-list-item-icons">
+                    <NavLink to={"/inputs/" + input._id}>
+                      <FontAwesomeIcon
+                        icon={faPenToSquare}
+                        className="item-icon"
+                      />
+                    </NavLink>
+                    {!protectedInputIDs.includes(input._id) && (
+                      <FontAwesomeIcon
+                        icon={faTrash}
+                        className="item-icon"
+                        title="ATTENTION! This will delete the input and all simulation results that were generated with this input!"
+                        //style={{ border: "none" , backgroundColor: "transparent" , padding : 0, color: "inherit"}}
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          console.log("Deleting " + input._id + " ...");
+                          // if the input to be deleted is the one that is currently selected, deselect it
+                          if (selectedInputIndex === index) {
+                            console.log(
+                              "Entered the branch where selectedInputIndex === index",
+                              selectedInputIndex,
+                              index
+                            );
+                            setSelectedInputIndex(-1);
+                            console.log(
+                              "selectedInputIndex is now",
+                              selectedInputIndex
+                            );
                           }
-                          console.log("Deleted simulation with id " + input._id);
-                          setInputs(inputs.filter(i => i._id !== input._id));
-                        })
-                        .catch(err => {
-                          console.log("Deleting simulation with id " + input._id + " lead to an error.");
-                          console.log(err);
-                        });
-                      }}
-                    />
-                  )}
-                </span>
-              </button>
-            );
-          })}
+                          sendRequest("/simulations/" + input._id, "DELETE")
+                            .then((_) => {
+                              // if the input to be deleted is before the currently selected one, decrement the selected index
+                              const indexOfDeleted = inputs.findIndex(
+                                (i) => i._id === input._id
+                              );
+                              if (indexOfDeleted < selectedInputIndex) {
+                                setSelectedInputIndex(selectedInputIndex - 1);
+                              }
+                              console.log(
+                                "Deleted simulation with id " + input._id
+                              );
+                              setInputs(
+                                inputs.filter((i) => i._id !== input._id)
+                              );
+                            })
+                            .catch((err) => {
+                              console.log(
+                                "Deleting simulation with id " +
+                                  input._id +
+                                  " lead to an error."
+                              );
+                              console.log(err);
+                            });
+                        }}
+                      />
+                    )}
+                  </span>
+                </button>
+              );
+            })}
         </div>
 
         <NavLink to="/inputs/new">
@@ -133,7 +156,9 @@ function Inputs() {
 
         <Map
           input={
-            !inputs || selectedInputIndex === -1 ? undefined : inputs[selectedInputIndex]
+            !inputs || selectedInputIndex === -1
+              ? undefined
+              : inputs[selectedInputIndex]
           }
           center={mapCenter}
           shouldRecenter={true}
@@ -150,6 +175,40 @@ function Inputs() {
           </Link>
         </div>
       </div>
+
+      {inputs && selectedInputIndex !== -1 && (
+        <div
+          className="simple-button sources-button"
+          onClick={() => {
+            setDataSourceModal(true);
+          }}
+        >
+          <FontAwesomeIcon icon={faInfo} className="sources-icon" />
+        </div>
+      )}
+
+      {isDataSourceModal && (
+        <DataSourceModal
+          setDataSourceModalOpen={setDataSourceModal}
+          acled_url={inputs![selectedInputIndex].data_sources.acled.url}
+          acled_last_update_date={
+            inputs![selectedInputIndex].data_sources.acled.last_update
+          }
+          population_url={
+            inputs![selectedInputIndex].data_sources.population.url
+          }
+          population_last_update_date={
+            inputs![selectedInputIndex].data_sources.population
+              .latest_population_date
+          }
+          camp_url={
+            inputs![selectedInputIndex].data_sources.camps.url_from_last_update
+          }
+          camp_last_update_date={
+            inputs![selectedInputIndex].data_sources.camps.last_update
+          }
+        />
+      )}
     </div>
   );
 }

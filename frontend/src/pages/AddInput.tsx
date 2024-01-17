@@ -3,9 +3,17 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useEffect } from "react";
 import { useForm } from "../hooks/useForm";
 import { formatDate } from "../helper/misc";
-import { DateInputField, NumberInputField } from "../components/SimsettingField";
+import {
+  DateInputField,
+  NumberInputField,
+} from "../components/SimsettingField";
 import { defaultValues } from "../helper/constants/InputConstants";
-import { durationText, maxValues, minValues, startDateText } from "../helper/constants/InputConstants";
+import {
+  durationText,
+  maxValues,
+  minValues,
+  startDateText,
+} from "../helper/constants/InputConstants";
 
 function AddInput() {
   const { id } = useParams<{ id: string }>();
@@ -15,12 +23,8 @@ function AddInput() {
 
   const initialValues = defaultValues;
 
-  const {
-    values,
-    handleInputChange,
-    handlePrefillData,
-    handleSubmit,
-  } = useForm(initialValues);
+  const { values, handleInputChange, handlePrefillData, handleSubmit } =
+    useForm(initialValues);
 
   useEffect(() => {
     if (!isNewInput) {
@@ -81,7 +85,7 @@ function AddInput() {
               name="date"
               value={formatDate(values.sim_period["date"])}
               disabled={true}
-             />
+            />
           </div>
           <div className="input-field-container">
             <NumberInputField

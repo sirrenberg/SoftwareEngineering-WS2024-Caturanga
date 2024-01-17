@@ -55,6 +55,20 @@ interface Input {
   conflicts: Array<{
     [key: string]: number;
   }>;
+  data_sources: {
+    acled: {
+      url: string;
+      last_update: string;
+    };
+    population: {
+      url: string;
+      latest_population_date: string;
+    };
+    camps: {
+      url_from_last_update: string;
+      last_update: string;
+    };
+  };
 }
 
 interface ResultPreview {

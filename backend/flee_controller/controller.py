@@ -430,8 +430,9 @@ class Controller:
                 "_id": 1,
                 "name": 1,
                 "locations": 1,
-                "routes": 1
-            })
+                "routes": 1,
+                "data_sources": 1})
+
         elif collection_name == "simulations_results":
             summaries = collection.find({}, {
                 "_id": 1,
