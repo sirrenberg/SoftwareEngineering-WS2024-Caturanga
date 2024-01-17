@@ -12,9 +12,7 @@ function LandingPage() {
         </div>
         <div className="lp-title-page-content">
           <div className="lp-title-container lp-title-content-section">
-            <h1 className="main-title">
-              Caturanga
-            </h1>
+            <h1 className="main-title">Caturanga</h1>
             <h2 className="sub-title">A Humanitarian Logistics Tool</h2>
 
             <p className="lp-title-description">
@@ -48,15 +46,10 @@ function LandingPage() {
       <div className="lp-sources">
         <p className="sources-description">Powered by</p>
         <div className="sources-logos-container">
-
           {/*Credits and link to FLEE*/}
           <div className="img-container">
             <a href="https://flee.readthedocs.io/en/master/" target="_blank">
-              <img
-                  className="source-logo"
-                  src="./flee.png"
-                  alt="flee-logo"
-              />
+              <img className="source-logo" src="./flee.png" alt="flee-logo" />
             </a>
           </div>
 
@@ -64,9 +57,9 @@ function LandingPage() {
           <div className="img-container">
             <a href="https://acleddata.com/" target="_blank">
               <img
-                  className="source-logo"
-                  src="./acled-logo.png"
-                  alt="acled-logo"
+                className="source-logo"
+                src="./acled-logo.png"
+                alt="acled-logo"
               />
             </a>
           </div>
@@ -75,10 +68,10 @@ function LandingPage() {
           <div className="img-container">
             <a href="https://www.wfp.org/" target="_blank">
               <img
-                  id="wfp-logo"
-                  className="source-logo"
-                  src="./wfp-logo.png"
-                  alt="wfp-logo"
+                id="wfp-logo"
+                className="source-logo"
+                src="./wfp-logo.png"
+                alt="wfp-logo"
               />
             </a>
           </div>
@@ -87,9 +80,9 @@ function LandingPage() {
           <div className="img-container">
             <a href="https://www.netlight.com/" target="_blank">
               <img
-                  className="source-logo"
-                  src="../../public/netlight-logo.png"
-                  alt="netlight-logo"
+                className="source-logo"
+                src="../../public/netlight-logo.png"
+                alt="netlight-logo"
               />
             </a>
           </div>
@@ -98,20 +91,25 @@ function LandingPage() {
 
       <div id="lp-simulation-page" className="content-page">
         <h1 id="lp-simulation-title" className="page-title">
-          Latest Simulation
+          Tutorial
         </h1>
-        <Map/>
+        <div className="video-container">
+          <iframe
+            src="https://www.youtube.com/embed/r6tH55syq0o"
+            title="YouTube video player"
+            frameBorder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+          ></iframe>
+        </div>
       </div>
-
 
       <div id="lp-credits-page" className="content-page">
         <h1 id="lp-credits-title" className="page-title">
           Credits
         </h1>
-        <Credits/>
+        <Credits />
       </div>
-
-
     </div>
   );
 }
