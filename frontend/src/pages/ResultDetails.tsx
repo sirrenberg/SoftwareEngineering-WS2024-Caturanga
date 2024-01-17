@@ -11,7 +11,7 @@ import {
   validationDataByDate,
 } from "../types";
 import { LatLngExpression } from "leaflet";
-import Slider, { SliderMark } from "@mui/material/Slider";
+import Slider from "@mui/material/Slider";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlay, faPause, faInfo } from "@fortawesome/free-solid-svg-icons";
 import { Colors } from "../helper/constants/DesignConstants";
