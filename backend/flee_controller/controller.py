@@ -670,3 +670,4 @@ class Controller:
         collection.delete_one({"_id": ObjectID(document_id)})
         client.close()
         return 
+    

@@ -51,8 +51,3 @@ for integration in integrations:
 for integration_id, new_uri in integration_id_and_uri:
     response = api_gateway.update_integration(ApiId=API_GATEWAY_ID, IntegrationId=integration_id, IntegrationUri=new_uri)
     logging.info("Updated integration: " + str(response))
-
-
-
-
-#deployment_time = [(arn,(ecs.describe_services(cluster=cluster_name, services=[service_name])['services'][0]['deployments'][0]['createdAt']

@@ -1,3 +1,7 @@
+# API to migrate the database from Atlas to DocumentDB.
+# Build, push and deploy on AWS, then use the /delete_all_in_document_db route to delete all data in the DocumentDB database 
+# and route /migrate to copy all data from Atlas to DocumentDB.
+
 from fastapi import FastAPI, Path, Request
 import logging
 import boto3
@@ -228,4 +232,4 @@ async def delete_simulations(sim_id: str):
         {"_id": ObjectID(sim_id)}
     )
     client.close()
-    return 
+    return

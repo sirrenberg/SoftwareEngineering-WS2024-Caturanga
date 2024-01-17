@@ -1,5 +1,5 @@
+# Stage 1: Build the application
 # Use an official Node.js runtime as a parent image
-# This one also includes httpd (also known as Apache HTTP Server) and git
 FROM node:21.5-bookworm as build-stage
 
 # Set the working directory to /app
@@ -25,14 +25,9 @@ FROM httpd:2.4-bookworm
 # Copy the build output from the build stage to the Apache server directory
 COPY --from=build-stage /app/dist/ /usr/local/apache2/htdocs/
 
-# Copy your custom httpd.conf file to the Apache configuration directory
+# Copy custom httpd.conf file to the Apache configuration directory
 COPY ./httpd.conf /usr/local/apache2/conf/httpd.conf
-# COPY apache2.conf /etc/apache2/apache2.conf
 COPY ./.htaccess /usr/local/apache2/htdocs/.htaccess
-# RUN echo "AddType application/javascript .js" >> /usr/local/apache2/conf/httpd.conf
-# RUN echo "AddType text/css .css" >> /usr/local/apache2/conf/httpd.conf
-# RUN echo "AddType text/html .html" >> /usr/local/apache2/conf/httpd.conf
-# RUN echo "AddType application/octet-stream .json" >> /usr/local/apache2/conf/httpd.conf
 
 # Apache runs on port 80 by default, so expose it
 EXPOSE 80
