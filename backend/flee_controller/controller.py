@@ -14,7 +14,6 @@ from botocore.exceptions import ClientError
 import json
 import csv
 
-logging.basicConfig(level=logging.DEBUG)
 
 
 
@@ -32,21 +31,21 @@ class Controller:
         Initializes the Controller object.
         """
 
-        # self.adapter = Adapter()
-        # secret = self.get_secret("caturanga-db-user-and-pw")
-        # self.username = secret["username"] # store username and password in environment variables, so that they don't have to be fetched from the AWS Secrets Manager every time, which is expensive
-        # self.password = secret["password"]
-        # # MONGO_USER = os.environ.get('MONGO_USER')
-        # # MONGO_PASSWORD = os.environ.get('MONGO_PASSWORD')
-        # # print(MONGO_PASSWORD)
-        # # MONGO_CONNECTION_STRING_PREFIX = os.environ.get('MONGO_CONNECTION_STRING_PREFIX')
-        # # print(MONGO_CONNECTION_STRING_PREFIX)
-        # # MONGO_CONNECTION_STRING_SUFFIX = os.environ.get('MONGO_CONNECTION_STRING_SUFFIX')
-        # # print(MONGO_CONNECTION_STRING_SUFFIX)
-        # # self.MONGODB_URI = MONGO_CONNECTION_STRING_PREFIX + MONGO_USER + ":" + MONGO_PASSWORD + "@" + MONGO_CONNECTION_STRING_SUFFIX
-        # self.backend_root_dir = Path(__file__).resolve().parent
-        # self.client, self.db = self.connect_db()
-        # self.csvTransformer = CsvTransformer(self.db)
+        self.adapter = Adapter()
+        secret = self.get_secret("caturanga-db-user-and-pw")
+        self.username = secret["MONGO_USER"] # store username and password in environment variables, so that they don't have to be fetched from the AWS Secrets Manager every time, which is expensive
+        self.password = secret["MONGO_PASSWORD"]
+        # MONGO_USER = os.environ.get('MONGO_USER')
+        # MONGO_PASSWORD = os.environ.get('MONGO_PASSWORD')
+        # print(MONGO_PASSWORD)
+        # MONGO_CONNECTION_STRING_PREFIX = os.environ.get('MONGO_CONNECTION_STRING_PREFIX')
+        # print(MONGO_CONNECTION_STRING_PREFIX)
+        # MONGO_CONNECTION_STRING_SUFFIX = os.environ.get('MONGO_CONNECTION_STRING_SUFFIX')
+        # print(MONGO_CONNECTION_STRING_SUFFIX)
+        # self.MONGODB_URI = MONGO_CONNECTION_STRING_PREFIX + MONGO_USER + ":" + MONGO_PASSWORD + "@" + MONGO_CONNECTION_STRING_SUFFIX
+        self.backend_root_dir = Path(__file__).resolve().parent
+        self.client, self.db = self.connect_db()
+        self.csvTransformer = CsvTransformer(self.db)
 
         self.default_input_id = "65a6d3eb9ae2636fa2b3e3c6"
         self.default_setting_id = "6599846eeb8f8c36cce8307a"
@@ -56,42 +55,22 @@ class Controller:
         """
         Retrieves the secret value that contains the username and password for the documentDB database from the AWS Secrets Manager.
         """
-        logging.basicConfig(level=logging.DEBUG)
         region_name = "eu-west-1"
 
         # Create a Secrets Manager client
-        logging.debug("Creating a boto3 session...")
         session = boto3.session.Session()
-        logging.debug("Session created. Session is of type: " + str(type(session)))
-        logging.debug("Creating a boto3 client...")
         client = session.client(service_name="secretsmanager", region_name=region_name)
-        logging.debug("Client created. Client is of type: " + str(type(client)))
 
         try:
-            logging.debug("Trying to get secret value...")
             get_secret_value_response = client.get_secret_value(SecretId=secret_name)
-            logging.debug(
-                "Secret value retrieved. Secret value is of type: "
-                + str(type(get_secret_value_response))
-            )
         except ClientError as e:
             # For a list of exceptions thrown, see
             # https://docs.aws.amazon.com/secretsmanager/latest/apireference/API_GetSecretValue.html
             return e
 
-        logging.debug("Trying to parse secret value...")
         secret = get_secret_value_response["SecretString"]
-        logging.debug("Secret value parsed. Secret value is of type: " + str(type(secret)))
 
         json_secret = json.loads(secret)
-        print("Type of json_secret:" + str(type(json_secret)))
-
-        logging.debug("Trying to parse secret value as JSON...")
-        username = json_secret["username"]
-        print("Username is " + str(username))
-        logging.debug(
-            "Secret value parsed as JSON. Username is of type: " + str(type(username))
-        )
 
         return json.loads(secret)
 

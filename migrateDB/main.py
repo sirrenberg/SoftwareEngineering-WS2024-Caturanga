@@ -32,7 +32,7 @@ def read_user():
     logging.info(
         "get_secret() invoked from main(). Username is of type: " + str(type(username))
     )
-    return {"username": get_secret("caturanga-db-user-and-pw")["username"]}
+    return {"MONGO_USER": get_secret("caturanga-db-user-and-pw")["MONGO_USER"]}
 
 @app.get("/simsettings")
 def get_all_simsettings():
@@ -79,42 +79,23 @@ def get_secret(secret_name):
     """
     Retrieves the secret value that contains the username and password for the documentDB database from the AWS Secrets Manager.
     """
-    logging.basicConfig(level=logging.info)
     region_name = "eu-west-1"
 
     # Create a Secrets Manager client
-    logging.info("Creating a boto3 session...")
     session = boto3.session.Session()
-    logging.info("Session created. Session is of type: " + str(type(session)))
-    logging.info("Creating a boto3 client...")
     client = session.client(service_name="secretsmanager", region_name=region_name)
-    logging.info("Client created. Client is of type: " + str(type(client)))
 
     try:
-        logging.info("Trying to get secret value...")
         get_secret_value_response = client.get_secret_value(SecretId=secret_name)
-        logging.info(
-            "Secret value retrieved. Secret value is of type: "
-            + str(type(get_secret_value_response))
-        )
     except ClientError as e:
         # For a list of exceptions thrown, see
         # https://docs.aws.amazon.com/secretsmanager/latest/apireference/API_GetSecretValue.html
         return e
 
-    logging.info("Trying to parse secret value...")
     secret = get_secret_value_response["SecretString"]
-    logging.info("Secret value parsed. Secret value is of type: " + str(type(secret)))
 
     json_secret = json.loads(secret)
-    print("Type of json_secret:" + str(type(json_secret)))
 
-    logging.info("Trying to parse secret value as JSON...")
-    username = json_secret["username"]
-    print("Username is " + str(username))
-    logging.info(
-        "Secret value parsed as JSON. Username is of type: " + str(type(username))
-    )
 
     return json.loads(secret)
 
@@ -127,8 +108,8 @@ def connect_db():
     """
     load_dotenv()
     secret = get_secret("caturanga-db-user-and-pw")
-    username = secret["username"]
-    password = secret["password"]
+    username = secret["MONGO_USER"]
+    password = secret["MONGO_PASSWORD"]
     MONGODB_URI = f"mongodb://{username}:{password}@caturanga-2023-12-08-16-18-00.cluster-cqhcnfxitkih.eu-west-1.docdb.amazonaws.com:27017/?tls=true&tlsCAFile=global-bundle.pem&replicaSet=rs0&readPreference=secondaryPreferred&retryWrites=false"
     client = MongoClient(MONGODB_URI)
     db = client.Caturanga
