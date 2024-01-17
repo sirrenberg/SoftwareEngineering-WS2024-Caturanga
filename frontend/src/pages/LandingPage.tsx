@@ -3,13 +3,14 @@ import "../styles/LandingPage.css";
 import { NavLink } from "react-router-dom";
 import Credits from "../components/Credits.tsx";
 import { ACLED_LOGO, FLEE_LOGO, NETLIGHT_LOGO, WFP_LOGO } from "../helper/constants/CreditsConstants.tsx";
+import { CATURANGA_LOGO } from "../helper/constants/DesignConstants.tsx";
 
 function LandingPage() {
   return (
     <div className="lp-container">
       <div id="lp-title-page" className="content-page">
         <div className="logo-container">
-          <img className="logo" src="./generic-logo.png" alt="logo" />
+          <img className="logo" src={CATURANGA_LOGO} alt="logo" />
         </div>
         <div className="lp-title-page-content">
           <div className="lp-title-container lp-title-content-section">
