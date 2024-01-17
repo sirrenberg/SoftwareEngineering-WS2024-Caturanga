@@ -1,7 +1,7 @@
 import "../styles/AddInput.css";
-import { useParams, useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useForm } from "../hooks/useForm";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { CheckboxInputField, NumberInputField, SelectInputField} from "../components/SimsettingField";
 import { movementRulesText, moveSpeedText, walkSpeedText, conflictWeightText,
   campWeightText, foreignWeightText, usePopForLocWeightText,
@@ -11,6 +11,7 @@ import { movementRulesText, moveSpeedText, walkSpeedText, conflictWeightText,
   displacedPerConflictDayText, maxValues} from "../helper/constants/SimsettingConstants";
 
 function AddSetting() {
+  const [submitted, setSubmitted] = useState<boolean>(false);
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
@@ -241,13 +242,10 @@ function AddSetting() {
         <button
           id="submit-settings-button"
           className="simple-button"
+          disabled={submitted}
           onClick={(e) => {
-            /**
-             * Handles the form submission and navigates to the "/settings" page.
-             * @param {Event} e - The form submission event.
-             */
-            handleSubmit(e, "/simsettings", "POST");
-            navigate("/settings");
+            setSubmitted(true);
+            handleSubmit(e, "/simsettings", "POST", () => {navigate("/settings");});
           }}
         >
           Save

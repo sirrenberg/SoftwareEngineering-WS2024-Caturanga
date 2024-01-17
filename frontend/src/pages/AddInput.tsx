@@ -1,6 +1,6 @@
 import "../styles/AddInput.css";
 import { useNavigate, useParams } from "react-router-dom";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "../hooks/useForm";
 import { formatDate } from "../helper/misc";
 import {
@@ -16,6 +16,7 @@ import {
 } from "../helper/constants/InputConstants";
 
 function AddInput() {
+  const [submitted, setSubmitted] = useState<boolean>(false);
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
@@ -105,9 +106,10 @@ function AddInput() {
       <div className="submit-button-container add-input-section">
         <button
           className="simple-button"
+          disabled={submitted}
           onClick={(e) => {
-            handleSubmit(e, "/simulations/", "POST");
-            navigate("/inputs");
+            setSubmitted(true);
+            handleSubmit(e, "/simulations/", "POST", () => {navigate("/inputs");});
           }}
         >
           Save
