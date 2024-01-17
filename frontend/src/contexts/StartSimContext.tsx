@@ -13,6 +13,7 @@ interface StartSimContextType {
 
 const Context = createContext<StartSimContextType | undefined>(undefined);
 
+// This component is used to pass data between all the pages in the Start Simulation process
 function ContextProvider({ children }: { children: ReactNode }) {
   const [inputId, setInputId] = useState("");
   const [inputName, setInputName] = useState("");

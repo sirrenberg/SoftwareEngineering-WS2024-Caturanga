@@ -18,6 +18,8 @@ services:
     restart: always
     environment:
       - MONGO_URI=${MONGO_URI}
+      - ACLED_API_KEY=${ACLED_API_KEY}
+      - ACLED_API_MAIL=${ACLED_API_MAIL}
 
 
   frontend:

@@ -2,6 +2,7 @@ import "../styles/Modal.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faX } from "@fortawesome/free-solid-svg-icons";
 
+// Modal Window for showing data sources
 function DataSourceModal({
   setDataSourceModalOpen,
   acled_url,

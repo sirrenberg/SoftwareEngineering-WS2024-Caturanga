@@ -1,6 +1,3 @@
-# https://flee.readthedocs.io/en/master/Multiscale_Simulation_instance_construction/?h=registration#5-define-registration-corrections:_
-# For each Macro and Micro models we will define and construct registration corrections based of validation camp files.
-
 import os 
 import csv
 

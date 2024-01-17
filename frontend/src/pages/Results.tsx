@@ -1,16 +1,24 @@
-import { faTrash, faInfo } from "@fortawesome/free-solid-svg-icons";
+import {
+  faTrash,
+  faInfo,
+  faMapLocationDot,
+} from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { LatLngExpression } from "leaflet";
 import { useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
 import Map from "../components/Map";
-import { calcMapCenter } from "../helper/misc";
+import { calcMapCenter, sliceName } from "../helper/misc";
 import { useAPI } from "../hooks/useAPI";
 import "../styles/Menu.css";
-import { ResultPreview, SimulationStatus } from "../types";
+import { ResultPreview, SimulationStatus, MapInputType } from "../types";
 import { Link } from "react-router-dom";
 import DataSourceModal from "../components/DataSourceModal";
+import MapLegendModal from "../components/MapLegendModal";
 
+const resultNameCutOff: number = 15;
+
+// Menu page for selecting a result
 function Results() {
   const { sendRequest } = useAPI();
 
@@ -19,7 +27,11 @@ function Results() {
   >(undefined);
   const [selectedResultIndex, setSelectedResultIndex] = useState<number>(-1);
   const [mapCenter, setMapCenter] = useState<LatLngExpression>([0, 0]); // [lat, lng]
+  const [indexForDeletion, setIndexForDeletion] = useState<number | undefined>(
+    undefined
+  );
   const [isDataSourceModal, setDataSourceModal] = useState(false);
+  const [isMapLegendModal, setMapLegendModal] = useState(false);
 
   useEffect(() => {
     sendRequest("/simulation_results/summary", "GET").then((resultData) => {
@@ -41,31 +53,6 @@ function Results() {
       });
     });
   }, []);
-
-  /* Function to delete Simulation_results from DB by clicking on trash-icon in item-List: */
-  const handleDeleteClick = async (simulationId: string, index: number) => {
-    // Call handleDeleteClick with both ID (for backend API call) and index (for updating ResultsPreview)
-    try {
-      await sendRequest(`/simulation_results/${simulationId}`, "DELETE"); // Call the backend API to delete the simulation result
-
-      // Update state to trigger a re-render
-      setResultPreviews((prevResults) => {
-        // prevResults: previous state value of resultPreviews (Given by React)
-        if (prevResults) {
-          // Check if prevResults is defined    // Check, if prevResults is undefined
-          const newResults = [...prevResults]; // Copy, but don´t modify original ResultsPreviews array
-          newResults.splice(index, 1);
-          return newResults;
-        }
-        return prevResults;
-      });
-
-      // Reset the selected index after deletion
-      setSelectedResultIndex(-1);
-    } catch (error) {
-      console.error("Error deleting simulation:", error);
-    }
-  };
 
   return (
     <div
@@ -90,6 +77,7 @@ function Results() {
                     "simple-button" +
                     (index === selectedResultIndex ? " selected-item" : "")
                   }
+                  disabled={index === indexForDeletion}
                   onClick={() => {
                     setSelectedResultIndex(index);
                     setMapCenter(
@@ -98,17 +86,36 @@ function Results() {
                   }}
                 >
                   <div className="items-list-item-text">
-                    <p className="item-preview-name">{`${resultPreview.name.slice(
-                      0,
-                      15
-                    )}...`}</p>
+                    <p className="item-preview-name">
+                      {sliceName(resultPreview.name, resultNameCutOff)}
+                    </p>
                     <p className="item-preview-status">{`Status: ${resultPreview.status}`}</p>
                   </div>
                   <span className="items-list-item-icons">
                     <FontAwesomeIcon
                       icon={faTrash}
                       className="item-icon"
-                      onClick={() => handleDeleteClick(resultPreview.id, index)}
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        setSelectedResultIndex(-1);
+                        setIndexForDeletion(index);
+                        const idForDeletion: string = resultPreview.id;
+                        sendRequest(
+                          `/simulation_results/${idForDeletion}`,
+                          "DELETE"
+                        )
+                          .then(() => {
+                            setResultPreviews(
+                              resultPreviews.filter(
+                                (r) => r.id !== idForDeletion
+                              )
+                            );
+                            setIndexForDeletion(undefined);
+                          })
+                          .catch((err) => {
+                            console.error(err);
+                          });
+                      }}
                     />
                   </span>
                 </button>
@@ -173,14 +180,36 @@ function Results() {
       </div>
 
       {selectedResultIndex !== -1 && (
-        <div
-          className="simple-button sources-button"
-          onClick={() => {
-            setDataSourceModal(true);
-          }}
-        >
-          <FontAwesomeIcon icon={faInfo} className="sources-icon" />
-        </div>
+        <>
+          <div
+            className="simple-button info-button"
+            id="sources-button"
+            onClick={() => {
+              setDataSourceModal(true);
+            }}
+          >
+            <FontAwesomeIcon icon={faInfo} className="sources-icon" />
+          </div>
+          <div
+            className="simple-button info-button"
+            id="map-legend-button"
+            onClick={() => {
+              setMapLegendModal(true);
+            }}
+          >
+            <FontAwesomeIcon
+              icon={faMapLocationDot}
+              className="map-legend-icon"
+            />
+          </div>
+        </>
+      )}
+
+      {isMapLegendModal && (
+        <MapLegendModal
+          setMapLegendModalOpen={setMapLegendModal}
+          mapInputType={MapInputType.inputs}
+        />
       )}
 
       {isDataSourceModal && resultPreviews && selectedResultIndex !== -1 && (
