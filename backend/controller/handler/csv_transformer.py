@@ -1,8 +1,6 @@
 import csv
 from datetime import datetime
 from io import StringIO
-from bson.objectid import ObjectId as ObjectID
-from pathlib import Path
 import os
 
 
@@ -13,11 +11,11 @@ class CsvTransformer:
     CSV Files are needed for FLEE execution
     """
 
-    def __init__(self, db):
-        self.db = db
+    def __init__(self, backend_root_dir):
+        self.backend_root_dir = backend_root_dir
 
     # Store simulation data from DB in csv files for FLEE execution:
-    async def convert_simulation_to_csv(self, simulation_id: str):
+    async def convert_simulation_to_csv(self, simulation):
 
         """
         Convert location data into .csv files (for FLEE simulation execution) - Returns location of simulation-data dir:
@@ -31,54 +29,41 @@ class CsvTransformer:
 
         # Fetch simulation data from DB by simulation_id:
         try:
-            simulations_collection = self.db.get_collection("simulations")
-            simulation = simulations_collection.find_one({"_id": ObjectID(simulation_id)})
+            simulation_dir = self.backend_root_dir / "flee_stored_files" / "conflict_input" / simulation["_id"]
+            os.makedirs(simulation_dir, exist_ok=True)
 
-            # Create all .csv files for simulation:
-            if simulation is not None:
+            # Cretae csv files using helper function export-csv (filename, data, fieldnames):
+            # Closures.csv file:
+            self.export_closures_csv(os.path.join(simulation_dir, "closures.csv"),
+                                                    simulation["closures"])
 
-                # Create directory for simulation:
-                backend_root_dir = Path(__file__).resolve().parent
-                simulation_dir = backend_root_dir / "flee_stored_files" / "conflict_input" / simulation_id
-                os.makedirs(simulation_dir, exist_ok=True)
+            # conflicts.csv file:
+            self.export_conflicts_csv(os.path.join(simulation_dir, "conflicts.csv"),
+                                                        simulation["conflicts"],
+                                                        simulation["conflicts"][
+                                                            0].keys())
 
-                # Cretae csv files using helper function export-csv (filename, data, fieldnames):
-                # Closures.csv file:
-                self.export_closures_csv(os.path.join(simulation_dir, "closures.csv"),
-                                                        simulation["closures"])
+            # locations.csv file:
+            self.export_locations_csv(os.path.join(simulation_dir, "locations.csv"),
+                                                        simulation["locations"],
+                                                        ["name", "region", "country", "latitude", "longitude",
+                                                        "location_type",
+                                                        "conflict_date",
+                                                        "population"])
 
-                # conflicts.csv file:
-                self.export_conflicts_csv(os.path.join(simulation_dir, "conflicts.csv"),
-                                                         simulation["conflicts"],
-                                                         simulation["conflicts"][
-                                                             0].keys())
+            # routes.csv file:
+            self.export_routes_csv(os.path.join(simulation_dir, "routes.csv"),
+                                                    simulation["routes"],
+                                                    ["from", "to", "distance",
+                                                    "forced_redirection"])
 
-                # locations.csv file:
-                self.export_locations_csv(os.path.join(simulation_dir, "locations.csv"),
-                                                         simulation["locations"],
-                                                         ["name", "region", "country", "latitude", "longitude",
-                                                          "location_type",
-                                                          "conflict_date",
-                                                          "population"])
+            # sim_period.csv file (values are single data points, not directories themselves -> unnested function):
+            self.export_sim_period_csv(os.path.join(simulation_dir, "sim_period.csv"),
+                                                        simulation["sim_period"])
 
-                # routes.csv file:
-                self.export_routes_csv(os.path.join(simulation_dir, "routes.csv"),
-                                                      simulation["routes"],
-                                                      ["from", "to", "distance",
-                                                       "forced_redirection"])
-
-                # sim_period.csv file (values are single data points, not directories themselves -> unnested function):
-                self.export_sim_period_csv(os.path.join(simulation_dir, "sim_period.csv"),
-                                                          simulation["sim_period"])
-
-                return "All files written with csvTransformer"
-
-            else:
-                raise SimulationNotFoundError(f"Simulation with ID {simulation_id} not found")
-
+            return "All files written with csvTransformer"
         except Exception as e:
             raise e
-
 
     # Helper Function to create closures.csv file from filename, data and fieldnames:
     def export_closures_csv(self, file_name, data):

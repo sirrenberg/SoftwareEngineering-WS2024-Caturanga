@@ -6,10 +6,6 @@ class Adapter:
     Adapter class for running simulations using the FLEE library.
     """
 
-    def __init__(self):
-        # This method is intentionally left empty
-        pass
-
     def run_simulation_config(self,
                               simulation_dir: str,
                               simsettings_file: str,
