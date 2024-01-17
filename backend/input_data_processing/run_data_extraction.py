@@ -162,6 +162,10 @@ def run_extraction(country_name, start_date, fetching_end_date, simulation_end_d
     print(f"Round data: {round_data}")
     print(100*"-")
 
+    # sort round_data
+    round_data = sorted(round_data, key=lambda k: k['round'])
+
+
     # check invalid dates
     if date_format(start_date) > date_format(fetching_end_date):
         print("Error: Start date is after fetching end date.")
@@ -169,6 +173,14 @@ def run_extraction(country_name, start_date, fetching_end_date, simulation_end_d
     elif date_format(start_date) > date_format(simulation_end_date):
         print("Error: Start date is after simulation end date.")
         return
+    elif round_data[0]["covered_to"] > date_format(fetching_end_date):
+        print("Error: The first round ends after the fetching end date.")
+        return
+    elif round_data[0]["covered_from"] < date_format(start_date):
+        print("Error: The fetching start date is after the beginning of the first round.")
+        return
+    
+    print("Start data extraction process...")
     
     start_year = int(start_date.split('-')[2])
     end_year = int(fetching_end_date.split('-')[2])
