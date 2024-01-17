@@ -1,4 +1,8 @@
-import { faTrash, faInfo } from "@fortawesome/free-solid-svg-icons";
+import {
+  faTrash,
+  faInfo,
+  faMapLocationDot,
+} from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { LatLngExpression } from "leaflet";
 import { useEffect, useState } from "react";
@@ -7,12 +11,14 @@ import Map from "../components/Map";
 import { calcMapCenter, sliceName } from "../helper/misc";
 import { useAPI } from "../hooks/useAPI";
 import "../styles/Menu.css";
-import { ResultPreview, SimulationStatus } from "../types";
+import { ResultPreview, SimulationStatus, MapInputType } from "../types";
 import { Link } from "react-router-dom";
 import DataSourceModal from "../components/DataSourceModal";
+import MapLegendModal from "../components/MapLegendModal";
 
-const resultNameCutOff : number = 15;
+const resultNameCutOff: number = 15;
 
+// Menu page for selecting a result
 function Results() {
   const { sendRequest } = useAPI();
 
@@ -21,8 +27,11 @@ function Results() {
   >(undefined);
   const [selectedResultIndex, setSelectedResultIndex] = useState<number>(-1);
   const [mapCenter, setMapCenter] = useState<LatLngExpression>([0, 0]); // [lat, lng]
-  const [indexForDeletion, setIndexForDeletion] = useState<number | undefined>(undefined);
+  const [indexForDeletion, setIndexForDeletion] = useState<number | undefined>(
+    undefined
+  );
   const [isDataSourceModal, setDataSourceModal] = useState(false);
+  const [isMapLegendModal, setMapLegendModal] = useState(false);
 
   useEffect(() => {
     sendRequest("/simulation_results/summary", "GET").then((resultData) => {
@@ -77,7 +86,9 @@ function Results() {
                   }}
                 >
                   <div className="items-list-item-text">
-                    <p className="item-preview-name">{sliceName(resultPreview.name, resultNameCutOff)}</p>
+                    <p className="item-preview-name">
+                      {sliceName(resultPreview.name, resultNameCutOff)}
+                    </p>
                     <p className="item-preview-status">{`Status: ${resultPreview.status}`}</p>
                   </div>
                   <span className="items-list-item-icons">
@@ -88,13 +99,22 @@ function Results() {
                         event.stopPropagation();
                         setSelectedResultIndex(-1);
                         setIndexForDeletion(index);
-                        const idForDeletion : string = resultPreview.id;
-                        sendRequest(`/simulation_results/${idForDeletion}`, "DELETE")
+                        const idForDeletion: string = resultPreview.id;
+                        sendRequest(
+                          `/simulation_results/${idForDeletion}`,
+                          "DELETE"
+                        )
                           .then(() => {
-                            setResultPreviews(resultPreviews.filter((r) => r.id !== idForDeletion));
+                            setResultPreviews(
+                              resultPreviews.filter(
+                                (r) => r.id !== idForDeletion
+                              )
+                            );
                             setIndexForDeletion(undefined);
                           })
-                          .catch((err) => {console.error(err);});
+                          .catch((err) => {
+                            console.error(err);
+                          });
                       }}
                     />
                   </span>
@@ -160,14 +180,36 @@ function Results() {
       </div>
 
       {selectedResultIndex !== -1 && (
-        <div
-          className="simple-button sources-button"
-          onClick={() => {
-            setDataSourceModal(true);
-          }}
-        >
-          <FontAwesomeIcon icon={faInfo} className="sources-icon" />
-        </div>
+        <>
+          <div
+            className="simple-button info-button"
+            id="sources-button"
+            onClick={() => {
+              setDataSourceModal(true);
+            }}
+          >
+            <FontAwesomeIcon icon={faInfo} className="sources-icon" />
+          </div>
+          <div
+            className="simple-button info-button"
+            id="map-legend-button"
+            onClick={() => {
+              setMapLegendModal(true);
+            }}
+          >
+            <FontAwesomeIcon
+              icon={faMapLocationDot}
+              className="map-legend-icon"
+            />
+          </div>
+        </>
+      )}
+
+      {isMapLegendModal && (
+        <MapLegendModal
+          setMapLegendModalOpen={setMapLegendModal}
+          mapInputType={MapInputType.inputs}
+        />
       )}
 
       {isDataSourceModal && resultPreviews && selectedResultIndex !== -1 && (

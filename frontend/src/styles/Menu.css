@@ -268,10 +268,9 @@ a .items-list-item-icons {
   background-color: var(--medium-orange);
 }
 
-.sources-button {
+.info-button {
   position: absolute;
-  bottom: 20px;
-  right: 20px;
+  right: 0px;
   border-radius: 50%;
   height: 50px;
   width: 50px;
@@ -279,4 +278,12 @@ a .items-list-item-icons {
   justify-content: center;
   align-items: center;
   padding: 1.3em;
+}
+
+#sources-button {
+  bottom: 0px;
+}
+
+#map-legend-button {
+  bottom: 80px;
 }
