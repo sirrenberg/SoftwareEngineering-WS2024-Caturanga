@@ -1,4 +1,4 @@
-# Caturanga - Enhanced React Application Documentation
+# Caturanga - React Application Documentation
 
 ## Introduction
 
