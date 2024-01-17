@@ -392,7 +392,7 @@ def insert_data_into_DB(country, current_dir, folder_name, acled_source_list=[],
             }    
             }    
     }
-
+    
     # insert data into the database
     result = simulations_collection.insert_one(mongo_document)
 

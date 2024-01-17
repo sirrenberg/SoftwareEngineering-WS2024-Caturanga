@@ -109,8 +109,8 @@ def extract_camp_locations(round_data):
     current_dir = os.getcwd()
     # paths to files with camp information
     # docker path
-    # paths_dtm = os.path.join(current_dir, "input_data_processing", "conflict_validation", "data_source")
-    paths_dtm = os.path.join(current_dir, "conflict_validation", "data_source")
+    paths_dtm = os.path.join(current_dir, "input_data_processing", "conflict_validation", "data_source")
+    # paths_dtm = os.path.join(current_dir, "conflict_validation", "data_source")
 
 
     # create empty dataframe
