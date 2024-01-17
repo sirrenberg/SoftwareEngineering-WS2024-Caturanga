@@ -1,8 +1,9 @@
-from fastapi import FastAPI, HTTPException, Path, BackgroundTasks
+from fastapi import FastAPI, HTTPException, Path, BackgroundTasks, Query
 from controller.handler.database_handler import DatabaseHandler
 from fastapi.middleware.cors import CORSMiddleware
 from typing import Any, Dict, AnyStr, List, Union
 from controller.simulation_executor import SimulationExecutor
+from controller.data_extractor import DataExtractor
 
 app = FastAPI()
 
@@ -11,6 +12,7 @@ DEFAULT_SETTING_ID = "6599846eeb8f8c36cce8307a"
 
 database_handler = DatabaseHandler(DEFAULT_INPUT_ID, DEFAULT_SETTING_ID)
 simulation_executor = SimulationExecutor(database_handler)
+data_extractor = DataExtractor()
 
 JSONObject = Dict[AnyStr, Any]
 JSONArray = List[Any]
@@ -153,8 +155,15 @@ async def delete_simulation_and_associated_results(
     Returns:
     - The result of the deletion operation.
     """
-    return await database_handler.delete_simulation_and_associated_results(
-        simulation_id)
+    result = \
+        await database_handler.delete_simulation_and_associated_results(
+            simulation_id)
+
+    if result["status"] == "error":
+        raise HTTPException(status_code=404,
+                            detail="Simulation input not found.")
+    else:
+        return result
 
 
 @app.post("/simulations")
@@ -239,8 +248,14 @@ async def delete_simulation_results(
     Returns:
     - dict: The data of the simulation result.
     """
-    return await database_handler.delete("simulations_results",
-                                         simulation_result_id)
+    result = await database_handler.delete("simulations_results",
+                                           simulation_result_id)
+
+    if result["status"] == "error":
+        raise HTTPException(status_code=404,
+                            detail="Simulation setting not found.")
+    else:
+        return result
 
 
 # Simulation Settings: --------------------------------------------------------
@@ -327,4 +342,29 @@ async def delete_simsetting(
     Returns:
     - The result of the deletion operation.
     """
-    return await database_handler.delete("simsettings", simsetting_id)
+    result = await database_handler.delete("simsettings", simsetting_id)
+
+    if result["status"] == "error":
+        raise HTTPException(status_code=404,
+                            detail="Simulation setting not found.")
+    else:
+        return result
+
+
+@app.get("/run_data_extraction")
+def run_data_extraction(
+    country_name: str = Query(..., description="Country name"),
+    start_date: str = Query(..., description="Start date of data fetching"),
+    end_date: str = Query(..., description="End date of data fetching"),
+    max_simulation_end_date: str = Query(...,
+                                         description="Max simulation end date")
+):
+    # Call the run_data_extraction method with the provided parameters
+    result = data_extractor.run_data_extraction(
+        country_name=country_name,
+        start_date=start_date,
+        end_date=end_date,
+        max_simulation_end_date=max_simulation_end_date,
+    )
+
+    return result
