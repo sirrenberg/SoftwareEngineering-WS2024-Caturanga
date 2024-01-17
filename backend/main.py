@@ -310,7 +310,7 @@ async def delete_simsetting(
 @app.get("/run_data_extraction")
 def run_data_extraction(
     country_name: str = Query(..., description="Country name"),
-    start_date: str = Query(..., description="Start date"),
+    start_date: str = Query(..., description="Start date of data fetching"),
     end_date: str = Query(..., description="End date of data fetching"),
     max_simulation_end_date: str = Query(..., description="Max simulation end date"),
 ):
