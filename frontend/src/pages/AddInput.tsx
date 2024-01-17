@@ -106,7 +106,7 @@ function AddInput() {
         <button
           className="simple-button"
           onClick={(e) => {
-            handleSubmit(e, "/simulations/", "POST");
+            handleSubmit(e, "/simulations", "POST");
             navigate("/inputs");
           }}
         >
