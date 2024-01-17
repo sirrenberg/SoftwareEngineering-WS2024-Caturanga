@@ -88,7 +88,7 @@ function LandingPage() {
             <a href="https://www.netlight.com/" target="_blank">
               <img
                   className="source-logo"
-                  src="../../public/netlight-logo.png"
+                  src="./netlight-logo.png"
                   alt="netlight-logo"
               />
             </a>
