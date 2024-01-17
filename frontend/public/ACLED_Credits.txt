@@ -1,0 +1,3 @@
+The Armed Conflict Location & Event Data Project (ACLED) has supported Caturanga with the collection, processing and mapping of conflict data, especially concerning the locations of camps, towns and cities, conflict related data as well as population data.
+
+Since high quality and accurate data is the basis for performant and valuable simulations, the ACLED played an outstanding role of utmost importance for the successful realization of the Caturanga project.
