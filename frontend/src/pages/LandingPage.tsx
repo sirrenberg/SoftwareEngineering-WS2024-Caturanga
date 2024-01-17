@@ -95,7 +95,7 @@ function LandingPage() {
         </h1>
         <div className="video-container">
           <iframe
-            src="https://www.youtube.com/embed/r6tH55syq0o"
+            src="https://www.youtube.com/embed/_TVtHzm9VpA"
             title="YouTube video player"
             frameBorder="0"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
