@@ -217,7 +217,7 @@ def run_extraction(country_name, start_date, fetching_end_date, simulation_end_d
     create_empty_registration_corrections_csv(folder_name)
     
     # 11. create sim_period.csv
-    create_sim_period_csv(folder_name, start_date, fetching_end_date)
+    create_sim_period_csv(folder_name, start_date, simulation_end_date)
 
     # 12. create validation data
     # create folder in conflict_validation 
