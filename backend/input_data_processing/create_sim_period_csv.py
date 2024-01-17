@@ -23,10 +23,3 @@ def create_sim_period_csv(folder_name, start_date, end_date):
         csv_file.write('"Length",' + str(duration) + '\n')
     
         print(f'{folder_name}/sim_period.csv created.')
-
-
-
-
-
-
-
