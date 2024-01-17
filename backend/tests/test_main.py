@@ -4,8 +4,9 @@ import sys
 import pytest
 
 # add backend directory to PYTHONPATH
-backend = Path(__file__).resolve().parent.parent
-sys.path.append(str(backend))
+BACKEND = Path(__file__).resolve().parent.parent
+sys.path.append(str(BACKEND))
+sys.path.append(str(BACKEND / "flee"))
 
 from main import app  # noqa: E402
 
@@ -16,9 +17,10 @@ class TestClass:
     """
 
     client = TestClient(app)
-    valid_input_id = "65a6d3eb9ae2636fa2b3e3c6"
-    valid_setting_id = "6599846eeb8f8c36cce8307a"
-    valid_result_id = "65a722c0e95bd59c24943951"
+    INVALID_ID = "aaaaaaaaaaaaaaaaaaaaaaaa"
+    VALID_INPUT_ID = "65a6d3eb9ae2636fa2b3e3c6"
+    VALID_SETTING_ID = "6599846eeb8f8c36cce8307a"
+    VALID_RESULT_IT = "65a722c0e95bd59c24943951"
 
     def test_root(self):
         """
@@ -33,11 +35,11 @@ class TestClass:
     def test_run_simulation_config(self):
         simulation_config = {
             "input": {
-                "input_id": self.valid_input_id,
+                "input_id": self.VALID_INPUT_ID,
                 "input_name": "test_input_name"
             },
             "settings": {
-                "simsettings_id": self.valid_setting_id,
+                "simsettings_id": self.VALID_SETTING_ID,
                 "simsettings_name": "test_simsettings_name"
             }
         }
@@ -55,7 +57,7 @@ class TestClass:
         ID that does not exist in that collection.
         """
         await self.get_data_bad_id("simulation_results",
-                                   self.valid_input_id)
+                                   self.INVALID_ID)
 
     @pytest.mark.asyncio
     async def test_get_simulation_result(self):
@@ -66,7 +68,7 @@ class TestClass:
         expected_keys = ["_id", "name",
                          "simulation_id", "simsettings_id", "status", "data"]
         await self.get_data("simulation_results",
-                            self.valid_result_id,
+                            self.VALID_RESULT_IT,
                             expected_keys)
 
     @pytest.mark.asyncio
@@ -85,7 +87,7 @@ class TestClass:
         ID that does not exist in that collection.
         """
         await self.get_data_bad_id("simulations",
-                                   self.valid_result_id)
+                                   self.INVALID_ID)
 
     @pytest.mark.asyncio
     async def test_get_simulation(self):
@@ -96,7 +98,7 @@ class TestClass:
                          "locations", "registration_corrections", "routes",
                          "sim_period", "validation", "data_sources"]
         await self.get_data("simulations",
-                            self.valid_input_id,
+                            self.VALID_INPUT_ID,
                             expected_keys)
 
     @pytest.mark.asyncio
@@ -120,7 +122,7 @@ class TestClass:
         with an ID that does not exist in that collection.
         """
         await self.delete_data_bad_id("simulations",
-                                      self.valid_setting_id)
+                                      self.INVALID_ID)
 
     @pytest.mark.asyncio
     async def test_delete_simulation(self):
@@ -139,7 +141,7 @@ class TestClass:
         ID that does not exist in that collection.
         """
         await self.get_data_bad_id("simsettings",
-                                   self.valid_result_id)
+                                   self.VALID_RESULT_IT)
 
     @pytest.mark.asyncio
     async def test_get_simsetting(self):
@@ -149,7 +151,7 @@ class TestClass:
         expected_simsettings = ["_id", "name", "log_levels", "spawn_rules",
                                 "move_rules", "optimisations"]
         await self.get_data("simsettings",
-                            self.valid_setting_id,
+                            self.VALID_SETTING_ID,
                             expected_simsettings)
 
     @pytest.mark.asyncio
@@ -172,7 +174,7 @@ class TestClass:
         Test the DELETE request to the "/simsettings/{id}" endpoint of the API
         with an ID that does not exist in that collection.
         """
-        await self.delete_data_bad_id("simsettings", self.valid_input_id)
+        await self.delete_data_bad_id("simsettings", self.VALID_INPUT_ID)
 
     @pytest.mark.asyncio
     async def test_delete_simsettings(self):
