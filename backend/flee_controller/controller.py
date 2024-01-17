@@ -453,7 +453,7 @@ class Controller:
         client.close()
 
         return result
-    
+
     async def delete_simulation_and_associated_results(self, simulation_id: str):
         """
         Deletes a simulation from the database.
@@ -614,9 +614,7 @@ class Controller:
     async def delete_simsetting(self, simsetting_id: str):
         return self.delete_document("simsettings", simsetting_id)
 
-
 # Helper functions - Database: ------------------------------------------------
-
 
     def delete_document(self, collection_name: str, document_id: str):
         """
@@ -628,9 +626,13 @@ class Controller:
         """
         client, db = self.connect_db()
         collection = db.get_collection(collection_name)
-        collection.delete_one({"_id": ObjectID(document_id)})
+        deleted_object = collection.delete_one({"_id": ObjectID(document_id)})
         client.close()
-        return
+
+        if deleted_object.deleted_count == 1:
+            return {"status": "success"}
+        else:
+            return {"status": "error"}
 
 
     def run_data_extraction(self, country_name, start_date, end_date, max_simulation_end_date):
