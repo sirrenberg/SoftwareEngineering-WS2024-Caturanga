@@ -6,7 +6,7 @@ Collaboration of University Augsburg, Netlight, and the World Food Programme.
 
 ## Installation
 1. Clone this repository
-2. Add MONGO_URI in .env file
+2. Add MONGO_URI, ACLED_API_KEY & ACLED_API_MAIL in .env file
 3. `git submodule update --init` to clone the FLEE submodule
 
 ### Requirements

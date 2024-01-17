@@ -169,12 +169,17 @@ export function useForm(initialFValues: any) {
     setValues(initialFValues);
   };
 
-  function handleSubmit(e: FormEvent, url: string, method: string) {
+  function handleSubmit(
+    e: FormEvent,
+    url: string,
+    method: string,
+    afterAction: () => void
+  ) {
     e.preventDefault();
     const { sendRequest } = useAPI();
 
-    sendRequest(url, method, values).then((data) => {
-      console.log(data);
+    sendRequest(url, method, values).then(() => {
+      afterAction();
     });
   }
 
