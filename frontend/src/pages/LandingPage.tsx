@@ -2,6 +2,7 @@ import Map from "../components/Map";
 import "../styles/LandingPage.css";
 import { NavLink } from "react-router-dom";
 import Credits from "../components/Credits.tsx";
+import { ACLED_LOGO, FLEE_LOGO, NETLIGHT_LOGO, WFP_LOGO } from "../helper/constants/CreditsConstants.tsx";
 
 function LandingPage() {
   return (
@@ -51,7 +52,7 @@ function LandingPage() {
             <a href="https://flee.readthedocs.io/en/master/" target="_blank">
               <img
                   className="source-logo"
-                  src="./flee.png"
+                  src={FLEE_LOGO}
                   alt="flee-logo"
               />
             </a>
@@ -62,7 +63,7 @@ function LandingPage() {
             <a href="https://acleddata.com/" target="_blank">
               <img
                   className="source-logo"
-                  src="./acled-logo.png"
+                  src={ACLED_LOGO}
                   alt="acled-logo"
               />
             </a>
@@ -74,7 +75,7 @@ function LandingPage() {
               <img
                   id="wfp-logo"
                   className="source-logo"
-                  src="./wfp-logo.png"
+                  src={WFP_LOGO}
                   alt="wfp-logo"
               />
             </a>
@@ -85,7 +86,7 @@ function LandingPage() {
             <a href="https://www.netlight.com/" target="_blank">
               <img
                   className="source-logo"
-                  src="./netlight-logo.png"
+                  src={NETLIGHT_LOGO}
                   alt="netlight-logo"
               />
             </a>
