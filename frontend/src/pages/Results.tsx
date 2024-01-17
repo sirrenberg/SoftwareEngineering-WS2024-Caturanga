@@ -26,7 +26,7 @@ function Results() {
       sendRequest("/simulations/summary", "GET").then((inputData) => {
         const res: ResultPreview[] = [];
         for (var resultElement of resultData) {
-          for (var inputElement of inputData) {
+          for (var inputElement of inputData.data) {
             if (inputElement._id === resultElement.simulation_id) {
               res.push({
                 id: resultElement._id,
