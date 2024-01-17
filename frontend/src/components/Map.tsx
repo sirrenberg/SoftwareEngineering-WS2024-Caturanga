@@ -19,7 +19,7 @@ import { LatLngExpression } from "leaflet";
 import { useMap } from "react-leaflet/hooks";
 import { useEffect } from "react";
 import { v4 as uuidv4 } from "uuid";
-import { prettifyLocationTypeName, getLocationColor } from "../helper/misc";
+import { prettifyLocationTypeName, getLocationTypeColor } from "../helper/misc";
 
 function Map({
   input,
@@ -109,7 +109,7 @@ function Map({
                   ? location.idp_population
                   : location.population
               )}
-              color={getLocationColor(location.location_type)}
+              color={getLocationTypeColor(location.location_type)}
               eventHandlers={{
                 click: () => {
                   if (NodeClickHandler) {

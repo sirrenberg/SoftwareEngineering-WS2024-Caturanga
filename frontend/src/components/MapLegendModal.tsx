@@ -2,7 +2,7 @@ import "../styles/Modal.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faX } from "@fortawesome/free-solid-svg-icons";
 import { MapInputType, LocationType } from "../types";
-import { getLocationColor } from "../helper/misc";
+import { getLocationTypeColor } from "../helper/misc";
 
 // Modal Window for showing map legend
 function MapLegendModal({
@@ -37,7 +37,7 @@ function MapLegendModal({
                     <div
                       className="legend-item-color"
                       style={{
-                        backgroundColor: getLocationColor(locationType),
+                        backgroundColor: getLocationTypeColor(locationType),
                       }}
                     ></div>
                     <div className="legend-item-text">{locationType}</div>

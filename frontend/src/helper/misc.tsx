@@ -48,7 +48,7 @@ function prettifyLocationTypeName(locationName: string): string {
   }
 }
 
-function getLocationColor(locationType: LocationType) {
+function getLocationTypeColor(locationType: LocationType) {
   // get the color of the node based on the location type
   switch (locationType) {
     case LocationType.conflict_zone:
@@ -68,5 +68,5 @@ export {
   calcMapCenter,
   formatDate,
   prettifyLocationTypeName,
-  getLocationColor,
+  getLocationTypeColor,
 };
