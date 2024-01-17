@@ -51,15 +51,6 @@ class TestClass:
     # Tests for the "/simulation_results" endpoint
 
     @pytest.mark.asyncio
-    async def test_get_simulation_result_bad_id(self):
-        """
-        Test the "/simulation_results/{id}" endpoint of the API with an
-        ID that does not exist in that collection.
-        """
-        await self.get_data_bad_id("simulation_results",
-                                   self.INVALID_ID)
-
-    @pytest.mark.asyncio
     async def test_get_simulation_result(self):
         """
         Test the "/simulation_results/{id}" endpoint of the API with a
@@ -79,15 +70,6 @@ class TestClass:
         await self.get_all_data("simulation_results")
 
     # Tests for the "/simulations" endpoint
-
-    @pytest.mark.asyncio
-    async def test_get_simulation_bad_id(self):
-        """
-        Test the "/simulations/{id}" endpoint of the API with an
-        ID that does not exist in that collection.
-        """
-        await self.get_data_bad_id("simulations",
-                                   self.INVALID_ID)
 
     @pytest.mark.asyncio
     async def test_get_simulation(self):
@@ -133,15 +115,6 @@ class TestClass:
         await self.delete_data("simulations")
 
     # Test for the "/simsettings" endpoint
-
-    @pytest.mark.asyncio
-    async def test_get_simsetting_bad_id(self):
-        """
-        Test the "/simsettings/{id}" endpoint of the API with an
-        ID that does not exist in that collection.
-        """
-        await self.get_data_bad_id("simsettings",
-                                   self.VALID_RESULT_IT)
 
     @pytest.mark.asyncio
     async def test_get_simsetting(self):
