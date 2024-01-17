@@ -1,4 +1,3 @@
-import Map from "../components/Map";
 import "../styles/LandingPage.css";
 import { NavLink } from "react-router-dom";
 import Credits from "../components/Credits.tsx";
@@ -95,9 +94,17 @@ function LandingPage() {
 
       <div id="lp-simulation-page" className="content-page">
         <h1 id="lp-simulation-title" className="page-title">
-          Latest Simulation
+          Tutorial
         </h1>
-        <Map />
+        <div className="video-container">
+          <iframe
+            src="https://www.youtube.com/embed/_TVtHzm9VpA"
+            title="YouTube video player"
+            frameBorder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+          ></iframe>
+        </div>
       </div>
 
       <div id="lp-credits-page" className="content-page">
