@@ -1,5 +1,7 @@
 import { FormEvent, useState } from "react";
 import { useAPI } from "../hooks/useAPI";
+import { maxValues } from "../helper/constants/SimsettingConstants";
+import { maxValues as inputMaxValues, minValues as inputMinValues } from "../helper/constants/InputConstants";
 
 export function useForm(initialFValues: any) {
   const [values, setValues] = useState(initialFValues);
@@ -12,12 +14,22 @@ export function useForm(initialFValues: any) {
     return value;
   }
 
-  const handleInputChange = (
+  const handleInputChange =
+  (
     e:
       | React.ChangeEvent<HTMLInputElement>
-      | React.ChangeEvent<HTMLSelectElement>
+      | React.ChangeEvent<HTMLSelectElement>,
   ) => {
     let { name, value, type } = e.target;
+
+    // sanitise name input
+    if(name === "name") {
+      if (value.length > 30) {
+        value = value.slice(0, 30);
+      } else if (value.length === 0) {
+        value = "untitled";
+      }
+    }
 
     // handle type = checkbox
     if (type === "checkbox") {
@@ -29,53 +41,23 @@ export function useForm(initialFValues: any) {
     // convert string to boolean
     value = str2bool(value);
 
-    // if name is date or length, then we need to update the sim_period object
-    if (name === "date" || name === "length") {
+    // Input
+    if (name === "length") {
+      value = sanitiseInput(value,
+                            inputMaxValues.sim_period.length,
+                            inputMinValues.sim_period.length);
       setValues({
         ...values,
         sim_period: {
           ...values.sim_period,
-          [name]: value,
+          [name]: Number(value),
         },
       });
       return;
     }
 
-    // Log levels are nested in the sim_settings object
-    if (
-      [
-        "agent",
-        "link",
-        "camp",
-        "conflict",
-        "init",
-        "idp_totals",
-        "granularity",
-      ].includes(name)
-    ) {
-      setValues({
-        ...values,
-        log_levels: {
-          ...values.log_levels,
-          [name]: value,
-        },
-      });
-      return;
-    }
-
-    // Spawn rules are nested in the sim_settings object
-    if (["take_from_population", "insert_day0"].includes(name)) {
-      setValues({
-        ...values,
-        spawn_rules: {
-          ...values.spawn_rules,
-          [name]: value,
-        },
-      });
-      return;
-    }
-
-    // Move rules are nested in the sim_settings object
+    // Simsettings
+    // Move rules
     if (
       [
         "max_move_speed",
@@ -83,33 +65,74 @@ export function useForm(initialFValues: any) {
         "foreign_weight",
         "conflict_weight",
         "camp_weight",
+        "pop_power_for_loc_weight",
         "conflict_movechance",
         "camp_movechance",
+        "idpcamp_movechance",
         "default_movechance",
         "awareness_level",
         "capacity_scaling",
+        "weight_power",
+      ].includes(name)
+    ) {
+      value = sanitiseInput(value, 
+                            maxValues.
+                            move_rules[name as keyof typeof maxValues.move_rules]);
+      setValues({
+        ...values,
+        move_rules: {
+          ...values.move_rules,
+          [name]: Number(value),
+        },
+      });
+      return;
+    }
+
+    if (
+      [
+        "use_pop_for_loc_weight",
         "avoid_short_stints",
         "start_on_foot",
-        "weight_power",
       ].includes(name)
     ) {
       setValues({
         ...values,
         move_rules: {
           ...values.move_rules,
-          [name]: value,
+          [name]: Boolean(value),
         },
       });
       return;
     }
 
+    // Spawn rules
+    if (name === "displaced_per_conflict_day") {
+      value = sanitiseInput(value, 
+                            maxValues.
+                            spawn_rules.
+                            conflict_driven_spawning[name as keyof typeof maxValues.spawn_rules.conflict_driven_spawning]);
+      setValues({
+        ...values,
+        spawn_rules: {
+          ...values.spawn_rules,
+          conflict_driven_spawning: {
+            ...values.spawn_rules.conflict_driven_spawning,
+            [name]: Number(value),
+        }
+      }});
+      return;
+    }
+
     // Optimisations are nested in the sim_settings object
-    if (["hasten"].includes(name)) {
+    if (name === "hasten") {
+      value = sanitiseInput(value, 
+                            maxValues.
+                            optimisations[name as keyof typeof maxValues.optimisations]);
       setValues({
         ...values,
         optimisations: {
           ...values.optimisations,
-          [name]: value,
+          [name]: Number(value),
         },
       });
       return;
@@ -122,6 +145,17 @@ export function useForm(initialFValues: any) {
     });
   };
 
+  function sanitiseInput(value: string, max?: number, min?: number) {
+    if (max && Number(value) > max) {
+      value = max.toString();
+    } else if (value.length > 10) {
+      value = value.slice(0, 10);
+    } else if (min && Number(value) < min) {
+      value = min.toString();
+    }
+    return value;
+  }
+
   const resetForm = () => {
     setValues(initialFValues);
   };
@@ -129,6 +163,7 @@ export function useForm(initialFValues: any) {
   function handleSubmit(e: FormEvent, url: string, method: string) {
     e.preventDefault();
     const { sendRequest } = useAPI();
+    
     sendRequest(url, method, values).then((data) => {
       console.log(data);
     });

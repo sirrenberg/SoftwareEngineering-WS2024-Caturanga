@@ -1,0 +1,5 @@
+As an agent-based modeling toolkit specifically designed for simulating the movement of individual refugees and internally displaced persons (IDPs) across geographical locations, FLEE constitutes the core element of the simulation execution in Caturanga.
+In collaboration with Dr. Derek Groen of Brunel University London, we have substantiated the appropriateness of the FLEE toolkit for our project's objective of refugee flow simulation based on agent-based modeling. He and his team further supported us during the ideation and implementation phase of the project.
+
+
+For further details and references, please take a look at:

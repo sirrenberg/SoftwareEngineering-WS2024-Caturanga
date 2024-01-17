@@ -2,13 +2,24 @@ enum LocationType {
   conflict_zone = "conflict_zone",
   town = "town",
   forwarding_hub = "forwarding_hub",
-  camp = "camp",
+  camp = "idpcamp",
 }
 
 enum MapOperatingMode {
   vizualizing = "Visualizing",
   adding_location = "Adding Location",
   adding_route = "Adding Route",
+}
+
+enum MapInputType {
+  results = "Results",
+  inputs = "Inputs",
+}
+
+enum SimulationStatus {
+  running = "running",
+  done = "done",
+  error = "error",
 }
 
 interface SimLocation {
@@ -41,22 +52,58 @@ interface Input {
     date: string;
     length: number;
   };
+  conflicts: Array<{
+    [key: string]: number;
+  }>;
+  data_sources: {
+    acled: {
+      url: string;
+      last_update: string;
+    };
+    population: {
+      url: string;
+      latest_population_date: string;
+    };
+    camps: {
+      url_from_last_update: string;
+      last_update: string;
+    };
+  };
+}
+
+interface ResultPreview {
+  id: string;
+  name: string;
+  input: Input;
+  status: SimulationStatus;
+}
+
+interface Result {
+  _id: string;
+  name: string;
+  simulation_id: string;
+  data: Array<{
+    [key: string]: number;
+  }>;
+}
+
+interface Result {
+  _id: string;
+  name: string;
+  simulation_id: string;
+  data: Array<{
+    [key: string]: number;
+  }>;
 }
 
 interface SimSettings {
   _id: string;
   name: string;
-  log_levels: {
-    agent: number;
-    link: number;
-    camp: number;
-    conflict: number;
-    init: number;
-    idp_totals: number;
-    granularity: string;
-  };
   spawn_rules: {
-    take_from_population: boolean;
+    conflict_driven_spawning: {
+      spawn_mode: string;
+      displaced_per_conflict_day: number;
+    };
     insert_day0: boolean;
   };
   move_rules: {
@@ -65,8 +112,11 @@ interface SimSettings {
     foreign_weight: number;
     conflict_weight: number;
     camp_weight: number;
+    use_pop_for_loc_weight: boolean;
+    pop_power_for_loc_weight: number;
     conflict_movechance: number;
     camp_movechance: number;
+    idpcamp_movechance: number;
     default_movechance: number;
     awareness_level: number;
     capacity_scaling: number;
@@ -79,5 +129,5 @@ interface SimSettings {
   };
 }
 
-export type { SimLocation, Route, Input, SimSettings };
-export { LocationType, MapOperatingMode };
+export type { SimLocation, Route, Input, SimSettings, ResultPreview, Result };
+export { LocationType, MapOperatingMode, MapInputType, SimulationStatus };

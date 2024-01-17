@@ -15,7 +15,7 @@
 .modal-container {
   background: #fff;
   width: 40vw;
-  min-height: 60vh;
+  min-height: 40vh;
   padding: 20px;
   border-radius: 8px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
@@ -23,7 +23,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
 
   position: relative;
 }
@@ -42,6 +42,54 @@
 .modal-close-icon:hover {
   color: var(--dark-green);
   transform: scale(1.2);
+}
+
+.modal-title {
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+  justify-self: flex-start;
+}
+
+.modal-content {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  align-items: center;
+}
+
+.modal-section {
+  height: 25%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  align-items: center;
+  margin: 1rem;
+}
+
+.modal-section-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 0.4rem;
+}
+
+.modal-section p {
+  font-size: 1.2rem;
+  font-weight: 400;
+  margin-bottom: 0.4rem;
+  text-align: center;
+}
+
+.modal-section a {
+  color: var(--black);
+  transition: all 0.3s ease-in-out;
+}
+
+.modal-section a:hover {
+  color: var(--gray);
 }
 
 .modal-form {

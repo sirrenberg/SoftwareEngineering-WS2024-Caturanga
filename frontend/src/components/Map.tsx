@@ -7,11 +7,18 @@ import {
   Polyline,
 } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
-import { LocationType, SimLocation, Input, Route } from "../types";
+import {
+  LocationType,
+  SimLocation,
+  Input,
+  Route,
+  MapInputType,
+} from "../types";
 import { LatLngExpression } from "leaflet";
 import { useMap } from "react-leaflet/hooks";
 import { useEffect } from "react";
 import { v4 as uuidv4 } from "uuid";
+import { Colors } from "../helper/constants/DesignConstants";
 
 function Map({
   input,
@@ -21,6 +28,7 @@ function Map({
   NodeDoubleClickHandler,
   RouteDoubleClickHandler,
   shouldRecenter,
+  mapMode,
 }: {
   input?: Input;
   center?: LatLngExpression;
@@ -29,6 +37,7 @@ function Map({
   NodeDoubleClickHandler?: (location: SimLocation) => void;
   RouteDoubleClickHandler?: (route: Route) => void;
   shouldRecenter?: boolean;
+  mapMode?: string;
 }) {
   const zoomLevel = 5;
 
@@ -50,17 +59,29 @@ function Map({
     return null;
   }
 
+  function calculateSize(input: number | undefined) {
+    if (!input) {
+      return 5000;
+    }
+
+    if (mapMode === MapInputType.results) {
+      return 5000 + input;
+    } else {
+      return 5000 + input / 10;
+    }
+  }
+
   function getNodeColor(location: SimLocation) {
     // get the color of the node based on the location type
     switch (location.location_type) {
       case LocationType.conflict_zone:
-        return "red";
+        return Colors.medium_orange;
       case LocationType.town:
-        return "blue";
+        return Colors.medium_blue;
       case LocationType.forwarding_hub:
-        return "orange";
+        return Colors.white;
       case LocationType.camp:
-        return "green";
+        return Colors.medium_green;
       default:
         return "black";
     }
@@ -108,7 +129,7 @@ function Map({
             <Circle
               key={uuidv4()}
               center={[location.latitude, location.longitude]}
-              radius={location.population ? location.population / 100 : 10000}
+              radius={calculateSize(location.population)}
               color={getNodeColor(location)}
               eventHandlers={{
                 click: () => {
@@ -124,10 +145,9 @@ function Map({
               }}
             >
               <Popup>
-                {location.name} ({location.location_type})
-                <ul>
-                  <li>pop.: {location.population}</li>
-                </ul>
+                <strong>{location.name}</strong> ({location.location_type})
+                <br />
+                Population: {location.population === 0 ? "N/A" : location.population}
               </Popup>
             </Circle>
           );
@@ -166,7 +186,7 @@ function Map({
               }}
             >
               <Popup>
-                {fromLocation.name} to {toLocation.name}: {route.distance} km
+                <strong>{fromLocation.name}</strong> to <strong>{toLocation.name}</strong>: {route.distance} km
               </Popup>
             </Polyline>
           );
