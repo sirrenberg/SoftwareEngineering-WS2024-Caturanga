@@ -11,8 +11,6 @@ name: Deploy to Amazon ECS
 
 on:
   push:
-    branches: [ "main", "deployment" ]
-  pull_request:
     branches: [ "main" ]
 
 env:
