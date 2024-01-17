@@ -19,7 +19,6 @@
   display: flex;
   justify-content: center;
   align-items: center;
-
   width: 100%;
   height: 60vh;
 }
@@ -50,10 +49,11 @@
 }
 
 .lp-title-description {
-  font-size: 1.5rem;
+  font-size: 1.7rem;
   font-weight: 500;
   max-width: 80%;
   color: var(--gray);
+  margin-top: 0.4em;
 }
 
 .lp-title-buttons-container {
@@ -150,10 +150,6 @@
 
   .sub-title {
     font-size: 1.2rem;
-  }
-
-  .lp-title-description {
-    font-size: 1rem;
   }
   .lp-title-buttons-container {
     margin-top: 1rem;
