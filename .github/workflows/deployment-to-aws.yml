@@ -1,0 +1,103 @@
+# This workflow uses actions that are published by AWS (officially authenticated by GitHub).
+
+# Actions in this file are pinned to a commit SHA.
+# To get a newer version, you will need to update the SHA.
+# You can also reference a tag or branch, but the action may change without warning.
+
+# This workflow will build a container image from your Dockerfile, push it to Amazon ECR, 
+# update the ECS Fargate service to use the new image and update the API Gateway stage to point to the new ECS service.
+
+name: Deploy to Amazon ECS
+
+on:
+  push:
+    branches: [ "main" ]
+
+env:
+  AWS_REGION: eu-west-1
+  ECR_REPOSITORY_FRONTEND: caturanga-frontend             # set this to your Amazon ECR repository name
+  ECR_REPOSITORY_BACKEND: caturanga-backend
+  ECS_CLUSTER: caturanga-cluster                          # set this to your Amazon ECS cluster name
+  ECS_TASK_DEFINITION_FRONTEND: caturanga-frontend
+  ECS_TASK_DEFINITION_BACKEND: caturanga-backend
+  CONTAINER_NAME_FRONTEND: caturanga-frontend-container1            
+  CONTAINER_NAME_BACKEND: caturanga-backend-container    
+  API_GATEWAY_BACKEND: sj6mxvhnt8
+  API_GATEWAY_FRONTEND: 984ft56931
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: "true"
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@0e613a0980cbf65ed5b322eb7a1e075d28913a83
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@62f4f872db3836360b72999f4b87f1ff13310f3a # uses this commit SHA version of the action
+
+      - name: Build, tag and push frontend image to Amazon ECR
+        id: build-frontend-image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}                     # uses the output from the `login-ecr` step
+          IMAGE_TAG: latest
+        run: |
+          # Build a docker container and
+          # push it to ECR so that it can
+          # be deployed to ECS.
+          cd frontend
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_FRONTEND:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY_FRONTEND:$IMAGE_TAG
+          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY_FRONTEND:$IMAGE_TAG" >> $GITHUB_OUTPUT
+
+      - name: Force new deployment of frontend image to ECS
+        id: update-frontend-task-def
+        run:
+          aws ecs update-service --cluster $ECS_CLUSTER --service $ECS_TASK_DEFINITION_FRONTEND --force-new-deployment
+
+      - name: Build, tag, and push backend image to Amazon ECR
+        id: build-backend-image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}                     # uses the output from the `login-ecr` step
+          IMAGE_TAG: latest
+        run: |
+          cd backend
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_BACKEND:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY_BACKEND:$IMAGE_TAG
+          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY_BACKEND:$IMAGE_TAG" >> $GITHUB_OUTPUT
+
+      - name: Force new deployment of backend image to ECS
+        id: update-backend-task-def
+        run:
+          aws ecs update-service --cluster $ECS_CLUSTER --service $ECS_TASK_DEFINITION_BACKEND --force-new-deployment
+
+      - name: Install dependencies for deployment scripts
+        run: |
+          python3 -m pip install --upgrade pip
+          pip3 install -r deployment_scripts/requirements.txt
+
+      - name: Update API Gateway to point to new backend ECS service
+        id: update-api-gateway-backend
+        run: |
+          echo "sleeping for 30 seconds to allow ECS service to be updated"
+          sleep 30
+          python3 deployment_scripts/redirect_gateways.py $ECS_CLUSTER $ECS_TASK_DEFINITION_BACKEND $API_GATEWAY_BACKEND
+
+      - name: Update API Gateway to point to new frontend ECS service
+        id: update-api-gateway-frontend
+        run: |
+          echo "sleeping for 30 seconds to allow ECS service to be updated"
+          sleep 30
+          python3 deployment_scripts/redirect_gateways.py $ECS_CLUSTER $ECS_TASK_DEFINITION_FRONTEND $API_GATEWAY_FRONTEND

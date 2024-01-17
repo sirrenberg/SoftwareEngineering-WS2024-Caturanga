@@ -288,7 +288,6 @@ async def post_simsettings(
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-
 @app.delete("/simsettings/{simsetting_id}")
 async def delete_simsetting(
         simsetting_id: str = Path(),

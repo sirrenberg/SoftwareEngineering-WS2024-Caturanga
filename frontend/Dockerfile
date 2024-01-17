@@ -1,5 +1,6 @@
+# Stage 1: Build the application
 # Use an official Node.js runtime as a parent image
-FROM node:20.9-bookworm as build
+FROM node:21.5-bookworm as build-stage
 
 # Set the working directory to /app
 WORKDIR /app
@@ -16,11 +17,17 @@ COPY . .
 # Build the application
 RUN npm run build
 
-# Set the NODE_ENV environment variable to "production"
-ENV NODE_ENV=production
 
-## EXPOSE [Port you mentioned in the vite.config file]
-EXPOSE 5173
+# Stage 2: Serve the application using Apache
+# Use an Apache image
+FROM httpd:2.4-bookworm
 
-# Start the server
-CMD ["npm", "run", "dev"]
+# Copy the build output from the build stage to the Apache server directory
+COPY --from=build-stage /app/dist/ /usr/local/apache2/htdocs/
+
+# Copy custom httpd.conf file to the Apache configuration directory
+COPY ./httpd.conf /usr/local/apache2/conf/httpd.conf
+COPY ./.htaccess /usr/local/apache2/htdocs/.htaccess
+
+# Apache runs on port 80 by default, so expose it
+EXPOSE 80

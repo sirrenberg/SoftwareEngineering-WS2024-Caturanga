@@ -1,5 +1,5 @@
 export function useAPI() {
-  const API_URL = "http://localhost:8080";
+  const API_URL = "https://sj6mxvhnt8.execute-api.eu-west-1.amazonaws.com";
 
   function sendRequest(route: string, method: string, body?: any) {
     const url = new URL(API_URL + route);

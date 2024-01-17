@@ -2,11 +2,14 @@ from pymongo import MongoClient
 from dotenv import load_dotenv
 from flee_adapter.adapter import Adapter
 from flee_controller.csvtransformer import CsvTransformer
-
 import yaml
 from bson.objectid import ObjectId as ObjectID
 from pathlib import Path
-import os
+import boto3
+from botocore.exceptions import ClientError
+import json
+
+
 
 
 class Controller:
@@ -14,6 +17,7 @@ class Controller:
     The Controller class handles the interaction with the database and the
     execution of simulations.
     """
+    
 
     # Setup of MongoDB DB Connection: ---------------------------------------------
 
@@ -21,16 +25,47 @@ class Controller:
         """
         Initializes the Controller object.
         """
-
         self.adapter = Adapter()
+        secret = self.get_secret("caturanga-db-user-and-pw")
+        self.username = secret["MONGO_USER"]
+        self.password = secret["MONGO_PASSWORD"]
         self.backend_root_dir = Path(__file__).resolve().parent
-        self.client, self.db = self.connect_db()
+        _, self.db = self.connect_db()
         self.csvTransformer = CsvTransformer(self.db)
 
         self.default_input_id = "65a6d3eb9ae2636fa2b3e3c6"
         self.default_setting_id = "6599846eeb8f8c36cce8307a"
 
-    # Run simulations: ------------------------------------------------------------
+        
+    def get_secret(self, secret_name):
+        """
+        Retrieves the secret value that contains the username and password for the documentDB database from the AWS Secrets Manager.
+
+        Parameters:
+            secret_name (str): The name of the secret.
+
+        Returns:
+            dict: A dictionary containing the username and password.
+        """
+        region_name = "eu-west-1"
+
+        # Create a Secrets Manager client
+        session = boto3.session.Session()
+        client = session.client(service_name="secretsmanager", region_name=region_name)
+
+        try:
+            get_secret_value_response = client.get_secret_value(SecretId=secret_name)
+        except ClientError as e:
+            # For a list of exceptions thrown, see
+            # https://docs.aws.amazon.com/secretsmanager/latest/apireference/API_GetSecretValue.html
+            return e
+
+        secret = get_secret_value_response["SecretString"]
+
+        return json.loads(secret)
+
+# Run simulations: ------------------------------------------------------------
+
 
     async def initialize_simulation(
             self,
@@ -125,7 +160,7 @@ class Controller:
                    the database object.
         """
         load_dotenv()
-        MONGODB_URI = os.environ.get('MONGO_URI')
+        MONGODB_URI = f"mongodb://{self.username}:{self.password}@caturanga-2023-12-08-16-18-00.cluster-cqhcnfxitkih.eu-west-1.docdb.amazonaws.com:27017/?tls=true&tlsCAFile=global-bundle.pem&replicaSet=rs0&readPreference=secondaryPreferred&retryWrites=false"
         client = MongoClient(MONGODB_URI)
         db = client.Caturanga
         return client, db
@@ -598,7 +633,8 @@ class Controller:
 
     # Get specific simsettings by simsetting_id and return as dict:
     async def get_simsetting_dict(self, simsetting_id: str):
-        simsetting = self.db.get_collection("simsettings").find_one(
+        client, db = self.connect_db()
+        simsetting = db.get_collection("simsettings").find_one(
             {"_id": ObjectID(simsetting_id)}
         )
 
@@ -606,6 +642,7 @@ class Controller:
             # Convert the MongoDB document to a dictionary
             simsetting_dict = dict(simsetting)
             simsetting_dict["_id"] = str(simsetting_dict["_id"])
+            client.close()
             return simsetting_dict
 
     # Delete specific simsettings by simsetting_id:
@@ -628,4 +665,5 @@ class Controller:
         collection = db.get_collection(collection_name)
         collection.delete_one({"_id": ObjectID(document_id)})
         client.close()
-        return
+        return 
+    

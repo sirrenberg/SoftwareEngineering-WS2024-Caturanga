@@ -1,0 +1,13 @@
+# Adding this file fixes the issue with the 404 error when refreshing the page on a route that is not the root route
+
+<IfModule mod_rewrite.c>
+    RewriteRule ^(wp-admin|wp-content|wp-includes|wp-json)($|/) - [L]
+    RewriteEngine On
+    RewriteBase /
+    RewriteRule ^index\.html$ - [L]
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_FILENAME} !-l
+    RewriteRule . /index.html [L]
+  </IfModule>
+  
