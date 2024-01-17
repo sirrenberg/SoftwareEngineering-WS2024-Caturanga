@@ -7,7 +7,7 @@ from bson.objectid import ObjectId as ObjectID
 from pathlib import Path
 import os
 import logging
-from fastapi import FastAPI, Path, Request
+from fastapi import FastAPI, Request
 import boto3
 from botocore.exceptions import ClientError
 import json
@@ -42,8 +42,9 @@ class Controller:
         # MONGO_CONNECTION_STRING_SUFFIX = os.environ.get('MONGO_CONNECTION_STRING_SUFFIX')
         # print(MONGO_CONNECTION_STRING_SUFFIX)
         # self.MONGODB_URI = MONGO_CONNECTION_STRING_PREFIX + MONGO_USER + ":" + MONGO_PASSWORD + "@" + MONGO_CONNECTION_STRING_SUFFIX
-        #self.backend_root_dir = Path(__file__).resolve().parent
-        #self.csvTransformer = CsvTransformer(self.db)
+        self.backend_root_dir = Path(__file__).resolve().parent
+        _, self.db = self.connect_db()
+        self.csvTransformer = CsvTransformer(self.db)
 
         self.default_input_id = "65a6d3eb9ae2636fa2b3e3c6"
         self.default_setting_id = "6599846eeb8f8c36cce8307a"
@@ -255,73 +256,73 @@ class Controller:
 
     # Store results in file system: -------------------------------------------
 
-    # async def store_simsettings_to_filesystem(
-    #         self,
-    #         simsettings_id: str):
+    async def store_simsettings_to_filesystem(
+            self,
+            simsettings_id: str):
 
-    #     # Get Simsettings from DB:
-    #     try:
-    #         simsettings = await self.get_simsetting(simsettings_id)
-    #     except Exception as e:
-    #         return f"No simsettings with ID {simsettings_id} stored in DB: {e}"
+        # Get Simsettings from DB:
+        try:
+            simsettings = await self.get_simsetting(simsettings_id)
+        except Exception as e:
+            return f"No simsettings with ID {simsettings_id} stored in DB: {e}"
 
-    #     # Total path to simsettings-file:
-    #     simsettings_dir = \
-    #         self.backend_root_dir / "flee_stored_files" / "simsettings"
-    #     filename = simsettings_id + ".yml"
-    #     simsettings_filename = simsettings_dir / filename
+        # Total path to simsettings-file:
+        simsettings_dir = \
+            self.backend_root_dir / "flee_stored_files" / "simsettings"
+        filename = simsettings_id + ".yml"
+        simsettings_filename = simsettings_dir / filename
 
-    #     # Create simsettings-directory:
-    #     if not simsettings_dir.exists():
-    #         simsettings_dir.mkdir(parents=True)
+        # Create simsettings-directory:
+        if not simsettings_dir.exists():
+            simsettings_dir.mkdir(parents=True)
 
-    #     # Create simsettings-file:
-    #     try:
-    #         with open(simsettings_filename, 'w') as yml_file:
-    #             yaml.dump(simsettings, yml_file,
-    #                       default_flow_style=False,
-    #                       sort_keys=False)
-    #     except Exception as e:
-    #         return f"Exception while storing the simsettings.yml file: {e}"
+        # Create simsettings-file:
+        try:
+            with open(simsettings_filename, 'w') as yml_file:
+                yaml.dump(simsettings, yml_file,
+                          default_flow_style=False,
+                          sort_keys=False)
+        except Exception as e:
+            return f"Exception while storing the simsettings.yml file: {e}"
 
-    #     return simsettings_filename
+        return simsettings_filename
 
-    # async def store_simulation_to_filesystem(
-    #         self,
-    #         simulation_id: str):
+    async def store_simulation_to_filesystem(
+            self,
+            simulation_id: str):
 
-    #     try:
-    #         await self.csvTransformer.convert_simulation_to_csv(simulation_id)
-    #     except Exception as e:
-    #         return f"No simulation with ID {simulation_id} stored in DB: {e}"
+        try:
+            await self.csvTransformer.convert_simulation_to_csv(simulation_id)
+        except Exception as e:
+            return f"No simulation with ID {simulation_id} stored in DB: {e}"
 
-    #     # Path to simulation directory (.csv - FLEE files of simulation):
-    #     simulation_dir = \
-    #         self.backend_root_dir / "flee_stored_files" / "conflict_input" / \
-    #         simulation_id
+        # Path to simulation directory (.csv - FLEE files of simulation):
+        simulation_dir = \
+            self.backend_root_dir / "flee_stored_files" / "conflict_input" / \
+            simulation_id
 
-    #     # Create simulations-directory:
-    #     if not simulation_dir.exists():
-    #         simulation_dir.mkdir(parents=True)
+        # Create simulations-directory:
+        if not simulation_dir.exists():
+            simulation_dir.mkdir(parents=True)
 
-    #     return simulation_dir
+        return simulation_dir
 
-    # async def store_validation_to_filesystem(self):
+    async def store_validation_to_filesystem(self):
 
-    #     validation_dir = \
-    #         self.backend_root_dir / "flee_stored_files" / "conflict_validation"
-    #     data_layout = validation_dir / "data_layout.csv"
+        validation_dir = \
+            self.backend_root_dir / "flee_stored_files" / "conflict_validation"
+        data_layout = validation_dir / "data_layout.csv"
 
-    #     if not validation_dir.exists():
-    #         validation_dir.mkdir(parents=True)
+        if not validation_dir.exists():
+            validation_dir.mkdir(parents=True)
 
-    #     # create an empty csv file
-    #     try:
-    #         open(data_layout, 'w').close()
-    #     except Exception as e:
-    #         return f"Exception while creating data_layout.csv: {e}"
+        # create an empty csv file
+        try:
+            open(data_layout, 'w').close()
+        except Exception as e:
+            return f"Exception while creating data_layout.csv: {e}"
 
-    #     return validation_dir
+        return validation_dir
 
     # Simulations and Simulation Results: -----------------------------------------
 
