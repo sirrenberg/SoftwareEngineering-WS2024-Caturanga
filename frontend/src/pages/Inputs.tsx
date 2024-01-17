@@ -19,6 +19,7 @@ import DataSourceModal from "../components/DataSourceModal";
 import MapLegendModal from "../components/MapLegendModal";
 import { MapInputType } from "../types";
 
+// Menu page for selecting an input
 function Inputs() {
   const { sendRequest } = useAPI();
 

@@ -23,6 +23,7 @@ import { Colors } from "../helper/constants/DesignConstants";
 import DataSourceModal from "../components/DataSourceModal";
 import MapLegendModal from "../components/MapLegendModal";
 
+// Page for showing details of a result
 function ResultDetails() {
   const { sendRequest } = useAPI();
   const { id } = useParams<{ id: string }>();

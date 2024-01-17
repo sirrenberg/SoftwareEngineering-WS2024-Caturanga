@@ -4,6 +4,7 @@ import { faX } from "@fortawesome/free-solid-svg-icons";
 import { useForm } from "../hooks/useForm";
 import { SimLocation, Input, LocationType } from "../types";
 
+// Modal Window for editing location details
 function LocationModal({
   setLocationModalOpen,
   location,

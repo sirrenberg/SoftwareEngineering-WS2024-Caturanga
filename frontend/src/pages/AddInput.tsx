@@ -15,6 +15,7 @@ import {
   startDateText,
 } from "../helper/constants/InputConstants";
 
+// Page to add a new input or edit an existing one
 function AddInput() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();

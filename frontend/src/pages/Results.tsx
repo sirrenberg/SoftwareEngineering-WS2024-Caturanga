@@ -16,6 +16,7 @@ import { Link } from "react-router-dom";
 import DataSourceModal from "../components/DataSourceModal";
 import MapLegendModal from "../components/MapLegendModal";
 
+// Menu page for selecting a result
 function Results() {
   const { sendRequest } = useAPI();
 

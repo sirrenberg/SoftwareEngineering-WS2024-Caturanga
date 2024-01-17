@@ -33,7 +33,7 @@ function formatDate(dateToFormat: string): string {
   return dateToFormat.slice(0, 10);
 }
 
-function pretifyLocationName(locationName: string): string {
+function prettifyLocationName(locationName: string): string {
   switch (locationName) {
     case LocationType.camp:
       return "Camp";
@@ -62,4 +62,4 @@ function getLocationColor(locationType: LocationType) {
   }
 }
 
-export { calcMapCenter, formatDate, pretifyLocationName, getLocationColor };
+export { calcMapCenter, formatDate, prettifyLocationName, getLocationColor };

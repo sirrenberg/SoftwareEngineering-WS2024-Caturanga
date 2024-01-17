@@ -6,14 +6,33 @@ import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useAPI } from "../hooks/useAPI";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPenToSquare, faTrash } from "@fortawesome/free-solid-svg-icons";
-import { movementRulesText, moveSpeedText, walkSpeedText, conflictWeightText,
-        campWeightText, foreignWeightText, usePopForLocWeightText,
-        popPowerForLocWeightText, conflictMovechanceText, idpcampMovechanceText,
-        defaultMovechanceText, awarenessLevelText, startOnFootText, hastenText,
-        optimisationsText, awarenessLevelOptions, spawnRulesText, displacedPerConflictDayText } 
-        from "../helper/constants/SimsettingConstants";
-import { CheckboxInputField, NumberInputField, SelectInputField } from "../components/SimsettingField";
+import {
+  movementRulesText,
+  moveSpeedText,
+  walkSpeedText,
+  conflictWeightText,
+  campWeightText,
+  foreignWeightText,
+  usePopForLocWeightText,
+  popPowerForLocWeightText,
+  conflictMovechanceText,
+  idpcampMovechanceText,
+  defaultMovechanceText,
+  awarenessLevelText,
+  startOnFootText,
+  hastenText,
+  optimisationsText,
+  awarenessLevelOptions,
+  spawnRulesText,
+  displacedPerConflictDayText,
+} from "../helper/constants/SimsettingConstants";
+import {
+  CheckboxInputField,
+  NumberInputField,
+  SelectInputField,
+} from "../components/SimsettingField";
 
+// Menu page for selecting a simsetting
 function Settings() {
   const { sendRequest } = useAPI();
   const navigate = useNavigate();
@@ -22,7 +41,9 @@ function Settings() {
     undefined
   );
   const [selectedSettingIndex, setSelectedSettingIndex] = useState<number>(-1);
-  const [protectedSimSettingIDs, setProtectedSimSettingIDs] = useState<string[]>([]);
+  const [protectedSimSettingIDs, setProtectedSimSettingIDs] = useState<
+    string[]
+  >([]);
 
   const context = useContext(StartSimContext);
   if (!context) {
@@ -260,12 +281,16 @@ function Settings() {
                   />
                 </div>
                 <div className="input-field-container">
-                    <NumberInputField 
-                      label="Camp Movechance"
-                      infoText={idpcampMovechanceText}
-                      name="idpcamp_movechance"
-                      value={settings[selectedSettingIndex].move_rules.idpcamp_movechance}
-                      disabled={true}/>
+                  <NumberInputField
+                    label="Camp Movechance"
+                    infoText={idpcampMovechanceText}
+                    name="idpcamp_movechance"
+                    value={
+                      settings[selectedSettingIndex].move_rules
+                        .idpcamp_movechance
+                    }
+                    disabled={true}
+                  />
                 </div>
                 <div className="input-field-container">
                   <NumberInputField

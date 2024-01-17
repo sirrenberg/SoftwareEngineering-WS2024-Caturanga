@@ -1,7 +1,10 @@
 import { FormEvent, useState } from "react";
 import { useAPI } from "../hooks/useAPI";
 import { maxValues } from "../helper/constants/SimsettingConstants";
-import { maxValues as inputMaxValues, minValues as inputMinValues } from "../helper/constants/InputConstants";
+import {
+  maxValues as inputMaxValues,
+  minValues as inputMinValues,
+} from "../helper/constants/InputConstants";
 
 export function useForm(initialFValues: any) {
   const [values, setValues] = useState(initialFValues);
@@ -14,16 +17,15 @@ export function useForm(initialFValues: any) {
     return value;
   }
 
-  const handleInputChange =
-  (
+  const handleInputChange = (
     e:
       | React.ChangeEvent<HTMLInputElement>
-      | React.ChangeEvent<HTMLSelectElement>,
+      | React.ChangeEvent<HTMLSelectElement>
   ) => {
     let { name, value, type } = e.target;
 
     // sanitise name input
-    if(name === "name") {
+    if (name === "name") {
       if (value.length > 30) {
         value = value.slice(0, 30);
       } else if (value.length === 0) {
@@ -43,9 +45,11 @@ export function useForm(initialFValues: any) {
 
     // Input
     if (name === "length") {
-      value = sanitiseInput(value,
-                            inputMaxValues.sim_period.length,
-                            inputMinValues.sim_period.length);
+      value = sanitiseInput(
+        value,
+        inputMaxValues.sim_period.length,
+        inputMinValues.sim_period.length
+      );
       setValues({
         ...values,
         sim_period: {
@@ -75,9 +79,10 @@ export function useForm(initialFValues: any) {
         "weight_power",
       ].includes(name)
     ) {
-      value = sanitiseInput(value, 
-                            maxValues.
-                            move_rules[name as keyof typeof maxValues.move_rules]);
+      value = sanitiseInput(
+        value,
+        maxValues.move_rules[name as keyof typeof maxValues.move_rules]
+      );
       setValues({
         ...values,
         move_rules: {
@@ -107,10 +112,12 @@ export function useForm(initialFValues: any) {
 
     // Spawn rules
     if (name === "displaced_per_conflict_day") {
-      value = sanitiseInput(value, 
-                            maxValues.
-                            spawn_rules.
-                            conflict_driven_spawning[name as keyof typeof maxValues.spawn_rules.conflict_driven_spawning]);
+      value = sanitiseInput(
+        value,
+        maxValues.spawn_rules.conflict_driven_spawning[
+          name as keyof typeof maxValues.spawn_rules.conflict_driven_spawning
+        ]
+      );
       setValues({
         ...values,
         spawn_rules: {
@@ -118,16 +125,18 @@ export function useForm(initialFValues: any) {
           conflict_driven_spawning: {
             ...values.spawn_rules.conflict_driven_spawning,
             [name]: Number(value),
-        }
-      }});
+          },
+        },
+      });
       return;
     }
 
     // Optimisations are nested in the sim_settings object
     if (name === "hasten") {
-      value = sanitiseInput(value, 
-                            maxValues.
-                            optimisations[name as keyof typeof maxValues.optimisations]);
+      value = sanitiseInput(
+        value,
+        maxValues.optimisations[name as keyof typeof maxValues.optimisations]
+      );
       setValues({
         ...values,
         optimisations: {
@@ -163,7 +172,7 @@ export function useForm(initialFValues: any) {
   function handleSubmit(e: FormEvent, url: string, method: string) {
     e.preventDefault();
     const { sendRequest } = useAPI();
-    
+
     sendRequest(url, method, values).then((data) => {
       console.log(data);
     });

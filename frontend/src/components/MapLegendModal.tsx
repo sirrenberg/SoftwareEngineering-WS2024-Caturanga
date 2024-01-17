@@ -4,6 +4,7 @@ import { faX } from "@fortawesome/free-solid-svg-icons";
 import { MapInputType, LocationType } from "../types";
 import { getLocationColor } from "../helper/misc";
 
+// Modal Window for showing map legend
 function MapLegendModal({
   setMapLegendModalOpen,
   mapInputType,

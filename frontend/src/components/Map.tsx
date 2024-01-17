@@ -19,7 +19,7 @@ import { LatLngExpression } from "leaflet";
 import { useMap } from "react-leaflet/hooks";
 import { useEffect } from "react";
 import { v4 as uuidv4 } from "uuid";
-import { pretifyLocationName, getLocationColor } from "../helper/misc";
+import { prettifyLocationName, getLocationColor } from "../helper/misc";
 
 function Map({
   input,
@@ -90,21 +90,9 @@ function Map({
         <MapClickHandler />
         <Recenter />
         {/* Add a tile layer */}
-        {/* OPEN STREEN MAPS TILES */}
-        {/* <TileLayer
-    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-  /> */}
-        {/* WATERCOLOR CUSTOM TILES */}
-        {/* <TileLayer
-    attribution='Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-    url="https://stamen-tiles-{s}.a.ssl.fastly.net/watercolor/{z}/{x}/{y}.jpg"
-  /> */}
         {/* GOOGLE MAPS TILES */}
         <TileLayer
           attribution="Google Maps"
-          // url="http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}" // regular
-          // url="http://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}" // satellite
           url="http://{s}.google.com/vt/lyrs=p&x={x}&y={y}&z={z}" // terrain
           maxZoom={20}
           subdomains={["mt0", "mt1", "mt2", "mt3"]}
@@ -138,7 +126,7 @@ function Map({
               <Popup>
                 <strong>{location.name}</strong>
                 <br />
-                Type: {pretifyLocationName(location.location_type)}
+                Type: {prettifyLocationName(location.location_type)}
                 <br />
                 Initial Population:{" "}
                 {location.population === 0 ? "N/A" : location.population}
@@ -187,7 +175,6 @@ function Map({
           return (
             <Polyline
               key={uuidv4()}
-              // weight={route.distance / 100}
               positions={[
                 [fromLocation.latitude, fromLocation.longitude],
                 [toLocation.latitude, toLocation.longitude],

@@ -4,6 +4,7 @@ import { faX } from "@fortawesome/free-solid-svg-icons";
 import { useForm } from "../hooks/useForm";
 import { Input, Route } from "../types";
 
+// Modal Window for editing route details
 function RouteModal({
   setRouteModalOpen,
   route,
