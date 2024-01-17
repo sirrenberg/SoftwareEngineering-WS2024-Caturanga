@@ -177,7 +177,7 @@ def run_extraction(country_name, start_date, fetching_end_date, simulation_end_d
         print("Error: The first round ends before the fetching end date.")
         return
     elif round_data[-1]["covered_from"] < date_format(start_date):     # startDate is after last round start 
-        print("Error: The fetching start date is after the beginning of the first round.")
+        print("Error: The fetching start date is after the beginning of the last round.")
         return
     
     print("Start data extraction process...")
