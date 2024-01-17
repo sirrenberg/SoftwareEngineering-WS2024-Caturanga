@@ -194,7 +194,7 @@ class DatabaseHandler:
         collection.delete_many({"simulation_id": simulation_id})
         client.close()
 
-        return self.delete("simulations", simulation_id)
+        return await self.delete("simulations", simulation_id)
 
     def store_simulation(
             self,
