@@ -6,10 +6,10 @@ from controller.simulation_executor import SimulationExecutor
 
 app = FastAPI()
 
-default_input_id = "65a6d3eb9ae2636fa2b3e3c6"
-default_setting_id = "6599846eeb8f8c36cce8307a"
+DEFAULT_INPUT_ID = "65a6d3eb9ae2636fa2b3e3c6"
+DEFAULT_SETTING_ID = "6599846eeb8f8c36cce8307a"
 
-database_handler = DatabaseHandler(default_input_id, default_setting_id)
+database_handler = DatabaseHandler(DEFAULT_INPUT_ID, DEFAULT_SETTING_ID)
 simulation_executor = SimulationExecutor(database_handler)
 
 JSONObject = Dict[AnyStr, Any]
@@ -121,7 +121,7 @@ async def get_all_simulation_summaries():
     """
     summary = await database_handler.get_summaries("simulations")
     return {"data": summary,
-            "protectedIDs": [default_input_id]}
+            "protectedIDs": [DEFAULT_INPUT_ID]}
 
 
 @app.get("/simulations/{simulation_id}")
@@ -172,7 +172,7 @@ async def post_simulation(
     try:
         basic_input = await database_handler.get(
             "simulations",
-            default_input_id)
+            DEFAULT_INPUT_ID)
         simulation_id = await database_handler.post(
             simulation,
             "simulations",
@@ -222,7 +222,7 @@ async def get_simulation_result(
     Returns:
     - dict: The data of the simulation result.
     """
-    return await database_handler.get("simulations_results", 
+    return await database_handler.get("simulations_results",
                                       simulation_result_id)
 
 
@@ -256,7 +256,7 @@ async def get_all_simsettings():
     """
     simsettings = await database_handler.get_all("simsettings")
     return {"data": simsettings,
-            "protectedIDs": [default_setting_id]}
+            "protectedIDs": [DEFAULT_SETTING_ID]}
 
 
 @app.get("/simsettings/summary")
@@ -270,7 +270,7 @@ async def get_all_simsetting_summaries():
     """
     summary = await database_handler.get_summaries("simsettings")
     return {"data": summary,
-            "protectedIDs": [default_setting_id]}
+            "protectedIDs": [DEFAULT_SETTING_ID]}
 
 
 @app.get("/simsettings/{simsetting_id}")
@@ -304,7 +304,7 @@ async def post_simsettings(
     try:
         basic_setting = await database_handler.get(
             "simsettings",
-            default_setting_id)
+            DEFAULT_SETTING_ID)
         simsetting_id = await database_handler.post(
             simsetting,
             "simsettings",
