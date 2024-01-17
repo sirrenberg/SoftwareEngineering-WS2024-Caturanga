@@ -115,7 +115,10 @@ function ResultDetails() {
 
   // get difference between two dates in days
   function getDifferenceBetweenDates(date1: string, date2: string): number {
+    // get difference in milliseconds
     const dateDiff = new Date(date1).getTime() - new Date(date2).getTime();
+
+    // get difference in days
     const dayDiff = Math.floor(dateDiff / (1000 * 3600 * 24));
 
     // add 1 to dayDiff because the first day is 0
