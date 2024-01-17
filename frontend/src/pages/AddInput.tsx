@@ -110,7 +110,7 @@ function AddInput() {
           disabled={submitted}
           onClick={(e) => {
             setSubmitted(true);
-            handleSubmit(e, "/simulations/", "POST", () => {navigate("/inputs");});
+            handleSubmit(e, "/simulations", "POST", () => {navigate("/inputs");});
           }}
         >
           Save
