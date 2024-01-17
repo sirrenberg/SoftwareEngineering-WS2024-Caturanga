@@ -32,3 +32,4 @@ dist-ssr
 # Untrack and ignore pycache files:
 *.pyc
 __pycache__/
+node_modules
