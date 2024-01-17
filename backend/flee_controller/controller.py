@@ -29,19 +29,10 @@ class Controller:
         """
         Initializes the Controller object.
         """
-
         self.adapter = Adapter()
         secret = self.get_secret("caturanga-db-user-and-pw")
-        self.username = secret["MONGO_USER"] # store username and password in environment variables, so that they don't have to be fetched from the AWS Secrets Manager every time, which is expensive
+        self.username = secret["MONGO_USER"]
         self.password = secret["MONGO_PASSWORD"]
-        # MONGO_USER = os.environ.get('MONGO_USER')
-        # MONGO_PASSWORD = os.environ.get('MONGO_PASSWORD')
-        # print(MONGO_PASSWORD)
-        # MONGO_CONNECTION_STRING_PREFIX = os.environ.get('MONGO_CONNECTION_STRING_PREFIX')
-        # print(MONGO_CONNECTION_STRING_PREFIX)
-        # MONGO_CONNECTION_STRING_SUFFIX = os.environ.get('MONGO_CONNECTION_STRING_SUFFIX')
-        # print(MONGO_CONNECTION_STRING_SUFFIX)
-        # self.MONGODB_URI = MONGO_CONNECTION_STRING_PREFIX + MONGO_USER + ":" + MONGO_PASSWORD + "@" + MONGO_CONNECTION_STRING_SUFFIX
         self.backend_root_dir = Path(__file__).resolve().parent
         _, self.db = self.connect_db()
         self.csvTransformer = CsvTransformer(self.db)
@@ -53,6 +44,12 @@ class Controller:
     def get_secret(self, secret_name):
         """
         Retrieves the secret value that contains the username and password for the documentDB database from the AWS Secrets Manager.
+
+        Parameters:
+            secret_name (str): The name of the secret.
+
+        Returns:
+            dict: A dictionary containing the username and password.
         """
         region_name = "eu-west-1"
 
@@ -68,8 +65,6 @@ class Controller:
             return e
 
         secret = get_secret_value_response["SecretString"]
-
-        json_secret = json.loads(secret)
 
         return json.loads(secret)
 
@@ -171,7 +166,6 @@ class Controller:
         load_dotenv()
         MONGODB_URI = f"mongodb://{self.username}:{self.password}@caturanga-2023-12-08-16-18-00.cluster-cqhcnfxitkih.eu-west-1.docdb.amazonaws.com:27017/?tls=true&tlsCAFile=global-bundle.pem&replicaSet=rs0&readPreference=secondaryPreferred&retryWrites=false"
         client = MongoClient(MONGODB_URI)
-        #client = MongoClient(self.MONGODB_URI)
         db = client.Caturanga
         return client, db
 
