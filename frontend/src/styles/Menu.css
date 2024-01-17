@@ -166,8 +166,12 @@ a .items-list-item-icons {
   color: var(--dark-green);
 }
 
+#settings-list-container .item-icon:hover {
+  color: var(--dark-blue);
+}
+
 #outputs-list-container .item-icon:hover {
-  color: var(--medium-orange);
+  color: var(--dark-orange);
 }
 
 .content-section {
