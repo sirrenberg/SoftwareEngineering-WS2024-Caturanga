@@ -6,16 +6,23 @@ import Map from "../components/Map";
 import { LatLngExpression } from "leaflet";
 import { Link } from "react-router-dom";
 import { useAPI } from "../hooks/useAPI";
-import { calcMapCenter } from "../helper/misc";
+import { calcMapCenter, sliceName } from "../helper/misc";
 import { NavLink } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faPenToSquare,
   faTrash,
   faInfo,
+  faMapLocationDot,
 } from "@fortawesome/free-solid-svg-icons";
 import DataSourceModal from "../components/DataSourceModal";
+import InputDeletionConfirmation from "../components/InputDeletionConfirmation";
 
+const inputNameCutOff: number = 10;
+import MapLegendModal from "../components/MapLegendModal";
+import { MapInputType } from "../types";
+
+// Menu page for selecting an input
 function Inputs() {
   const { sendRequest } = useAPI();
 
@@ -23,7 +30,14 @@ function Inputs() {
   const [selectedInputIndex, setSelectedInputIndex] = useState<number>(-1);
   const [mapCenter, setMapCenter] = useState<LatLngExpression>([0, 0]); // [lat, lng]
   const [isDataSourceModal, setDataSourceModal] = useState(false);
+  const [isMapLegendModal, setMapLegendModal] = useState(false);
+
   const [protectedInputIDs, setProtectedInputIDs] = useState<string[]>([]);
+  const [indexForDeletion, setIndexForDeletion] = useState<number | undefined>(
+    undefined
+  );
+  const [isInputDeletionConfirmationActive, setInputDeletionConfirmation] =
+    useState(false);
 
   const context = useContext(StartSimContext);
   if (!context) {
@@ -64,6 +78,7 @@ function Inputs() {
                     "simple-button" +
                     (index === selectedInputIndex ? " selected-item" : "")
                   }
+                  disabled={index === indexForDeletion}
                   onClick={() => {
                     setSelectedInputIndex(index);
                     setMapCenter(calcMapCenter(input.locations));
@@ -71,11 +86,7 @@ function Inputs() {
                     setInputName(inputs[index].name);
                   }}
                 >
-                  <p>
-                    {input.name.length < 10
-                      ? input.name
-                      : input.name.slice(0, 10) + "..."}
-                  </p>
+                  <p>{sliceName(input.name, inputNameCutOff)}</p>
                   <span className="items-list-item-icons">
                     <NavLink to={"/inputs/" + input._id}>
                       <FontAwesomeIcon
@@ -87,48 +98,10 @@ function Inputs() {
                       <FontAwesomeIcon
                         icon={faTrash}
                         className="item-icon"
-                        title="ATTENTION! This will delete the input and all simulation results that were generated with this input!"
-                        //style={{ border: "none" , backgroundColor: "transparent" , padding : 0, color: "inherit"}}
                         onClick={(event) => {
                           event.stopPropagation();
-                          console.log("Deleting " + input._id + " ...");
-                          // if the input to be deleted is the one that is currently selected, deselect it
-                          if (selectedInputIndex === index) {
-                            console.log(
-                              "Entered the branch where selectedInputIndex === index",
-                              selectedInputIndex,
-                              index
-                            );
-                            setSelectedInputIndex(-1);
-                            console.log(
-                              "selectedInputIndex is now",
-                              selectedInputIndex
-                            );
-                          }
-                          sendRequest("/simulations/" + input._id, "DELETE")
-                            .then((_) => {
-                              // if the input to be deleted is before the currently selected one, decrement the selected index
-                              const indexOfDeleted = inputs.findIndex(
-                                (i) => i._id === input._id
-                              );
-                              if (indexOfDeleted < selectedInputIndex) {
-                                setSelectedInputIndex(selectedInputIndex - 1);
-                              }
-                              console.log(
-                                "Deleted simulation with id " + input._id
-                              );
-                              setInputs(
-                                inputs.filter((i) => i._id !== input._id)
-                              );
-                            })
-                            .catch((err) => {
-                              console.log(
-                                "Deleting simulation with id " +
-                                  input._id +
-                                  " lead to an error."
-                              );
-                              console.log(err);
-                            });
+                          setIndexForDeletion(index);
+                          setInputDeletionConfirmation(true);
                         }}
                       />
                     )}
@@ -177,14 +150,97 @@ function Inputs() {
       </div>
 
       {inputs && selectedInputIndex !== -1 && (
-        <div
-          className="simple-button sources-button"
-          onClick={() => {
-            setDataSourceModal(true);
+        <>
+          <div
+            className="simple-button info-button"
+            id="sources-button"
+            onClick={() => {
+              setDataSourceModal(true);
+            }}
+          >
+            <FontAwesomeIcon icon={faInfo} className="sources-icon" />
+          </div>
+
+          <div
+            className="simple-button info-button"
+            id="map-legend-button"
+            onClick={() => {
+              setMapLegendModal(true);
+            }}
+          >
+            <FontAwesomeIcon
+              icon={faMapLocationDot}
+              className="map-legend-icon"
+            />
+          </div>
+        </>
+      )}
+
+      {isMapLegendModal && (
+        <MapLegendModal
+          setMapLegendModalOpen={setMapLegendModal}
+          mapInputType={MapInputType.inputs}
+        />
+      )}
+
+      {isInputDeletionConfirmationActive && (
+        <InputDeletionConfirmation
+          performInputDeletion={() => {
+            // if the input to be deleted is currently selected, deselect it
+            if (selectedInputIndex === indexForDeletion) {
+              setSelectedInputIndex(-1);
+            }
+            setInputDeletionConfirmation(false);
+            const idForDeletion: string = inputs![indexForDeletion!]._id;
+            sendRequest(`/simulations/${idForDeletion}`, "DELETE")
+              .then(() => {
+                // if the input to be deleted is above the currently selected one,
+                // decrement the selected index so that the same index stays selected
+                if (indexForDeletion! < selectedInputIndex) {
+                  setSelectedInputIndex(selectedInputIndex - 1);
+                }
+                setInputs(inputs!.filter((i) => i._id !== idForDeletion));
+                setIndexForDeletion(undefined);
+              })
+              .catch((err) => {
+                console.error(err);
+              });
           }}
-        >
-          <FontAwesomeIcon icon={faInfo} className="sources-icon" />
-        </div>
+          abortInputDeletion={() => {
+            setIndexForDeletion(undefined);
+            setInputDeletionConfirmation(false);
+          }}
+        />
+      )}
+
+      {isInputDeletionConfirmationActive && (
+        <InputDeletionConfirmation
+          performInputDeletion={() => {
+            // if the input to be deleted is currently selected, deselect it
+            if (selectedInputIndex === indexForDeletion) {
+              setSelectedInputIndex(-1);
+            }
+            setInputDeletionConfirmation(false);
+            const idForDeletion: string = inputs![indexForDeletion!]._id;
+            sendRequest(`/simulations/${idForDeletion}`, "DELETE")
+              .then(() => {
+                // if the input to be deleted is above the currently selected one,
+                // decrement the selected index so that the same index stays selected
+                if (indexForDeletion! < selectedInputIndex) {
+                  setSelectedInputIndex(selectedInputIndex - 1);
+                }
+                setInputs(inputs!.filter((i) => i._id !== idForDeletion));
+                setIndexForDeletion(undefined);
+              })
+              .catch((err) => {
+                console.error(err);
+              });
+          }}
+          abortInputDeletion={() => {
+            setIndexForDeletion(undefined);
+            setInputDeletionConfirmation(false);
+          }}
+        />
       )}
 
       {isDataSourceModal && (

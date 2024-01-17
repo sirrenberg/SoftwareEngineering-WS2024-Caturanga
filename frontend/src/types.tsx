@@ -32,6 +32,7 @@ interface SimLocation {
   location_type: LocationType;
   conflict_date?: number;
   population?: number; // or capacity of camp
+  idp_population?: number;
 }
 
 interface Route {
@@ -41,13 +42,21 @@ interface Route {
   forced_redirection?: number;
 }
 
+interface validationData {
+  camp_name: string;
+  refugee_numbers: string;
+}
+
+interface validationDataByDate {
+  [key: string]: Array<validationData>;
+}
+
 interface Input {
   _id: string;
   region: string;
   locations: SimLocation[];
   routes: Route[];
   name: string;
-  // TODO: Remove Array (only one sim_period)
   sim_period: {
     date: string;
     length: number;
@@ -67,6 +76,14 @@ interface Input {
     camps: {
       url_from_last_update: string;
       last_update: string;
+    };
+  };
+  validation: {
+    camps: {
+      [key: string]: Array<{
+        date: string;
+        refugee_numbers: string;
+      }>;
     };
   };
 }
@@ -129,5 +146,14 @@ interface SimSettings {
   };
 }
 
-export type { SimLocation, Route, Input, SimSettings, ResultPreview, Result };
+export type {
+  SimLocation,
+  Route,
+  Input,
+  SimSettings,
+  ResultPreview,
+  Result,
+  validationDataByDate,
+  validationData,
+};
 export { LocationType, MapOperatingMode, MapInputType, SimulationStatus };

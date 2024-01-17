@@ -25,6 +25,9 @@ export const defaultValues: Input = {
       last_update: "",
     },
   },
+  validation: {
+    camps: {},
+  },
 };
 
 export const minValues = {

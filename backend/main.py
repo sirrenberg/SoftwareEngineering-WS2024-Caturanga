@@ -1,17 +1,23 @@
-from fastapi import FastAPI, HTTPException, Path, BackgroundTasks
-from flee_controller.controller import Controller
+from fastapi import FastAPI, HTTPException, Path, BackgroundTasks, Query
+from controller.handler.database_handler import DatabaseHandler
 from fastapi.middleware.cors import CORSMiddleware
 from typing import Any, Dict, AnyStr, List, Union
+from controller.simulation_executor import SimulationExecutor
+from controller.data_extractor import DataExtractor
 
 app = FastAPI()
-controller = Controller()
+
+DEFAULT_INPUT_ID = "65a6d3eb9ae2636fa2b3e3c6"
+DEFAULT_SETTING_ID = "6599846eeb8f8c36cce8307a"
+
+database_handler = DatabaseHandler(DEFAULT_INPUT_ID, DEFAULT_SETTING_ID)
+simulation_executor = SimulationExecutor(database_handler)
+data_extractor = DataExtractor()
 
 JSONObject = Dict[AnyStr, Any]
 JSONArray = List[Any]
 JSONStructure = Union[JSONArray, JSONObject]
 
-
-# TODO: adjust this for production as allowing all origins is not secure
 origins = ["*"]
 app.add_middleware(
     CORSMiddleware,
@@ -76,12 +82,12 @@ async def run_simulation_config(
         }
 
     """
-    data = await controller.initialize_simulation(
+    data = await simulation_executor.initialize_simulation(
         simulation_config=simulation_config
     )
 
     background_tasks.add_task(
-        controller.run_simulation_config,
+        simulation_executor.run_simulation,
         data["name"],
         data["simulation_id"],
         data["simsettings_id"],
@@ -92,8 +98,7 @@ async def run_simulation_config(
 
     return {"dummy simulation": str(data["objectid"])}
 
-
-# Simulations: ---------------------------------------------------------------
+# /simulations
 
 
 @app.get("/simulations")
@@ -104,7 +109,7 @@ async def get_all_simulations():
     Returns:
     - list: The data of the all simulations.
     """
-    return await controller.get_all_simulations()
+    return await database_handler.get_all("simulations")
 
 
 @app.get("/simulations/summary")
@@ -116,7 +121,9 @@ async def get_all_simulation_summaries():
     Returns:
     - list of simulation summaries.
     """
-    return await controller.get_all_simulation_summaries()
+    summary = await database_handler.get_summaries("simulations")
+    return {"data": summary,
+            "protectedIDs": [DEFAULT_INPUT_ID]}
 
 
 @app.get("/simulations/{simulation_id}")
@@ -132,7 +139,8 @@ async def get_simulation(
     Returns:
     - dict: The data of the simulation.
     """
-    return await controller.get_simulation(simulation_id)
+    return await database_handler.get("simulations", simulation_id)
+
 
 @app.delete("/simulations/{simulation_id}")
 async def delete_simulation_and_associated_results(
@@ -147,14 +155,22 @@ async def delete_simulation_and_associated_results(
     Returns:
     - The result of the deletion operation.
     """
-    return await controller.delete_simulation_and_associated_results(simulation_id)
+    result = \
+        await database_handler.delete_simulation_and_associated_results(
+            simulation_id)
+
+    if result["status"] == "error":
+        raise HTTPException(status_code=404,
+                            detail="Simulation input not found.")
+    else:
+        return result
 
 
 @app.post("/simulations")
 async def post_simulation(
         simulation: JSONStructure = None):
     """
-    Posts the simulation input to the controller.
+    Posts the simulation input to the api_service.
 
     Parameters:
     - simulation (JSONStructure, optional): The simulation input.
@@ -163,7 +179,13 @@ async def post_simulation(
     - dict: A dictionary containing the posted simulation input.
     """
     try:
-        simulation_id = await controller.post_simulation(simulation)
+        basic_input = await database_handler.get(
+            "simulations",
+            DEFAULT_INPUT_ID)
+        simulation_id = await database_handler.post(
+            simulation,
+            "simulations",
+            basic_input)
         return {"id": simulation_id}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -180,7 +202,7 @@ async def get_all_simulation_results():
     Returns:
     - list: A list of all simulation results.
     """
-    return await controller.get_all_simulation_results()
+    return await database_handler.get_all("simulations_results")
 
 
 @app.get("/simulation_results/summary")
@@ -193,7 +215,7 @@ async def get_all_simulation_result_summaries():
     Returns:
     - list of simulation result summaries.
     """
-    return await controller.get_all_simulation_result_summaries()
+    return await database_handler.get_summaries("simulations_results")
 
 
 @app.get("/simulation_results/{simulation_result_id}")
@@ -209,7 +231,8 @@ async def get_simulation_result(
     Returns:
     - dict: The data of the simulation result.
     """
-    return await controller.get_simulation_result(simulation_result_id)
+    return await database_handler.get("simulations_results",
+                                      simulation_result_id)
 
 
 @app.delete("/simulation_results/{simulation_result_id}")
@@ -225,7 +248,14 @@ async def delete_simulation_results(
     Returns:
     - dict: The data of the simulation result.
     """
-    return await controller.delete_simulation_results(simulation_result_id)
+    result = await database_handler.delete("simulations_results",
+                                           simulation_result_id)
+
+    if result["status"] == "error":
+        raise HTTPException(status_code=404,
+                            detail="Simulation setting not found.")
+    else:
+        return result
 
 
 # Simulation Settings: --------------------------------------------------------
@@ -239,7 +269,9 @@ async def get_all_simsettings():
     Returns:
     - list: A list of all simulation settings.
     """
-    return await controller.get_all_simsettings()
+    simsettings = await database_handler.get_all("simsettings")
+    return {"data": simsettings,
+            "protectedIDs": [DEFAULT_SETTING_ID]}
 
 
 @app.get("/simsettings/summary")
@@ -251,7 +283,9 @@ async def get_all_simsetting_summaries():
     Returns:
     - list of simsetting summaries.
     """
-    return await controller.get_all_simsetting_summaries()
+    summary = await database_handler.get_summaries("simsettings")
+    return {"data": summary,
+            "protectedIDs": [DEFAULT_SETTING_ID]}
 
 
 @app.get("/simsettings/{simsetting_id}")
@@ -267,7 +301,7 @@ async def get_simsetting(
     Returns:
     - dict: The data of the simulation setting.
     """
-    return await controller.get_simsetting(simsetting_id)
+    return await database_handler.get("simsettings", simsetting_id)
 
 
 @app.post("/simsettings")
@@ -283,7 +317,13 @@ async def post_simsettings(
     - dict: A dictionary containing the posted simulation settings id.
     """
     try:
-        simsetting_id = await controller.post_simsettings(simsetting)
+        basic_setting = await database_handler.get(
+            "simsettings",
+            DEFAULT_SETTING_ID)
+        simsetting_id = await database_handler.post(
+            simsetting,
+            "simsettings",
+            basic_setting)
         return {"id": simsetting_id}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -301,4 +341,29 @@ async def delete_simsetting(
     Returns:
     - The result of the deletion operation.
     """
-    return await controller.delete_simsetting(simsetting_id)
+    result = await database_handler.delete("simsettings", simsetting_id)
+
+    if result["status"] == "error":
+        raise HTTPException(status_code=404,
+                            detail="Simulation setting not found.")
+    else:
+        return result
+
+
+@app.get("/run_data_extraction")
+def run_data_extraction(
+    country_name: str = Query(..., description="Country name"),
+    start_date: str = Query(..., description="Start date of data fetching"),
+    end_date: str = Query(..., description="End date of data fetching"),
+    max_simulation_end_date: str = Query(...,
+                                         description="Max simulation end date")
+):
+    # Call the run_data_extraction method with the provided parameters
+    result = data_extractor.run_data_extraction(
+        country_name=country_name,
+        start_date=start_date,
+        end_date=end_date,
+        max_simulation_end_date=max_simulation_end_date,
+    )
+
+    return result

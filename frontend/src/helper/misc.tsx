@@ -1,5 +1,6 @@
-import { SimLocation } from "../types";
+import { SimLocation, LocationType } from "../types";
 import { LatLngExpression } from "leaflet";
+import { Colors } from "../helper/constants/DesignConstants";
 
 function calcMapCenter(locations: SimLocation[]): LatLngExpression {
   // Returns the location of the biggest location
@@ -32,4 +33,51 @@ function formatDate(dateToFormat: string): string {
   return dateToFormat.slice(0, 10);
 }
 
-export { calcMapCenter, formatDate };
+function sliceName(name: string, cutOff: number): string {
+  // if the name is short enough, we do not have to slice it
+  // we cut off if it is at least two characters too much
+  if (name.length <= cutOff + 1) {
+    return name;
+  } else {
+    return `${name.slice(0, cutOff)}...`;
+  }
+}
+
+function prettifyLocationTypeName(locationName: string): string {
+  switch (locationName) {
+    case LocationType.camp:
+      return "Camp";
+    case LocationType.town:
+      return "Town";
+    case LocationType.conflict_zone:
+      return "Conflict Zone";
+    case LocationType.forwarding_hub:
+      return "Forwarding Hub";
+    default:
+      return locationName;
+  }
+}
+
+function getLocationTypeColor(locationType: LocationType) {
+  // get the color of the node based on the location type
+  switch (locationType) {
+    case LocationType.conflict_zone:
+      return Colors.medium_orange;
+    case LocationType.town:
+      return Colors.medium_blue;
+    case LocationType.forwarding_hub:
+      return Colors.gray;
+    case LocationType.camp:
+      return Colors.medium_green;
+    default:
+      return "black";
+  }
+}
+
+export {
+  calcMapCenter,
+  formatDate,
+  prettifyLocationTypeName,
+  getLocationTypeColor,
+  sliceName,
+};
