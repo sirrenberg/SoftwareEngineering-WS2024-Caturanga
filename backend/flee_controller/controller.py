@@ -716,14 +716,14 @@ class Controller:
                 text=True,
                 check=True
             )
-
+ 
             # If the script runs successfully, return the output
             return {"success": True, "output": result.stdout}
 
         except subprocess.CalledProcessError as e:
             # If an error occurs during script execution, return the error message
             return {"success": False, "error": e.stderr}
-    
+   
 
 
 # Define a custom exception for simulation not found
