@@ -101,3 +101,4 @@ jobs:
           echo "sleeping for 30 seconds to allow ECS service to be updated"
           sleep 30
           python3 deployment_scripts/redirect_gateways.py $ECS_CLUSTER $ECS_TASK_DEFINITION_FRONTEND $API_GATEWAY_FRONTEND
+          
