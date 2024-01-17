@@ -3,7 +3,7 @@
 }
 
 #lp-title-page {
-  background-color: var(--tea-green);
+  background-color: var(--light-green);
   min-height: 85vh;
 }
 
@@ -95,6 +95,7 @@
   align-items: center;
   width: 50%;
   height: 100%;
+  gap: 7rem;
 }
 
 .img-container {
@@ -113,7 +114,7 @@
 }
 
 #lp-simulation-page {
-  background-color: var(--air-superiority-blue);
+  background-color: var(--light-blue);
   align-items: center;
 }
 
@@ -122,7 +123,20 @@
 }
 
 .map-background {
-  background-color: var(--charcoal);
+  background-color: var(--dark-blue);
+}
+
+#lp-credits-page {
+  background-color: var(--white);
+  align-items: center;
+}
+
+.credits-background {
+  background-color: var(--white);
+}
+
+#lp-simulation-title {
+  color: black;
 }
 
 @media (max-width: 1280px) {
@@ -146,6 +160,10 @@
   }
 
   .lp-title-map-container {
+    align-items: center;
+  }
+
+  .lp-title-credits-container {
     align-items: center;
   }
 

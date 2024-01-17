@@ -7,15 +7,25 @@
 }
 
 #settings-menu-container .simple-button {
-  background-color: var(--charcoal);
+  background-color: var(--dark-blue);
 }
 
-#outputs-menu-container .simple-button {
-  background-color: var(--charcoal);
+#settings-menu-container .simple-button:hover {
+  background-color: var(--medium-blue);
+}
+
+#outputs-menu-container .simple-button,
+.result-detail-container .simple-button {
+  background-color: var(--dark-orange);
+}
+
+#outputs-menu-container .simple-button:hover,
+.result-detail-container .simple-button:hover {
+  background-color: var(--medium-orange);
 }
 
 .items-list-container {
-  background-color: var(--tea-green);
+  background-color: var(--light-green);
   height: 100vh;
   width: 25%;
   padding: 2em 0;
@@ -26,11 +36,11 @@
 }
 
 #settings-list-container {
-  background-color: var(--air-superiority-blue);
+  background-color: var(--light-blue);
 }
 
 #outputs-list-container {
-  background-color: var(--peach);
+  background-color: var(--light-orange);
 }
 
 .items-list-title {
@@ -64,7 +74,7 @@
 }
 
 .items-list .simple-button:hover {
-  background-color: var(--light-green);
+  background-color: var(--medium-green);
   color: var(--white);
 }
 
@@ -74,18 +84,18 @@
 }
 
 #settings-items-list .simple-button:hover {
-  background-color: var(--light-charcoal);
+  background-color: var(--medium-blue);
   color: var(--white);
 }
 
 #outputs-items-list .simple-button {
   background-color: var(--white);
-  color: var(--black)
+  color: var(--black);
 }
 
 #outputs-items-list .simple-button:hover {
-  background-color: var(--coquelicot);
-  color: var(--white)
+  background-color: var(--medium-orange);
+  color: var(--white);
 }
 
 .simple-button.selected-item {
@@ -94,13 +104,33 @@
 }
 
 #settings-items-list .simple-button.selected-item {
-  background-color: var(--charcoal);
+  background-color: var(--dark-blue);
   color: var(--white);
 }
 
 #outputs-items-list .simple-button.selected-item {
-  background-color: var(--light-charcoal);
-  color: var(--white)
+  background-color: var(--dark-orange);
+  color: var(--white);
+}
+
+.items-list-item-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.item-preview-name {
+  font-size: 1.5rem;
+}
+
+.item-preview-status {
+  font-size: 0.9rem;
+  margin-top: 0.2em;
+  color: var(--gray);
+}
+
+#outputs-items-list .simple-button.selected-item .item-preview-status,
+#outputs-items-list .simple-button:hover .item-preview-status {
+  color: var(--light-gray);
 }
 
 .items-list-item-icons {
@@ -136,8 +166,8 @@ a .items-list-item-icons {
   color: var(--dark-green);
 }
 
-#outputs-list-container .item-icon:hover{
-  color: var(--charcoal);
+#outputs-list-container .item-icon:hover {
+  color: var(--medium-orange);
 }
 
 .content-section {
@@ -151,12 +181,22 @@ a .items-list-item-icons {
   padding: 2em 0;
 }
 
+.selected-item-subtitle {
+  margin-bottom: 1.5em;
+  font-weight: 700;
+  color: var(--gray);
+}
+
 .map-background {
   background-color: var(--dark-green);
 }
 
 #outputs-menu-container .map-background {
-  background-color: var(--peach);
+  background-color: var(--light-orange);
+}
+
+.result-detail-container .map-background {
+  background-color: var(--light-orange);
 }
 
 .leaflet-container {
@@ -197,4 +237,54 @@ a .items-list-item-icons {
   margin-bottom: 2rem;
   font-family: "Cabin", sans-serif;
   text-align: center;
+}
+
+.result-detail-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.result-map-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.day-label {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  text-align: center;
+}
+
+.slider-container {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+}
+
+.play-button {
+  justify-self: flex-start;
+  background-color: var(--dark-orange);
+}
+
+.play-button:hover {
+  background-color: var(--medium-orange);
+}
+
+.sources-button {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  border-radius: 50%;
+  height: 50px;
+  width: 50px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1.3em;
 }
