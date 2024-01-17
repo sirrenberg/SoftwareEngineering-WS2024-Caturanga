@@ -1,4 +1,3 @@
-import Map from "../components/Map";
 import "../styles/LandingPage.css";
 import { NavLink } from "react-router-dom";
 import Credits from "../components/Credits.tsx";
