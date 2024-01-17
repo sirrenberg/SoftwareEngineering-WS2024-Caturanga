@@ -100,3 +100,22 @@
   justify-content: center;
   height: 30vh;
 }
+
+.legend-item {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.legend-item-color {
+  width: 1rem;
+  height: 1rem;
+  border-radius: 50%;
+  margin-right: 0.5rem;
+}
+
+.legend-item-text {
+  font-size: 1.2rem;
+  font-weight: 500;
+}

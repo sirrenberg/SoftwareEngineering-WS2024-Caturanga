@@ -13,8 +13,11 @@ import {
   faPenToSquare,
   faTrash,
   faInfo,
+  faMapLocationDot,
 } from "@fortawesome/free-solid-svg-icons";
 import DataSourceModal from "../components/DataSourceModal";
+import MapLegendModal from "../components/MapLegendModal";
+import { MapInputType } from "../types";
 
 function Inputs() {
   const { sendRequest } = useAPI();
@@ -23,6 +26,8 @@ function Inputs() {
   const [selectedInputIndex, setSelectedInputIndex] = useState<number>(-1);
   const [mapCenter, setMapCenter] = useState<LatLngExpression>([0, 0]); // [lat, lng]
   const [isDataSourceModal, setDataSourceModal] = useState(false);
+  const [isMapLegendModal, setMapLegendModal] = useState(false);
+
   const [protectedInputIDs, setProtectedInputIDs] = useState<string[]>([]);
 
   const context = useContext(StartSimContext);
@@ -177,14 +182,37 @@ function Inputs() {
       </div>
 
       {inputs && selectedInputIndex !== -1 && (
-        <div
-          className="simple-button sources-button"
-          onClick={() => {
-            setDataSourceModal(true);
-          }}
-        >
-          <FontAwesomeIcon icon={faInfo} className="sources-icon" />
-        </div>
+        <>
+          <div
+            className="simple-button info-button"
+            id="sources-button"
+            onClick={() => {
+              setDataSourceModal(true);
+            }}
+          >
+            <FontAwesomeIcon icon={faInfo} className="sources-icon" />
+          </div>
+
+          <div
+            className="simple-button info-button"
+            id="map-legend-button"
+            onClick={() => {
+              setMapLegendModal(true);
+            }}
+          >
+            <FontAwesomeIcon
+              icon={faMapLocationDot}
+              className="map-legend-icon"
+            />
+          </div>
+        </>
+      )}
+
+      {isMapLegendModal && (
+        <MapLegendModal
+          setMapLegendModalOpen={setMapLegendModal}
+          mapInputType={MapInputType.inputs}
+        />
       )}
 
       {isDataSourceModal && (

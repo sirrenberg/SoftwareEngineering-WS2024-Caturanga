@@ -1,4 +1,8 @@
-import { faTrash, faInfo } from "@fortawesome/free-solid-svg-icons";
+import {
+  faTrash,
+  faInfo,
+  faMapLocationDot,
+} from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { LatLngExpression } from "leaflet";
 import { useEffect, useState } from "react";
@@ -7,9 +11,10 @@ import Map from "../components/Map";
 import { calcMapCenter } from "../helper/misc";
 import { useAPI } from "../hooks/useAPI";
 import "../styles/Menu.css";
-import { ResultPreview, SimulationStatus } from "../types";
+import { ResultPreview, SimulationStatus, MapInputType } from "../types";
 import { Link } from "react-router-dom";
 import DataSourceModal from "../components/DataSourceModal";
+import MapLegendModal from "../components/MapLegendModal";
 
 function Results() {
   const { sendRequest } = useAPI();
@@ -20,6 +25,7 @@ function Results() {
   const [selectedResultIndex, setSelectedResultIndex] = useState<number>(-1);
   const [mapCenter, setMapCenter] = useState<LatLngExpression>([0, 0]); // [lat, lng]
   const [isDataSourceModal, setDataSourceModal] = useState(false);
+  const [isMapLegendModal, setMapLegendModal] = useState(false);
 
   useEffect(() => {
     sendRequest("/simulation_results/summary", "GET").then((resultData) => {
@@ -173,14 +179,36 @@ function Results() {
       </div>
 
       {selectedResultIndex !== -1 && (
-        <div
-          className="simple-button sources-button"
-          onClick={() => {
-            setDataSourceModal(true);
-          }}
-        >
-          <FontAwesomeIcon icon={faInfo} className="sources-icon" />
-        </div>
+        <>
+          <div
+            className="simple-button info-button"
+            id="sources-button"
+            onClick={() => {
+              setDataSourceModal(true);
+            }}
+          >
+            <FontAwesomeIcon icon={faInfo} className="sources-icon" />
+          </div>
+          <div
+            className="simple-button info-button"
+            id="map-legend-button"
+            onClick={() => {
+              setMapLegendModal(true);
+            }}
+          >
+            <FontAwesomeIcon
+              icon={faMapLocationDot}
+              className="map-legend-icon"
+            />
+          </div>
+        </>
+      )}
+
+      {isMapLegendModal && (
+        <MapLegendModal
+          setMapLegendModalOpen={setMapLegendModal}
+          mapInputType={MapInputType.inputs}
+        />
       )}
 
       {isDataSourceModal && resultPreviews && selectedResultIndex !== -1 && (

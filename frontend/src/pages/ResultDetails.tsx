@@ -13,9 +13,15 @@ import {
 import { LatLngExpression } from "leaflet";
 import Slider from "@mui/material/Slider";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPlay, faPause, faInfo } from "@fortawesome/free-solid-svg-icons";
+import {
+  faPlay,
+  faPause,
+  faInfo,
+  faMapLocationDot,
+} from "@fortawesome/free-solid-svg-icons";
 import { Colors } from "../helper/constants/DesignConstants";
 import DataSourceModal from "../components/DataSourceModal";
+import MapLegendModal from "../components/MapLegendModal";
 
 function ResultDetails() {
   const { sendRequest } = useAPI();
@@ -26,6 +32,7 @@ function ResultDetails() {
   const [playSimulationIndex, setPlaySimulationIndex] = useState<number>(0);
   const [playingSimulation, setPlayingSimulation] = useState(false);
   const [isDataSourceModal, setDataSourceModal] = useState(false);
+  const [isMapLegendModal, setMapLegendModal] = useState(false);
   const [validationMarks, setValidationMarks] = useState<
     {
       value: number;
@@ -187,10 +194,12 @@ function ResultDetails() {
 
   return (
     <div className="content-page result-detail-container">
-      <h1 className="page-title">{result ? result.name : "Loading..."}</h1>
+      <h1 className="page-title">
+        {result && input ? result.name : "Loading..."}
+      </h1>
 
       <div className="result-map-container">
-        {result?.data && (
+        {result?.data && input && (
           <p className="day-label">
             Day {playSimulationIndex}:{" "}
             {result?.data[playSimulationIndex]["Date"]}
@@ -249,14 +258,36 @@ function ResultDetails() {
       </div>
 
       {input && (
-        <div
-          className="simple-button sources-button"
-          onClick={() => {
-            setDataSourceModal(true);
-          }}
-        >
-          <FontAwesomeIcon icon={faInfo} className="sources-icon" />
-        </div>
+        <>
+          <div
+            className="simple-button info-button"
+            id="sources-button"
+            onClick={() => {
+              setDataSourceModal(true);
+            }}
+          >
+            <FontAwesomeIcon icon={faInfo} className="sources-icon" />
+          </div>
+          <div
+            className="simple-button info-button"
+            id="map-legend-button"
+            onClick={() => {
+              setMapLegendModal(true);
+            }}
+          >
+            <FontAwesomeIcon
+              icon={faMapLocationDot}
+              className="map-legend-icon"
+            />
+          </div>
+        </>
+      )}
+
+      {isMapLegendModal && (
+        <MapLegendModal
+          setMapLegendModalOpen={setMapLegendModal}
+          mapInputType={MapInputType.results}
+        />
       )}
 
       {isDataSourceModal && input && (

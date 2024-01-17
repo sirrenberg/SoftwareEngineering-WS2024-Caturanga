@@ -19,8 +19,7 @@ import { LatLngExpression } from "leaflet";
 import { useMap } from "react-leaflet/hooks";
 import { useEffect } from "react";
 import { v4 as uuidv4 } from "uuid";
-import { Colors } from "../helper/constants/DesignConstants";
-import { pretifyLocationName } from "../helper/misc";
+import { pretifyLocationName, getLocationColor } from "../helper/misc";
 
 function Map({
   input,
@@ -75,22 +74,6 @@ function Map({
     }
   }
 
-  function getNodeColor(location: SimLocation) {
-    // get the color of the node based on the location type
-    switch (location.location_type) {
-      case LocationType.conflict_zone:
-        return Colors.medium_orange;
-      case LocationType.town:
-        return Colors.medium_blue;
-      case LocationType.forwarding_hub:
-        return Colors.white;
-      case LocationType.camp:
-        return Colors.medium_green;
-      default:
-        return "black";
-    }
-  }
-
   // if no click handlers are passed
   if (!MapClickHandler) {
     MapClickHandler = () => null;
@@ -138,7 +121,7 @@ function Map({
                   ? location.idp_population
                   : location.population
               )}
-              color={getNodeColor(location)}
+              color={getLocationColor(location.location_type)}
               eventHandlers={{
                 click: () => {
                   if (NodeClickHandler) {
