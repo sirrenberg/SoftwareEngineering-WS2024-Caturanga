@@ -40,7 +40,7 @@ def haversine_distance(lat1, lon1, lat2, lon2):
     return round(distance, 2)
 
 
-def extract_routes_csv(folder_name, top=3):
+def extract_routes_csv(folder_name, top=4):
     """
     Extract the routes.csv file for the specified country.
     The function processes location data to generate a set of routes between locations.
